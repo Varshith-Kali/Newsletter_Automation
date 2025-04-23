@@ -24,15 +24,15 @@ const NewsletterCover: React.FC = () => {
         </div>
         
         {/* Org Logo */}
-        <div className="absolute top-0 right-0 bg-red-700 p-6 z-10">
-          <h2 className="text-2xl font-bold text-white">{organizationName.split(' ')[0]}</h2>
+        <div className="absolute top-0 right-0 bg-red-700 p-5 z-10">
+          <h2 className="text-3xl font-bold text-white">{organizationName.split(' ')[0]}</h2>
         </div>
         
         {/* Main Content */}
         <div className="relative z-10 flex flex-col h-full">
-          <div className="mt-auto ml-8 mb-32">
+          <div className="mt-auto ml-8 mb-52">
             <div className="flex items-end">
-              <h1 className="text-8xl font-bold leading-none text-red-700 mr-4">
+              <h1 className="text-8xl font-bold leading-none text-red-700 -ml-4 mr-4">
                 {year}
               </h1>
               <div>
@@ -44,7 +44,7 @@ const NewsletterCover: React.FC = () => {
                 </h2>
               </div>
             </div>
-            <div className="mt-16 bg-red-700 inline-block py-2 px-4">
+            <div className="mt-10 bg-red-700 inline-block py-2 px-4">
               <h3 className="text-lg font-medium">
                 CYBERSECURITY INSIGHTS FOR COMPREHENSIVE PROTECTION
               </h3>
