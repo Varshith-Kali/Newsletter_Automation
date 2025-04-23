@@ -29,12 +29,18 @@ function App() {
               <title>Cybersecurity Newsletter</title>
               <style>${styles}</style>
               <style>
+                @page {
+                  margin: 0;
+                  size: auto;
+                }
+
                 html, body {
                   background: white;
                   margin: 0;
                   padding: 0;
                   font-family: Arial, sans-serif;
                 }
+
                 @media print {
                   body {
                     -webkit-print-color-adjust: exact !important;
