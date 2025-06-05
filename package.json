@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "fetch-news": "python3 scripts/fetch_news.py"
   },
   "dependencies": {
     "html2pdf.js": "^0.10.3",
