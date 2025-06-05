@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface Threat {
   id: string;
@@ -68,49 +68,79 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [email, setEmail] = useState('security@acmecorp.com');
   const [website, setWebsite] = useState('www.acmesecurity.com');
   
-  const [threats, setThreats] = useState<Threat[]>([
-    {
-      id: '1',
-      title: 'Critical Microsoft Exchange Vulnerability (CVE-2023-29357)',
-      description: 'A zero-day exploit allows attackers to escalate privileges remotely. Patches released – ensure immediate updates for on-premises servers.'
-    },
-    {
-      id: '2',
-      title: 'Log4j 2 Resurfaces with New Flaw (CVE-2023-31038)',
-      description: 'Apache patched a high-severity RCE vulnerability. Check dependencies in your Java apps.'
-    },
-    {
-      id: '3',
-      title: 'Jenkins Servers Targeted in Ransomware Campaigns',
-      description: 'Unpatched Jenkins installations are being exploited to deploy cryptominers. Enforce access controls and disable unused plugins.'
-    },
-    {
-      id: '4',
-      title: 'Phishing Campaigns via Fake GitHub Clones',
-      description: 'Attackers use Google Ads to mimic GitHub repositories. Train teams to verify URLs and avoid "urgent" clone requests.'
-    },
-    {
-      id: '5',
-      title: 'Critical Infrastructure Flaw in Siemens PLCs',
-      description: 'INDUSTRIAL SYSTEMS VULNERABLE TO UNAUTHENTICATED COMMAND EXECUTION. ISOLATE OT NETWORKS AND APPLY VENDOR PATCHES.'
-    }
-  ]);
-  
-  const [bestPractices, setBestPractices] = useState<BestPractice[]>([
-    { id: '1', content: 'Patch Faster: Prioritize updates for Microsoft Exchange, Jenkins, and Log4j dependencies.' },
-    { id: '2', content: 'Enforce MFA Everywhere: Especially for CI/CD tools like GitHub and Jenkins.' },
-    { id: '3', content: 'Audit Third-Party Code: Use SCA tools (e.g., Snyk) to detect vulnerable dependencies.' },
-    { id: '4', content: 'Segment Networks: Isolate OT/IoT devices from core banking systems.' }
-  ]);
-  
-  const [trainingItems, setTrainingItems] = useState<TrainingItem[]>([
-    { id: '1', content: 'Assume breach: Conduct weekly log reviews for unusual API calls or unauthorized access to SWIFT-related systems' },
-    { id: '2', content: 'Phishing Simulation: Launch a mock campaign using fake GitHub security alerts to test employee vigilance' },
-    { id: '3', content: 'OWASP Top 10 for Developers: Host a workshop on insecure design (A4) and software supply chain risks (A8)' }
-  ]);
-  
-  const [thoughtOfTheDay, setThoughtOfTheDay] = useState('IN CYBERSECURITY, PARANOIA IS A VIRTUE. THE QUESTION ISN\'T "IF" BUT "WHEN" - SO BUILD WALLS TODAY THAT WITHSTAND TOMORROW\'S SIEGE.');
-  const [securityJoke, setSecurityJoke] = useState('WHY DID THE CYBERSECURITY EXPERT BRING A LADDER TO WORK? TO CLIMB THE FIREWALL!');
+  const [threats, setThreats] = useState<Threat[]>([]);
+  const [bestPractices, setBestPractices] = useState<BestPractice[]>([]);
+  const [trainingItems, setTrainingItems] = useState<TrainingItem[]>([]);
+  const [thoughtOfTheDay, setThoughtOfTheDay] = useState('');
+  const [securityJoke, setSecurityJoke] = useState('');
+
+  useEffect(() => {
+    // Load content from the JSON file
+    const loadContent = async () => {
+      try {
+        const response = await fetch('/src/data/newsletter_content.json');
+        const data = await response.json();
+        
+        setThreats(data.threats);
+        setBestPractices(data.bestPractices);
+        setTrainingItems(data.trainingItems);
+        setThoughtOfTheDay(data.thoughtOfTheDay);
+        setSecurityJoke(data.securityJoke);
+      } catch (error) {
+        console.error('Error loading newsletter content:', error);
+        // Set default content if loading fails
+        setDefaultContent();
+      }
+    };
+
+    loadContent();
+  }, []);
+
+  const setDefaultContent = () => {
+    setThreats([
+      {
+        id: '1',
+        title: 'Critical Microsoft Exchange Vulnerability (CVE-2023-29357)',
+        description: 'A zero-day exploit allows attackers to escalate privileges remotely. Patches released – ensure immediate updates for on-premises servers.'
+      },
+      {
+        id: '2',
+        title: 'Log4j 2 Resurfaces with New Flaw (CVE-2023-31038)',
+        description: 'Apache patched a high-severity RCE vulnerability. Check dependencies in your Java apps.'
+      },
+      {
+        id: '3',
+        title: 'Jenkins Servers Targeted in Ransomware Campaigns',
+        description: 'Unpatched Jenkins installations are being exploited to deploy cryptominers. Enforce access controls and disable unused plugins.'
+      },
+      {
+        id: '4',
+        title: 'Phishing Campaigns via Fake GitHub Clones',
+        description: 'Attackers use Google Ads to mimic GitHub repositories. Train teams to verify URLs and avoid "urgent" clone requests.'
+      },
+      {
+        id: '5',
+        title: 'Critical Infrastructure Flaw in Siemens PLCs',
+        description: 'INDUSTRIAL SYSTEMS VULNERABLE TO UNAUTHENTICATED COMMAND EXECUTION. ISOLATE OT NETWORKS AND APPLY VENDOR PATCHES.'
+      }
+    ]);
+    
+    setBestPractices([
+      { id: '1', content: 'Patch Faster: Prioritize updates for Microsoft Exchange, Jenkins, and Log4j dependencies.' },
+      { id: '2', content: 'Enforce MFA Everywhere: Especially for CI/CD tools like GitHub and Jenkins.' },
+      { id: '3', content: 'Audit Third-Party Code: Use SCA tools (e.g., Snyk) to detect vulnerable dependencies.' },
+      { id: '4', content: 'Segment Networks: Isolate OT/IoT devices from core banking systems.' }
+    ]);
+    
+    setTrainingItems([
+      { id: '1', content: 'Assume breach: Conduct weekly log reviews for unusual API calls or unauthorized access to SWIFT-related systems' },
+      { id: '2', content: 'Phishing Simulation: Launch a mock campaign using fake GitHub security alerts to test employee vigilance' },
+      { id: '3', content: 'OWASP Top 10 for Developers: Host a workshop on insecure design (A4) and software supply chain risks (A8)' }
+    ]);
+    
+    setThoughtOfTheDay('IN CYBERSECURITY, PARANOIA IS A VIRTUE. THE QUESTION ISN\'T "IF" BUT "WHEN" - SO BUILD WALLS TODAY THAT WITHSTAND TOMORROW\'S SIEGE.');
+    setSecurityJoke('WHY DID THE CYBERSECURITY EXPERT BRING A LADDER TO WORK? TO CLIMB THE FIREWALL!');
+  };
   
   const addThreat = () => {
     const newThreat: Threat = {
