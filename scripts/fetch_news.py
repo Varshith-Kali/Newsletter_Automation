@@ -159,13 +159,13 @@ def process_feeds() -> Dict:
 
 def save_newsletter_content():
     """Save processed content to a JSON file."""
-    # Create data directory if it doesn't exist
-    os.makedirs('src/data', exist_ok=True)
+    # Create public/data directory if it doesn't exist
+    os.makedirs('public/data', exist_ok=True)
     
     content = process_feeds()
     
-    # Save to JSON file
-    with open('src/data/newsletter_content.json', 'w') as f:
+    # Save to JSON file in public directory
+    with open('public/data/newsletter_content.json', 'w') as f:
         json.dump(content, f, indent=2)
 
 if __name__ == "__main__":

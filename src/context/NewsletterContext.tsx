@@ -78,7 +78,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     // Load content from the JSON file
     const loadContent = async () => {
       try {
-        const response = await fetch('/src/data/newsletter_content.json');
+        const response = await fetch('/data/newsletter_content.json');
         const data = await response.json();
         
         setThreats(data.threats);
