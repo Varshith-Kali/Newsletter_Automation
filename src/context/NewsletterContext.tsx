@@ -79,6 +79,13 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const loadContent = async () => {
       try {
         const response = await fetch('/data/newsletter_content.json');
+        if (!response.ok) {
+          throw new Error('Failed to fetch newsletter content');
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Invalid content type');
+        }
         const data = await response.json();
         
         setThreats(data.threats);
