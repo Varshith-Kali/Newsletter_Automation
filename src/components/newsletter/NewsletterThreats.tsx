@@ -4,6 +4,23 @@ import { useNewsletter } from '../../context/NewsletterContext';
 const NewsletterThreats: React.FC = () => {
   const { threats } = useNewsletter();
 
+  const getSeverityBadge = (severity?: string) => {
+    if (!severity) return null;
+    
+    const colors = {
+      'CRITICAL': 'bg-red-600 text-white',
+      'HIGH': 'bg-orange-500 text-white',
+      'MEDIUM': 'bg-yellow-500 text-black',
+      'LOW': 'bg-green-500 text-white'
+    };
+    
+    return (
+      <span className={`inline-block px-2 py-1 text-xs font-bold rounded ${colors[severity as keyof typeof colors] || 'bg-gray-500 text-white'} ml-2`}>
+        {severity}
+      </span>
+    );
+  };
+
   return (
     <div className="newsletter-page newsletter-threats">
       <div className="min-h-screen bg-white text-black flex">
@@ -41,17 +58,21 @@ const NewsletterThreats: React.FC = () => {
           <div className="space-y-8">
             {threats.map((threat, index) => (
               <div key={threat.id} className="mb-6">
-                <h3 className="font-bold mb-2">
+                <h3 className="font-bold mb-2 flex items-center">
                   {index + 1}. {threat.title}
+                  {getSeverityBadge(threat.severity)}
                 </h3>
                 <p className="text-sm leading-relaxed">{threat.description}</p>
+                {threat.source && (
+                  <p className="text-xs text-gray-500 mt-1 italic">Source: {threat.source}</p>
+                )}
               </div>
             ))}
           </div>
           
           {threats.length > 4 && (
-            <div className="mt-8 bg-gray-100 p-4 font-bold uppercase">
-              INDUSTRIAL SYSTEMS VULNERABLE TO UNAUTHENTICATED COMMAND EXECUTION. ISOLATE OT NETWORKS AND APPLY VENDOR PATCHES.
+            <div className="mt-8 bg-red-100 p-4 font-bold uppercase border-l-4 border-red-600">
+              ⚠️ CRITICAL ALERT: MULTIPLE HIGH-SEVERITY VULNERABILITIES DETECTED. IMMEDIATE ACTION REQUIRED.
             </div>
           )}
         </div>

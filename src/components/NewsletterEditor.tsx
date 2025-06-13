@@ -1,6 +1,6 @@
 import React from 'react';
 import { Threat, useNewsletter } from '../context/NewsletterContext';
-import { Trash2 } from 'lucide-react';
+import { Trash2, RefreshCw, Zap, Clock } from 'lucide-react';
 
 const NewsletterEditor: React.FC = () => {
   const {
@@ -31,11 +31,77 @@ const NewsletterEditor: React.FC = () => {
     thoughtOfTheDay,
     setThoughtOfTheDay,
     securityJoke,
-    setSecurityJoke
+    setSecurityJoke,
+    autoUpdateContent,
+    isUpdating,
+    lastUpdated
   } = useNewsletter();
+
+  const formatLastUpdated = (dateString: string | null) => {
+    if (!dateString) return 'Never';
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  };
+
+  const getSeverityColor = (severity?: string) => {
+    switch (severity) {
+      case 'CRITICAL': return 'bg-red-100 text-red-800 border-red-300';
+      case 'HIGH': return 'bg-orange-100 text-orange-800 border-orange-300';
+      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'LOW': return 'bg-green-100 text-green-800 border-green-300';
+      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+  };
 
   return (
     <div className="space-y-6 max-h-[800px] overflow-y-auto pr-4">
+      {/* AI Auto-Update Section */}
+      <div className="bg-gradient-to-r from-red-50 to-red-100 p-6 rounded-lg border border-red-200">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <Zap className="text-red-600" size={24} />
+            <h3 className="text-lg font-bold text-red-800">AI-Powered Content Generator</h3>
+          </div>
+          <button
+            onClick={autoUpdateContent}
+            disabled={isUpdating}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium transition-all ${
+              isUpdating 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl'
+            }`}
+          >
+            <RefreshCw className={isUpdating ? 'animate-spin' : ''} size={16} />
+            <span>{isUpdating ? 'Updating...' : 'Auto-Update Content'}</span>
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="space-y-2">
+            <h4 className="font-semibold text-red-700">🤖 AI Features:</h4>
+            <ul className="space-y-1 text-red-600">
+              <li>• Real-time news from 10+ cybersecurity feeds</li>
+              <li>• Smart threat classification (Critical/High/Medium/Low)</li>
+              <li>• CVE extraction and highlighting</li>
+              <li>• AI-powered content summarization</li>
+            </ul>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Clock size={16} className="text-red-600" />
+              <span className="font-semibold text-red-700">Last Updated:</span>
+            </div>
+            <p className="text-red-600">{formatLastUpdated(lastUpdated)}</p>
+            {isUpdating && (
+              <div className="flex items-center space-x-2 text-red-600">
+                <div className="animate-pulse w-2 h-2 bg-red-600 rounded-full"></div>
+                <span>Fetching latest threats...</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Header Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -109,8 +175,15 @@ const NewsletterEditor: React.FC = () => {
         <div className="space-y-4">
           {threats.map((threat) => (
             <div key={threat.id} className="p-4 border border-gray-300 rounded-md">
-              <div className="flex justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">Title</label>
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center space-x-2">
+                  <label className="block text-sm font-medium text-gray-700">Title</label>
+                  {threat.severity && (
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getSeverityColor(threat.severity)}`}>
+                      {threat.severity}
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => removeThreat(threat.id)}
                   className="p-1 text-gray-500 hover:text-red-600"
@@ -131,6 +204,9 @@ const NewsletterEditor: React.FC = () => {
                 rows={2}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
               />
+              {threat.source && (
+                <p className="mt-2 text-xs text-gray-500">Source: {threat.source}</p>
+              )}
             </div>
           ))}
         </div>

@@ -1,0 +1,25 @@
+{
+  "threats": [
+    {
+      "id": "1",
+      "title": "Critical Microsoft Exchange Vulnerability (CVE-2023-29357)",
+      "description": "A zero-day exploit allows attackers to escalate privileges remotely. Patches released – ensure immediate updates for on-premises servers.",
+      "severity": "CRITICAL"
+    }
+  ],
+  "bestPractices": [
+    {
+      "id": "1",
+      "content": "Implement multi-factor authentication across all critical systems and applications."
+    }
+  ],
+  "trainingItems": [
+    {
+      "id": "1",
+      "content": "Phishing recognition and reporting procedures for all staff members."
+    }
+  ],
+  "thoughtOfTheDay": "IN CYBERSECURITY, PARANOIA IS A VIRTUE. THE QUESTION ISN'T \"IF\" BUT \"WHEN\" - SO BUILD WALLS TODAY THAT WITHSTAND TOMORROW'S SIEGE.",
+  "securityJoke": "WHY DID THE CYBERSECURITY EXPERT BRING A LADDER TO WORK? TO CLIMB THE FIREWALL!",
+  "lastUpdated": "2025-01-11T10:00:00.000Z"
+}
