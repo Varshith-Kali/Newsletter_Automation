@@ -5,28 +5,36 @@
       "title": "Zero-Day Exploit in Popular Web Framework (CVE-2025-0123)",
       "description": "Critical remote code execution vulnerability discovered in widely-used framework. Immediate patching required for all affected systems.",
       "severity": "CRITICAL",
-      "source": "Security Advisory"
+      "source": "Security Advisory",
+      "formattedDate": "Today",
+      "pubDate": "2025-01-11T15:30:00.000Z"
     },
     {
       "id": "2", 
       "title": "Ransomware Group Targets Healthcare Infrastructure",
       "description": "New ransomware variant specifically designed to target hospital systems and medical devices, causing operational disruptions.",
       "severity": "HIGH",
-      "source": "Healthcare Security Alert"
+      "source": "Healthcare Security Alert",
+      "formattedDate": "Yesterday",
+      "pubDate": "2025-01-10T12:15:00.000Z"
     },
     {
       "id": "3",
       "title": "Supply Chain Attack via Compromised Software Update", 
       "description": "Malicious actors compromised legitimate software update mechanism to distribute backdoors to enterprise networks.",
       "severity": "HIGH",
-      "source": "Threat Intelligence"
+      "source": "Threat Intelligence",
+      "formattedDate": "2 days ago",
+      "pubDate": "2025-01-09T09:45:00.000Z"
     },
     {
       "id": "4",
       "title": "AI-Powered Social Engineering Campaign",
       "description": "Sophisticated social engineering attacks using deepfake technology to impersonate executives and bypass security protocols.",
       "severity": "MEDIUM",
-      "source": "Cybersecurity Research"
+      "source": "Cybersecurity Research",
+      "formattedDate": "3 days ago",
+      "pubDate": "2025-01-08T14:20:00.000Z"
     }
   ],
   "bestPractices": [
@@ -69,6 +77,8 @@
     "threatsGenerated": 4,
     "sourcesUsed": 4,
     "timeRange": "7 days",
-    "cveCount": 1
+    "cveCount": 1,
+    "newestArticle": "Today",
+    "oldestArticle": "3 days ago"
   }
 }

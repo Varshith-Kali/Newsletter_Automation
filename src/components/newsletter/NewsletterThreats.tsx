@@ -21,6 +21,21 @@ const NewsletterThreats: React.FC = () => {
     );
   };
 
+  const formatDate = (formattedDate?: string, pubDate?: string) => {
+    if (formattedDate) return formattedDate;
+    if (pubDate) {
+      const date = new Date(pubDate);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - date.getTime());
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) return 'Today';
+      if (diffDays === 1) return 'Yesterday';
+      return `${diffDays} days ago`;
+    }
+    return 'Recent';
+  };
+
   return (
     <div className="newsletter-page newsletter-threats">
       <div className="min-h-screen bg-white text-black flex">
@@ -58,14 +73,35 @@ const NewsletterThreats: React.FC = () => {
           <div className="space-y-8">
             {threats.map((threat, index) => (
               <div key={threat.id} className="mb-6">
-                <h3 className="font-bold mb-2 flex items-center">
-                  {index + 1}. {threat.title}
-                  {getSeverityBadge(threat.severity)}
-                </h3>
-                <p className="text-sm leading-relaxed">{threat.description}</p>
-                {threat.source && (
-                  <p className="text-xs text-gray-500 mt-1 italic">Source: {threat.source}</p>
-                )}
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-bold mb-2 flex items-center flex-1">
+                    {index + 1}. {threat.title}
+                    {getSeverityBadge(threat.severity)}
+                  </h3>
+                  <div className="ml-4 text-right flex-shrink-0">
+                    <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold border border-red-300">
+                      📅 {formatDate(threat.formattedDate, threat.pubDate)}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed mb-2">{threat.description}</p>
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center space-x-4">
+                    {threat.source && (
+                      <span className="italic">Source: {threat.source}</span>
+                    )}
+                    {threat.cves && threat.cves.length > 0 && (
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
+                        {threat.cves.join(', ')}
+                      </span>
+                    )}
+                  </div>
+                  {threat.pubDate && (
+                    <span className="text-gray-400">
+                      {new Date(threat.pubDate).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -75,6 +111,24 @@ const NewsletterThreats: React.FC = () => {
               ⚠️ CRITICAL ALERT: MULTIPLE HIGH-SEVERITY VULNERABILITIES DETECTED. IMMEDIATE ACTION REQUIRED.
             </div>
           )}
+          
+          <div className="mt-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <h4 className="font-semibold text-gray-700 mb-2">📊 Threat Intelligence Summary</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+              <div>
+                <span className="font-medium">Total Incidents:</span> {threats.length}
+              </div>
+              <div>
+                <span className="font-medium">CVEs Identified:</span> {threats.reduce((acc, t) => acc + (t.cves?.length || 0), 0)}
+              </div>
+              <div>
+                <span className="font-medium">Critical/High:</span> {threats.filter(t => t.severity === 'CRITICAL' || t.severity === 'HIGH').length}
+              </div>
+              <div>
+                <span className="font-medium">Sources:</span> {[...new Set(threats.map(t => t.source))].length}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
