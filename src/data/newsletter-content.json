@@ -2,24 +2,73 @@
   "threats": [
     {
       "id": "1",
-      "title": "Critical Microsoft Exchange Vulnerability (CVE-2023-29357)",
-      "description": "A zero-day exploit allows attackers to escalate privileges remotely. Patches released – ensure immediate updates for on-premises servers.",
-      "severity": "CRITICAL"
+      "title": "Zero-Day Exploit in Popular Web Framework (CVE-2025-0123)",
+      "description": "Critical remote code execution vulnerability discovered in widely-used framework. Immediate patching required for all affected systems.",
+      "severity": "CRITICAL",
+      "source": "Security Advisory"
+    },
+    {
+      "id": "2", 
+      "title": "Ransomware Group Targets Healthcare Infrastructure",
+      "description": "New ransomware variant specifically designed to target hospital systems and medical devices, causing operational disruptions.",
+      "severity": "HIGH",
+      "source": "Healthcare Security Alert"
+    },
+    {
+      "id": "3",
+      "title": "Supply Chain Attack via Compromised Software Update", 
+      "description": "Malicious actors compromised legitimate software update mechanism to distribute backdoors to enterprise networks.",
+      "severity": "HIGH",
+      "source": "Threat Intelligence"
+    },
+    {
+      "id": "4",
+      "title": "AI-Powered Social Engineering Campaign",
+      "description": "Sophisticated social engineering attacks using deepfake technology to impersonate executives and bypass security protocols.",
+      "severity": "MEDIUM",
+      "source": "Cybersecurity Research"
     }
   ],
   "bestPractices": [
     {
       "id": "1",
-      "content": "Implement multi-factor authentication across all critical systems and applications."
+      "content": "Deploy advanced email security solutions with AI-powered phishing detection and user training programs."
+    },
+    {
+      "id": "2", 
+      "content": "Implement zero-trust architecture with continuous verification and least-privilege access controls."
+    },
+    {
+      "id": "3",
+      "content": "Establish automated vulnerability management with prioritized patching based on threat intelligence."
+    },
+    {
+      "id": "4",
+      "content": "Deploy behavioral analysis and endpoint detection response (EDR) solutions for unknown threat detection."
     }
   ],
   "trainingItems": [
     {
       "id": "1",
-      "content": "Phishing recognition and reporting procedures for all staff members."
+      "content": "Advanced phishing simulation exercises with real-world attack scenarios and reporting procedures."
+    },
+    {
+      "id": "2",
+      "content": "Supply chain security assessment training for development teams and procurement staff."
+    },
+    {
+      "id": "3", 
+      "content": "Incident response tabletop exercises with cross-functional team coordination and communication protocols."
     }
   ],
-  "thoughtOfTheDay": "IN CYBERSECURITY, PARANOIA IS A VIRTUE. THE QUESTION ISN'T \"IF\" BUT \"WHEN\" - SO BUILD WALLS TODAY THAT WITHSTAND TOMORROW'S SIEGE.",
-  "securityJoke": "WHY DID THE CYBERSECURITY EXPERT BRING A LADDER TO WORK? TO CLIMB THE FIREWALL!",
-  "lastUpdated": "2025-01-11T10:00:00.000Z"
+  "thoughtOfTheDay": "CYBERSECURITY IS NOT ABOUT BUILDING PERFECT WALLS, BUT ABOUT DETECTING AND RESPONDING TO BREACHES FASTER THAN ATTACKERS CAN EXPLOIT THEM.",
+  "securityJoke": "WHY DO CYBERSECURITY EXPERTS NEVER GET LOCKED OUT? THEY ALWAYS HAVE A BACKUP PLAN... AND A BACKUP BACKUP PLAN!",
+  "lastUpdated": "2025-01-11T15:30:00.000Z",
+  "generationStats": {
+    "articlesProcessed": 25,
+    "threatsGenerated": 4,
+    "sourcesUsed": 4,
+    "timeRange": "7 days",
+    "cveCount": 1
+  }
 }

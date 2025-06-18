@@ -1,9 +1,11 @@
 import Parser from 'rss-parser';
 import fetch from 'node-fetch';
+import { writeFileSync, readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 const parser = new Parser();
 
-// Cybersecurity RSS feeds
+// Enhanced cybersecurity RSS feeds with more sources
 const RSS_FEEDS = [
   'https://feeds.feedburner.com/TheHackersNews',
   'https://krebsonsecurity.com/feed/',
@@ -14,51 +16,166 @@ const RSS_FEEDS = [
   'https://www.infosecurity-magazine.com/rss/news/',
   'https://www.csoonline.com/index.rss',
   'https://www.scmagazine.com/feed',
-  'https://cybersecuritynews.com/feed/'
+  'https://cybersecuritynews.com/feed/',
+  'https://www.cyberscoop.com/feed/',
+  'https://www.zdnet.com/topic/security/rss.xml',
+  'https://www.securitymagazine.com/rss/topic/2236-cyber-security',
+  'https://www.helpnetsecurity.com/feed/',
+  'https://www.recordedfuture.com/feed'
 ];
 
-export async function fetchCyberSecurityNews() {
-  const allArticles = [];
+const CACHE_FILE = 'src/data/news-cache.json';
+const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+
+// Load cached data
+function loadCache() {
+  if (!existsSync(CACHE_FILE)) {
+    return { articles: [], lastCleanup: Date.now() };
+  }
   
-  console.log('🔍 Fetching cybersecurity news from multiple sources...');
+  try {
+    const data = JSON.parse(readFileSync(CACHE_FILE, 'utf8'));
+    return data;
+  } catch (error) {
+    console.warn('⚠️ Failed to load cache, starting fresh');
+    return { articles: [], lastCleanup: Date.now() };
+  }
+}
+
+// Save cache data
+function saveCache(data) {
+  try {
+    writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.warn('⚠️ Failed to save cache:', error.message);
+  }
+}
+
+// Clean old articles (older than 7 days)
+function cleanOldArticles(articles) {
+  const sevenDaysAgo = Date.now() - CACHE_DURATION;
+  return articles.filter(article => {
+    const articleDate = new Date(article.pubDate).getTime();
+    return articleDate > sevenDaysAgo;
+  });
+}
+
+// Remove duplicates based on title similarity and URL
+function removeDuplicates(articles) {
+  const seen = new Set();
+  const unique = [];
+  
+  for (const article of articles) {
+    // Create a normalized key for duplicate detection
+    const normalizedTitle = article.title.toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    const key = `${normalizedTitle}_${article.link}`;
+    
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(article);
+    }
+  }
+  
+  return unique;
+}
+
+// Check if article is from the last 7 days
+function isRecentArticle(pubDate) {
+  const articleDate = new Date(pubDate);
+  const sevenDaysAgo = new Date(Date.now() - CACHE_DURATION);
+  return articleDate > sevenDaysAgo;
+}
+
+export async function fetchCyberSecurityNews() {
+  console.log('🔍 Fetching latest cybersecurity news from past 7 days...');
+  
+  // Load existing cache
+  let cache = loadCache();
+  
+  // Clean old articles from cache
+  cache.articles = cleanOldArticles(cache.articles);
+  
+  const newArticles = [];
+  let totalFetched = 0;
   
   for (const feedUrl of RSS_FEEDS) {
     try {
       console.log(`📡 Fetching from: ${feedUrl}`);
       const feed = await parser.parseURL(feedUrl);
       
-      const articles = feed.items.slice(0, 5).map(item => ({
-        title: item.title,
-        description: item.contentSnippet || item.description,
-        link: item.link,
-        pubDate: item.pubDate,
-        source: feed.title || feedUrl,
-        content: item.content || item.description
-      }));
+      const recentArticles = feed.items
+        .filter(item => isRecentArticle(item.pubDate))
+        .slice(0, 10) // Limit per feed to avoid overwhelming
+        .map(item => ({
+          title: item.title?.trim() || 'Untitled',
+          description: (item.contentSnippet || item.description || '').trim(),
+          link: item.link,
+          pubDate: item.pubDate,
+          source: feed.title || feedUrl.replace(/https?:\/\//, '').split('/')[0],
+          content: item.content || item.description || '',
+          fetchedAt: Date.now()
+        }));
       
-      allArticles.push(...articles);
+      newArticles.push(...recentArticles);
+      totalFetched += recentArticles.length;
+      
+      // Add delay to be respectful to servers
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
     } catch (error) {
       console.warn(`⚠️ Failed to fetch from ${feedUrl}:`, error.message);
     }
   }
   
-  console.log(`✅ Fetched ${allArticles.length} articles total`);
-  return allArticles.slice(0, 20); // Limit to 20 most recent
+  console.log(`📊 Fetched ${totalFetched} new articles from ${RSS_FEEDS.length} sources`);
+  
+  // Combine with cached articles and remove duplicates
+  const allArticles = [...cache.articles, ...newArticles];
+  const uniqueArticles = removeDuplicates(allArticles);
+  
+  // Sort by date (newest first)
+  uniqueArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  
+  // Update cache
+  cache.articles = uniqueArticles;
+  cache.lastCleanup = Date.now();
+  saveCache(cache);
+  
+  console.log(`✅ Total unique articles: ${uniqueArticles.length}`);
+  
+  // Return the most recent articles for processing
+  return uniqueArticles.slice(0, 25);
 }
 
-export async function summarizeWithHuggingFace(text, maxLength = 150) {
+export async function summarizeWithHuggingFace(text, maxLength = 120) {
   try {
+    // Clean and prepare text
+    const cleanText = text
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 1000);
+    
+    if (cleanText.length < 50) {
+      return cleanText + '...';
+    }
+    
     const response = await fetch('https://api-inference.huggingface.co/models/facebook/bart-large-cnn', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        inputs: text.substring(0, 1000), // Limit input length
+        inputs: cleanText,
         parameters: {
           max_length: maxLength,
-          min_length: 50,
-          do_sample: false
+          min_length: 40,
+          do_sample: false,
+          early_stopping: true
         }
       })
     });
@@ -68,7 +185,14 @@ export async function summarizeWithHuggingFace(text, maxLength = 150) {
     }
 
     const result = await response.json();
-    return result[0]?.summary_text || text.substring(0, maxLength);
+    
+    if (result[0]?.summary_text) {
+      return result[0].summary_text;
+    }
+    
+    // Fallback to truncated original text
+    return cleanText.substring(0, maxLength) + '...';
+    
   } catch (error) {
     console.warn('⚠️ Summarization failed, using truncated text:', error.message);
     return text.substring(0, maxLength) + '...';
@@ -77,15 +201,27 @@ export async function summarizeWithHuggingFace(text, maxLength = 150) {
 
 export function extractCVEs(text) {
   const cveRegex = /CVE-\d{4}-\d{4,7}/gi;
-  return text.match(cveRegex) || [];
+  const matches = text.match(cveRegex) || [];
+  return [...new Set(matches)]; // Remove duplicates
 }
 
 export function classifyThreatSeverity(title, description) {
-  const criticalKeywords = ['zero-day', 'critical', 'remote code execution', 'rce', 'privilege escalation'];
-  const highKeywords = ['vulnerability', 'exploit', 'breach', 'ransomware', 'malware'];
-  const mediumKeywords = ['phishing', 'scam', 'update', 'patch'];
-  
   const text = (title + ' ' + description).toLowerCase();
+  
+  const criticalKeywords = [
+    'zero-day', 'zero day', 'critical', 'remote code execution', 'rce', 
+    'privilege escalation', 'unauthenticated', 'wormable', 'actively exploited'
+  ];
+  
+  const highKeywords = [
+    'vulnerability', 'exploit', 'breach', 'ransomware', 'malware', 
+    'backdoor', 'trojan', 'apt', 'advanced persistent threat'
+  ];
+  
+  const mediumKeywords = [
+    'phishing', 'scam', 'update', 'patch', 'security flaw', 
+    'data leak', 'exposure', 'misconfiguration'
+  ];
   
   if (criticalKeywords.some(keyword => text.includes(keyword))) {
     return 'CRITICAL';
@@ -97,56 +233,96 @@ export function classifyThreatSeverity(title, description) {
   return 'LOW';
 }
 
-export function generateBestPractices(threats) {
-  const practices = [
-    'Implement multi-factor authentication across all critical systems and applications.',
-    'Maintain regular security patches and updates for all software components.',
-    'Conduct regular security awareness training for all employees.',
-    'Establish network segmentation to limit lateral movement of threats.',
-    'Deploy endpoint detection and response (EDR) solutions.',
-    'Maintain offline backups and test recovery procedures regularly.',
-    'Monitor and log all network traffic and system activities.',
-    'Implement zero-trust architecture principles.',
-    'Regular vulnerability assessments and penetration testing.',
-    'Establish incident response procedures and communication plans.'
+export function generateContextualBestPractices(threats) {
+  // Analyze threats to generate relevant best practices
+  const threatTypes = threats.map(t => t.title.toLowerCase() + ' ' + t.description.toLowerCase());
+  const allText = threatTypes.join(' ');
+  
+  const practices = [];
+  
+  // Add practices based on threat content
+  if (allText.includes('phishing') || allText.includes('email')) {
+    practices.push('Deploy advanced email security solutions with AI-powered phishing detection and user training programs.');
+  }
+  
+  if (allText.includes('ransomware') || allText.includes('malware')) {
+    practices.push('Implement comprehensive backup strategies with offline storage and regular recovery testing procedures.');
+  }
+  
+  if (allText.includes('vulnerability') || allText.includes('patch') || allText.includes('cve')) {
+    practices.push('Establish automated vulnerability management with prioritized patching based on threat intelligence.');
+  }
+  
+  if (allText.includes('zero-day') || allText.includes('exploit')) {
+    practices.push('Deploy behavioral analysis and endpoint detection response (EDR) solutions for unknown threat detection.');
+  }
+  
+  // Always include these fundamental practices
+  const fundamentalPractices = [
+    'Implement zero-trust architecture with continuous verification and least-privilege access controls.',
+    'Conduct regular security awareness training with simulated attack scenarios and incident response drills.',
+    'Maintain network segmentation with micro-segmentation to limit lateral movement of threats.',
+    'Deploy multi-factor authentication across all critical systems and privileged accounts.',
+    'Establish continuous monitoring with SIEM/SOAR integration for real-time threat detection and response.'
   ];
   
-  // Select random practices based on threat count
-  const count = Math.min(threats.length, 4);
-  return practices.slice(0, count).map((practice, index) => ({
+  // Combine contextual and fundamental practices
+  const allPractices = [...practices, ...fundamentalPractices];
+  
+  // Return top 4 practices
+  return allPractices.slice(0, 4).map((practice, index) => ({
     id: (index + 1).toString(),
     content: practice
   }));
 }
 
-export function generateTrainingItems(threats) {
-  const trainingTopics = [
-    'Phishing recognition and reporting procedures for all staff members.',
-    'Secure coding practices workshop for development teams.',
-    'Incident response simulation exercises and tabletop scenarios.',
-    'Social engineering awareness and prevention techniques.',
-    'Password security and credential management best practices.',
-    'Mobile device security and BYOD policy compliance.',
-    'Cloud security fundamentals and configuration management.',
-    'Data classification and handling procedures training.'
+export function generateContextualTraining(threats) {
+  const threatTypes = threats.map(t => t.title.toLowerCase() + ' ' + t.description.toLowerCase());
+  const allText = threatTypes.join(' ');
+  
+  const trainingItems = [];
+  
+  // Generate training based on current threats
+  if (allText.includes('phishing') || allText.includes('social engineering')) {
+    trainingItems.push('Advanced phishing simulation exercises with real-world attack scenarios and reporting procedures.');
+  }
+  
+  if (allText.includes('ransomware') || allText.includes('malware')) {
+    trainingItems.push('Ransomware response and recovery workshop including backup validation and incident communication.');
+  }
+  
+  if (allText.includes('vulnerability') || allText.includes('patch')) {
+    trainingItems.push('Secure development lifecycle training with vulnerability assessment and remediation techniques.');
+  }
+  
+  if (allText.includes('supply chain') || allText.includes('third-party')) {
+    trainingItems.push('Third-party risk management and supply chain security assessment methodologies.');
+  }
+  
+  // Default training items
+  const defaultTraining = [
+    'Incident response tabletop exercises with cross-functional team coordination and communication protocols.',
+    'Cloud security fundamentals workshop covering configuration management and access control best practices.',
+    'Mobile device and remote work security training including BYOD policies and secure connectivity.'
   ];
   
-  const count = Math.min(threats.length, 3);
-  return trainingTopics.slice(0, count).map((topic, index) => ({
+  const allTraining = [...trainingItems, ...defaultTraining];
+  
+  return allTraining.slice(0, 3).map((training, index) => ({
     id: (index + 1).toString(),
-    content: topic
+    content: training
   }));
 }
 
 export function generateSecurityThought() {
   const thoughts = [
-    'IN CYBERSECURITY, PARANOIA IS A VIRTUE. THE QUESTION ISN\'T "IF" BUT "WHEN" - SO BUILD WALLS TODAY THAT WITHSTAND TOMORROW\'S SIEGE.',
-    'SECURITY IS NOT A PRODUCT, BUT A PROCESS. IT\'S NOT A DESTINATION, BUT A JOURNEY OF CONTINUOUS VIGILANCE.',
-    'THE WEAKEST LINK IN SECURITY IS OFTEN THE HUMAN ELEMENT. INVEST IN PEOPLE AS MUCH AS TECHNOLOGY.',
-    'ASSUME BREACH: PLAN FOR FAILURE, PREPARE FOR SUCCESS, AND ALWAYS HAVE A BACKUP PLAN.',
-    'CYBERSECURITY IS EVERYONE\'S RESPONSIBILITY, NOT JUST THE IT DEPARTMENT\'S PROBLEM.',
-    'THE BEST DEFENSE IS A GOOD OFFENSE: KNOW YOUR ENEMY BEFORE THEY KNOW YOU.',
-    'IN THE DIGITAL AGE, YOUR DATA IS YOUR MOST VALUABLE ASSET. PROTECT IT LIKE YOUR LIFE DEPENDS ON IT.'
+    'CYBERSECURITY IS NOT ABOUT BUILDING PERFECT WALLS, BUT ABOUT DETECTING AND RESPONDING TO BREACHES FASTER THAN ATTACKERS CAN EXPLOIT THEM.',
+    'IN THE DIGITAL BATTLEFIELD, YOUR WEAKEST LINK IS OFTEN YOUR STRONGEST TEACHER - LEARN FROM EVERY INCIDENT.',
+    'SECURITY IS A TEAM SPORT: EVERY EMPLOYEE IS A DEFENDER, EVERY PROCESS IS A CONTROL, EVERY DECISION IS A RISK ASSESSMENT.',
+    'THE BEST DEFENSE AGAINST TOMORROW\'S THREATS IS TODAY\'S PREPARATION - ASSUME BREACH, PLAN FOR RESILIENCE.',
+    'CYBERSECURITY IS NOT A DESTINATION BUT A CONTINUOUS JOURNEY OF ADAPTATION, LEARNING, AND IMPROVEMENT.',
+    'IN CYBERSECURITY, PARANOIA IS PROFESSIONALISM - QUESTION EVERYTHING, VERIFY CONSTANTLY, TRUST CAUTIOUSLY.',
+    'THE COST OF PREVENTION IS ALWAYS LESS THAN THE PRICE OF RECOVERY - INVEST IN SECURITY BEFORE YOU NEED IT.'
   ];
   
   return thoughts[Math.floor(Math.random() * thoughts.length)];
@@ -154,13 +330,13 @@ export function generateSecurityThought() {
 
 export function generateSecurityJoke() {
   const jokes = [
-    'WHY DID THE CYBERSECURITY EXPERT BRING A LADDER TO WORK? TO CLIMB THE FIREWALL!',
-    'HOW MANY CYBERSECURITY EXPERTS DOES IT TAKE TO CHANGE A LIGHT BULB? NONE - THEY JUST DECLARE IT A SECURITY FEATURE!',
-    'WHY DON\'T HACKERS EVER GET LOCKED OUT? THEY ALWAYS HAVE A BACKDOOR!',
-    'WHAT DO YOU CALL A SECURITY GUARD AT A SAMSUNG STORE? A GUARDIAN OF THE GALAXY!',
-    'WHY DID THE PASSWORD GO TO THERAPY? IT HAD TOO MANY COMPLEX ISSUES!',
-    'WHAT\'S A HACKER\'S FAVORITE TYPE OF MUSIC? ALGO-RHYTHMS!',
-    'WHY DON\'T CYBERSECURITY EXPERTS TRUST STAIRS? THEY\'RE ALWAYS UP TO SOMETHING!'
+    'WHY DO CYBERSECURITY EXPERTS NEVER GET LOCKED OUT? THEY ALWAYS HAVE A BACKUP PLAN... AND A BACKUP BACKUP PLAN!',
+    'WHAT\'S THE DIFFERENCE BETWEEN A SECURITY EXPERT AND A MAGICIAN? THE MAGICIAN MAKES THINGS DISAPPEAR, THE SECURITY EXPERT MAKES THREATS REAPPEAR!',
+    'WHY DID THE HACKER BREAK UP WITH THE FIREWALL? BECAUSE THEIR RELATIONSHIP HAD TOO MANY TRUST ISSUES!',
+    'HOW MANY CYBERSECURITY PROFESSIONALS DOES IT TAKE TO CHANGE A LIGHT BULB? NONE - THEY JUST DECLARE DARKNESS A SECURITY FEATURE!',
+    'WHY DON\'T SECURITY ANALYSTS TRUST STAIRS? BECAUSE THEY\'RE ALWAYS UP TO SOMETHING SUSPICIOUS!',
+    'WHAT DO YOU CALL A CYBERSECURITY EXPERT WHO WORKS FROM HOME? A REMOTE ACCESS TROJAN... WAIT, THAT CAME OUT WRONG!',
+    'WHY DID THE PASSWORD GO TO THERAPY? IT HAD TOO MANY COMPLEX REQUIREMENTS AND COULDN\'T HANDLE THE PRESSURE!'
   ];
   
   return jokes[Math.floor(Math.random() * jokes.length)];
