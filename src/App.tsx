@@ -16,19 +16,44 @@ function App() {
     }
 
     try {
-      console.log('Starting PDF generation...');
+      console.log('🔍 Starting PDF generation...');
+      console.log('📋 Content element:', content);
+      console.log('📏 Content dimensions:', content.offsetWidth, 'x', content.offsetHeight);
       
-      // Scroll to top and wait for everything to settle
+      // Scroll to top and wait
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Get all newsletter pages
-      const pages = content.querySelectorAll('.newsletter-page');
-      console.log('Found newsletter pages:', pages.length);
+      // First, let's check what we can find
+      const allDivs = content.querySelectorAll('div');
+      console.log('📦 Total divs found:', allDivs.length);
+      
+      // Look for newsletter pages with different selectors
+      let pages = content.querySelectorAll('.newsletter-page');
+      console.log('📄 Pages with .newsletter-page:', pages.length);
       
       if (pages.length === 0) {
-        throw new Error('No newsletter pages found');
+        // Try alternative selectors
+        pages = content.querySelectorAll('.newsletter-cover, .newsletter-threats, .newsletter-best-practices');
+        console.log('📄 Pages with specific classes:', pages.length);
       }
+      
+      if (pages.length === 0) {
+        // Try to find the newsletter component directly
+        const newsletterDiv = content.querySelector('.newsletter');
+        if (newsletterDiv) {
+          pages = newsletterDiv.querySelectorAll('div');
+          console.log('📄 Direct newsletter divs:', pages.length);
+        }
+      }
+      
+      if (pages.length === 0) {
+        // Last resort - capture the entire content
+        console.log('⚠️ No specific pages found, capturing entire content');
+        pages = [content];
+      }
+
+      console.log('✅ Final pages to process:', pages.length);
 
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -36,119 +61,120 @@ function App() {
         format: 'a4'
       });
 
-      // Process each page with enhanced settings
+      // Process each page
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement;
-        console.log(`Processing page ${i + 1}/${pages.length}`);
+        console.log(`🔄 Processing page ${i + 1}/${pages.length}`);
+        console.log('📏 Page dimensions:', page.offsetWidth, 'x', page.offsetHeight);
+        console.log('🎨 Page background:', window.getComputedStyle(page).backgroundColor);
         
-        // Ensure page is fully visible and loaded
+        // Make sure the page is visible
+        page.style.display = 'block';
+        page.style.visibility = 'visible';
+        page.style.opacity = '1';
+        
+        // Scroll to the page
         page.scrollIntoView({ behavior: 'instant', block: 'start' });
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Wait for all images in this page to fully load
+        // Wait for images
         const images = page.querySelectorAll('img');
-        await Promise.all(Array.from(images).map(img => {
-          if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-          return new Promise(resolve => {
-            const timeout = setTimeout(() => resolve(undefined), 5000);
-            img.onload = () => {
-              clearTimeout(timeout);
-              resolve(undefined);
-            };
-            img.onerror = () => {
-              clearTimeout(timeout);
-              resolve(undefined);
-            };
-          });
-        }));
+        console.log(`🖼️ Images in page ${i + 1}:`, images.length);
+        
+        for (const img of images) {
+          if (!img.complete || img.naturalWidth === 0) {
+            console.log('⏳ Waiting for image:', img.src);
+            await new Promise(resolve => {
+              const timeout = setTimeout(() => resolve(undefined), 3000);
+              img.onload = () => {
+                clearTimeout(timeout);
+                console.log('✅ Image loaded:', img.src);
+                resolve(undefined);
+              };
+              img.onerror = () => {
+                clearTimeout(timeout);
+                console.log('❌ Image failed:', img.src);
+                resolve(undefined);
+              };
+            });
+          }
+        }
 
-        // Enhanced canvas creation with exact styling preservation
+        // Create canvas with debug logging
+        console.log('🎨 Creating canvas for page', i + 1);
         const canvas = await html2canvas(page, {
-          scale: 2, // Higher quality
+          scale: 1.5,
           useCORS: true,
           allowTaint: false,
-          backgroundColor: null, // Preserve original background
-          logging: false,
-          width: page.offsetWidth,
-          height: page.offsetHeight,
-          windowWidth: window.innerWidth,
-          windowHeight: window.innerHeight,
+          backgroundColor: '#ffffff',
+          logging: true, // Enable logging for debugging
+          width: page.offsetWidth || 1200,
+          height: page.offsetHeight || 800,
+          windowWidth: 1200,
+          windowHeight: 800,
           scrollX: 0,
           scrollY: 0,
-          foreignObjectRendering: true, // Better text rendering
-          imageTimeout: 10000,
-          removeContainer: true,
-          onclone: (clonedDoc) => {
-            // Ensure all styles are preserved in the clone
-            const clonedPage = clonedDoc.querySelector('.newsletter-page');
-            if (clonedPage) {
-              // Force all computed styles to be inline
-              const originalElements = page.querySelectorAll('*');
-              const clonedElements = clonedPage.querySelectorAll('*');
-              
-              originalElements.forEach((el, index) => {
-                if (clonedElements[index]) {
-                  const computedStyle = window.getComputedStyle(el);
-                  const clonedEl = clonedElements[index] as HTMLElement;
-                  
-                  // Copy critical styles
-                  clonedEl.style.color = computedStyle.color;
-                  clonedEl.style.backgroundColor = computedStyle.backgroundColor;
-                  clonedEl.style.fontSize = computedStyle.fontSize;
-                  clonedEl.style.fontFamily = computedStyle.fontFamily;
-                  clonedEl.style.fontWeight = computedStyle.fontWeight;
-                  clonedEl.style.textAlign = computedStyle.textAlign;
-                  clonedEl.style.padding = computedStyle.padding;
-                  clonedEl.style.margin = computedStyle.margin;
-                  clonedEl.style.border = computedStyle.border;
-                  clonedEl.style.borderRadius = computedStyle.borderRadius;
-                  clonedEl.style.boxShadow = computedStyle.boxShadow;
-                  clonedEl.style.backgroundImage = computedStyle.backgroundImage;
-                  clonedEl.style.backgroundSize = computedStyle.backgroundSize;
-                  clonedEl.style.backgroundPosition = computedStyle.backgroundPosition;
-                  clonedEl.style.backgroundRepeat = computedStyle.backgroundRepeat;
-                  clonedEl.style.filter = computedStyle.filter;
-                  clonedEl.style.opacity = computedStyle.opacity;
-                }
-              });
-            }
+          imageTimeout: 5000,
+          onclone: (clonedDoc, element) => {
+            console.log('🔄 Cloning document for canvas');
+            // Ensure all styles are applied
+            const clonedElement = element as HTMLElement;
+            clonedElement.style.display = 'block';
+            clonedElement.style.visibility = 'visible';
+            clonedElement.style.opacity = '1';
+            
+            // Apply Tailwind classes manually if needed
+            const allElements = clonedElement.querySelectorAll('*');
+            allElements.forEach(el => {
+              const htmlEl = el as HTMLElement;
+              if (htmlEl.classList.contains('bg-red-700')) {
+                htmlEl.style.backgroundColor = '#b91c1c';
+              }
+              if (htmlEl.classList.contains('bg-black')) {
+                htmlEl.style.backgroundColor = '#000000';
+              }
+              if (htmlEl.classList.contains('text-white')) {
+                htmlEl.style.color = '#ffffff';
+              }
+              if (htmlEl.classList.contains('min-h-screen')) {
+                htmlEl.style.minHeight = '100vh';
+              }
+            });
           }
         });
 
-        console.log(`Page ${i + 1} canvas:`, canvas.width, 'x', canvas.height);
+        console.log(`✅ Canvas created for page ${i + 1}:`, canvas.width, 'x', canvas.height);
 
         if (canvas.width === 0 || canvas.height === 0) {
-          console.warn(`Page ${i + 1} has zero dimensions, skipping`);
+          console.error(`❌ Page ${i + 1} canvas has zero dimensions!`);
           continue;
         }
 
-        // Add new page if not the first
+        // Add to PDF
         if (i > 0) {
           pdf.addPage();
         }
 
-        // Calculate dimensions to fit A4 perfectly
-        const imgData = canvas.toDataURL('image/png', 1.0); // Maximum quality
-        const imgWidth = canvas.width * 0.264583; // Convert px to mm
+        const imgData = canvas.toDataURL('image/png', 0.95);
+        const imgWidth = canvas.width * 0.264583;
         const imgHeight = canvas.height * 0.264583;
         
-        // Scale to fit A4 (210 x 297 mm) while maintaining aspect ratio
         const scale = Math.min(210 / imgWidth, 297 / imgHeight);
         const scaledWidth = imgWidth * scale;
         const scaledHeight = imgHeight * scale;
         
-        // Center on page
         const x = (210 - scaledWidth) / 2;
         const y = (297 - scaledHeight) / 2;
 
-        pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight, undefined, 'FAST');
+        pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
+        console.log(`✅ Added page ${i + 1} to PDF`);
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('PDF generated successfully with', pages.length, 'pages');
+      console.log('🎉 PDF generated successfully!');
       
     } catch (error) {
-      console.error('PDF generation failed:', error);
+      console.error('❌ PDF generation failed:', error);
       alert('PDF download failed: ' + error.message);
     }
   };
@@ -161,72 +187,93 @@ function App() {
     }
 
     try {
-      console.log('Starting PNG generation...');
+      console.log('🔍 Starting PNG generation...');
+      console.log('📋 Content element:', content);
       
-      // Scroll to top and wait
+      // Scroll to top
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Get all newsletter pages
-      const pages = content.querySelectorAll('.newsletter-page');
-      console.log('Found newsletter pages:', pages.length);
-      
+      // Find pages
+      let pages = content.querySelectorAll('.newsletter-page');
       if (pages.length === 0) {
-        throw new Error('No newsletter pages found');
+        pages = content.querySelectorAll('.newsletter-cover, .newsletter-threats, .newsletter-best-practices');
+      }
+      if (pages.length === 0) {
+        const newsletterDiv = content.querySelector('.newsletter');
+        if (newsletterDiv) {
+          pages = newsletterDiv.querySelectorAll('div');
+        }
+      }
+      if (pages.length === 0) {
+        pages = [content];
       }
 
-      // Create a temporary container to hold all pages
+      console.log('📄 Pages found for PNG:', pages.length);
+
+      // Create a visible container for combining pages
       const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
+      tempContainer.style.position = 'fixed';
       tempContainer.style.top = '0';
-      tempContainer.style.backgroundColor = 'transparent';
+      tempContainer.style.left = '0';
       tempContainer.style.width = '1200px';
-      tempContainer.style.zIndex = '-1000';
+      tempContainer.style.backgroundColor = '#ffffff';
+      tempContainer.style.zIndex = '9999';
+      tempContainer.style.visibility = 'visible';
+      tempContainer.style.opacity = '1';
       document.body.appendChild(tempContainer);
 
-      // Clone all pages with their exact styling
+      // Clone and combine all pages
       let totalHeight = 0;
-      const pageHeight = 800; // Fixed height per page
-      
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement;
         const clone = page.cloneNode(true) as HTMLElement;
         
-        // Preserve exact styling
-        clone.style.position = 'relative';
+        // Set explicit dimensions and styles
         clone.style.width = '1200px';
-        clone.style.height = pageHeight + 'px';
+        clone.style.height = '800px';
         clone.style.display = 'block';
+        clone.style.position = 'relative';
         clone.style.overflow = 'hidden';
-        clone.style.pageBreakAfter = 'auto';
+        clone.style.backgroundColor = window.getComputedStyle(page).backgroundColor || '#ffffff';
         
-        // Copy all computed styles to ensure exact appearance
-        const allElements = page.querySelectorAll('*');
+        // Apply critical styles to cloned elements
+        const originalElements = page.querySelectorAll('*');
         const clonedElements = clone.querySelectorAll('*');
         
-        allElements.forEach((el, index) => {
+        originalElements.forEach((el, index) => {
           if (clonedElements[index]) {
             const computedStyle = window.getComputedStyle(el);
             const clonedEl = clonedElements[index] as HTMLElement;
             
-            // Apply all critical styles
-            clonedEl.style.cssText = computedStyle.cssText;
+            // Copy essential styles
+            clonedEl.style.backgroundColor = computedStyle.backgroundColor;
+            clonedEl.style.color = computedStyle.color;
+            clonedEl.style.fontSize = computedStyle.fontSize;
+            clonedEl.style.fontFamily = computedStyle.fontFamily;
+            clonedEl.style.fontWeight = computedStyle.fontWeight;
+            clonedEl.style.textAlign = computedStyle.textAlign;
+            clonedEl.style.backgroundImage = computedStyle.backgroundImage;
+            clonedEl.style.backgroundSize = computedStyle.backgroundSize;
+            clonedEl.style.backgroundPosition = computedStyle.backgroundPosition;
+            clonedEl.style.filter = computedStyle.filter;
           }
         });
         
         tempContainer.appendChild(clone);
-        totalHeight += pageHeight;
+        totalHeight += 800;
       }
 
       tempContainer.style.height = totalHeight + 'px';
 
-      // Wait for all images to load in the cloned content
+      // Wait for images to load
       const allImages = tempContainer.querySelectorAll('img');
+      console.log('🖼️ Total images to load:', allImages.length);
+      
       await Promise.all(Array.from(allImages).map(img => {
         if (img.complete && img.naturalWidth > 0) return Promise.resolve();
         return new Promise(resolve => {
-          const timeout = setTimeout(() => resolve(undefined), 5000);
+          const timeout = setTimeout(() => resolve(undefined), 3000);
           img.onload = () => {
             clearTimeout(timeout);
             resolve(undefined);
@@ -238,33 +285,32 @@ function App() {
         });
       }));
 
-      // Wait a bit more for everything to settle
+      // Wait a bit more
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Create canvas with enhanced settings
+      console.log('🎨 Creating combined canvas...');
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: null,
-        logging: false,
+        backgroundColor: '#ffffff',
+        logging: true,
         width: 1200,
         height: totalHeight,
-        foreignObjectRendering: true,
-        imageTimeout: 10000,
-        removeContainer: true
+        windowWidth: 1200,
+        windowHeight: totalHeight
       });
 
       // Clean up
       document.body.removeChild(tempContainer);
 
-      console.log('Combined canvas:', canvas.width, 'x', canvas.height);
+      console.log('✅ Combined canvas created:', canvas.width, 'x', canvas.height);
 
       if (canvas.width === 0 || canvas.height === 0) {
         throw new Error('Canvas has zero dimensions');
       }
 
-      // Download the image with maximum quality
+      // Download
       const link = document.createElement('a');
       link.download = 'Cybersecurity-Newsletter.png';
       link.href = canvas.toDataURL('image/png', 1.0);
@@ -272,10 +318,10 @@ function App() {
       link.click();
       document.body.removeChild(link);
       
-      console.log('PNG generated successfully');
+      console.log('🎉 PNG generated successfully!');
       
     } catch (error) {
-      console.error('PNG generation failed:', error);
+      console.error('❌ PNG generation failed:', error);
       alert('PNG download failed: ' + error.message);
     }
   };
@@ -294,10 +340,11 @@ function App() {
               <h2 className="text-xl font-semibold mb-4">Newsletter Preview</h2>
               <div
                 ref={printRef}
-                className="border border-gray-300 rounded-lg overflow-hidden bg-white"
+                className="border border-gray-300 rounded-lg overflow-hidden bg-white newsletter-container"
                 style={{ 
                   backgroundColor: 'white',
-                  position: 'relative'
+                  position: 'relative',
+                  minHeight: '400px'
                 }}
               >
                 <Newsletter />

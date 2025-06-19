@@ -8,14 +8,14 @@ const Newsletter: React.FC = () => {
   const { title } = useNewsletter();
   
   return (
-    <div className="newsletter w-full">
-      <div className="newsletter-page newsletter-cover">
+    <div className="newsletter w-full" style={{ backgroundColor: 'white' }}>
+      <div className="newsletter-page newsletter-cover" style={{ minHeight: '800px', backgroundColor: 'black' }}>
         <NewsletterCover />
       </div>
-      <div className="newsletter-page newsletter-threats">
+      <div className="newsletter-page newsletter-threats" style={{ minHeight: '800px', backgroundColor: 'white' }}>
         <NewsletterThreats />
       </div>
-      <div className="newsletter-page newsletter-best-practices">
+      <div className="newsletter-page newsletter-best-practices" style={{ minHeight: '800px', backgroundColor: 'white' }}>
         <NewsletterBestPractices />
       </div>
     </div>
