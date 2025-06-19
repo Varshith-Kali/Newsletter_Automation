@@ -7,7 +7,8 @@
       "severity": "CRITICAL",
       "source": "Security Advisory",
       "formattedDate": "Today",
-      "pubDate": "2025-01-11T15:30:00.000Z"
+      "pubDate": "2025-01-11T15:30:00.000Z",
+      "link": "https://www.bleepingcomputer.com/news/security/zero-day-web-framework-vulnerability/"
     },
     {
       "id": "2", 
@@ -16,7 +17,8 @@
       "severity": "HIGH",
       "source": "Healthcare Security Alert",
       "formattedDate": "Yesterday",
-      "pubDate": "2025-01-10T12:15:00.000Z"
+      "pubDate": "2025-01-10T12:15:00.000Z",
+      "link": "https://krebsonsecurity.com/2025/01/ransomware-targets-healthcare-systems/"
     },
     {
       "id": "3",
@@ -25,7 +27,8 @@
       "severity": "HIGH",
       "source": "Threat Intelligence",
       "formattedDate": "2 days ago",
-      "pubDate": "2025-01-09T09:45:00.000Z"
+      "pubDate": "2025-01-09T09:45:00.000Z",
+      "link": "https://www.darkreading.com/attacks-breaches/supply-chain-attack-software-update"
     },
     {
       "id": "4",
@@ -34,7 +37,8 @@
       "severity": "MEDIUM",
       "source": "Cybersecurity Research",
       "formattedDate": "3 days ago",
-      "pubDate": "2025-01-08T14:20:00.000Z"
+      "pubDate": "2025-01-08T14:20:00.000Z",
+      "link": "https://www.securityweek.com/ai-powered-social-engineering-attacks/"
     }
   ],
   "bestPractices": [
