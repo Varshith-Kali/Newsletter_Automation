@@ -2,134 +2,44 @@ import React, { useRef } from 'react';
 import NewsletterEditor from './components/NewsletterEditor';
 import Newsletter from './components/Newsletter';
 import { NewsletterProvider } from './context/NewsletterContext';
+import html2pdf from 'html2pdf.js';
 
 function App() {
   const printRef = useRef<HTMLDivElement>(null);
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const content = printRef.current;
     if (content) {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Cybersecurity Newsletter</title>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <script src="https://cdn.tailwindcss.com"></script>
-              <style>
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-                
-                * {
-                  margin: 0;
-                  padding: 0;
-                  box-sizing: border-box;
-                }
+      try {
+        // Configure html2pdf options for high quality output
+        const options = {
+          margin: 0,
+          filename: 'Cybersecurity-Newsletter.pdf',
+          image: { type: 'jpeg', quality: 1.0 },
+          html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            letterRendering: true,
+            foreignObjectRendering: true
+          },
+          jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait',
+            compress: true
+          },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
 
-                html, body {
-                  background: white !important;
-                  margin: 0;
-                  padding: 0;
-                  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                  color-adjust: exact !important;
-                }
-
-                @page {
-                  margin: 0;
-                  size: A4;
-                }
-
-                @media print {
-                  * {
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                    color-adjust: exact !important;
-                  }
-                  
-                  body {
-                    overflow: visible !important;
-                  }
-                  
-                  .newsletter-page {
-                    page-break-after: always !important;
-                    page-break-inside: avoid !important;
-                    break-after: page !important;
-                    break-inside: avoid !important;
-                    min-height: 100vh !important;
-                    height: 100vh !important;
-                  }
-                  
-                  .newsletter-page:last-child {
-                    page-break-after: auto !important;
-                    break-after: auto !important;
-                  }
-                  
-                  img {
-                    max-width: 100% !important;
-                    height: auto !important;
-                    display: block !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                  }
-                  
-                  .bg-red-700, .bg-red-600 {
-                    background-color: #b91c1c !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                  }
-                  
-                  .bg-black {
-                    background-color: #000000 !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                  }
-                  
-                  .bg-white {
-                    background-color: #ffffff !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                  }
-                  
-                  .text-white {
-                    color: #ffffff !important;
-                  }
-                  
-                  .text-red-700 {
-                    color: #b91c1c !important;
-                  }
-                  
-                  .grayscale {
-                    filter: grayscale(100%) !important;
-                    -webkit-filter: grayscale(100%) !important;
-                  }
-                }
-
-                .newsletter-print-wrapper {
-                  width: 100%;
-                  overflow: visible;
-                }
-              </style>
-            </head>
-            <body>
-              <div class="newsletter-print-wrapper">
-                ${content.innerHTML}
-              </div>
-              <script>
-                window.onload = function() {
-                  setTimeout(function() {
-                    window.print();
-                    window.close();
-                  }, 1000);
-                };
-              </script>
-            </body>
-          </html>
-        `);
-
-        printWindow.document.close();
+        // Generate and download PDF
+        await html2pdf().set(options).from(content).save();
+        
+      } catch (error) {
+        console.error('PDF generation failed:', error);
+        alert('PDF download failed. Please try again.');
       }
     }
   };

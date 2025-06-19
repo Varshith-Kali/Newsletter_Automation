@@ -80,12 +80,14 @@ const NewsletterThreats: React.FC = () => {
                         href={threat.link} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-700 hover:text-blue-900 underline hover:no-underline transition-colors"
+                        className="text-blue-700 hover:text-blue-900 underline hover:no-underline transition-colors cursor-pointer"
                       >
                         {index + 1}. {threat.title}
                       </a>
                     ) : (
-                      <span>{index + 1}. {threat.title}</span>
+                      <span className="cursor-pointer text-blue-700 hover:text-blue-900 underline hover:no-underline transition-colors">
+                        {index + 1}. {threat.title}
+                      </span>
                     )}
                     {getSeverityBadge(threat.severity)}
                   </h3>
