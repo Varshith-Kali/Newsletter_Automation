@@ -17,103 +17,95 @@ function App() {
 
     try {
       console.log('Starting PDF generation...');
-      console.log('Content element:', content);
-      console.log('Content dimensions:', content.offsetWidth, 'x', content.offsetHeight);
       
-      // Scroll to top to ensure full content is visible
+      // Scroll to top and wait
       window.scrollTo(0, 0);
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Wait for any animations or transitions to complete
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Get all newsletter pages
+      const pages = content.querySelectorAll('.newsletter-page');
+      console.log('Found newsletter pages:', pages.length);
       
-      // Ensure all images are loaded
-      const images = content.querySelectorAll('img');
-      console.log('Found images:', images.length);
-      
-      await Promise.all(Array.from(images).map((img, index) => {
-        console.log(`Image ${index + 1}:`, img.src, 'Complete:', img.complete);
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-          img.onload = () => {
-            console.log(`Image ${index + 1} loaded`);
-            resolve(undefined);
-          };
-          img.onerror = () => {
-            console.log(`Image ${index + 1} failed to load`);
-            resolve(undefined);
-          };
-        });
-      }));
-
-      console.log('All images processed, creating canvas...');
-      
-      // Create canvas with optimized settings
-      const canvas = await html2canvas(content, {
-        scale: 1.5, // Reduced scale for better performance
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#ffffff',
-        logging: true,
-        letterRendering: true,
-        foreignObjectRendering: false, // Disable for better compatibility
-        scrollX: 0,
-        scrollY: 0,
-        width: content.scrollWidth,
-        height: content.scrollHeight,
-        windowWidth: content.scrollWidth,
-        windowHeight: content.scrollHeight,
-        onclone: (clonedDoc) => {
-          console.log('Cloning document...');
-          const clonedContent = clonedDoc.querySelector('[data-newsletter-content]');
-          if (clonedContent) {
-            clonedContent.style.backgroundColor = '#ffffff';
-            clonedContent.style.transform = 'none';
-            clonedContent.style.position = 'static';
-          }
-        }
-      });
-
-      console.log('Canvas created successfully:', canvas.width, 'x', canvas.height);
-
-      if (canvas.width === 0 || canvas.height === 0) {
-        throw new Error('Canvas has zero dimensions');
+      if (pages.length === 0) {
+        throw new Error('No newsletter pages found');
       }
 
-      const imgData = canvas.toDataURL('image/png', 0.95);
-      console.log('Image data created, length:', imgData.length);
-      
-      // Calculate PDF dimensions
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = imgWidth / imgHeight;
-      
-      // Create PDF with A4 proportions
-      const pdfWidth = ratio > 1 ? 297 : 210; // A4 landscape or portrait
-      const pdfHeight = ratio > 1 ? 210 : 297;
-      
       const pdf = new jsPDF({
-        orientation: ratio > 1 ? 'landscape' : 'portrait',
+        orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
 
-      // Calculate scaling to fit A4
-      const scale = Math.min(pdfWidth / (imgWidth * 0.264583), pdfHeight / (imgHeight * 0.264583));
-      const scaledWidth = imgWidth * 0.264583 * scale;
-      const scaledHeight = imgHeight * 0.264583 * scale;
-      
-      // Center the image on the page
-      const x = (pdfWidth - scaledWidth) / 2;
-      const y = (pdfHeight - scaledHeight) / 2;
+      // Process each page
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i] as HTMLElement;
+        console.log(`Processing page ${i + 1}/${pages.length}`);
+        
+        // Ensure page is visible
+        page.scrollIntoView({ behavior: 'instant', block: 'start' });
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Wait for images in this page to load
+        const images = page.querySelectorAll('img');
+        await Promise.all(Array.from(images).map(img => {
+          if (img.complete) return Promise.resolve();
+          return new Promise(resolve => {
+            img.onload = () => resolve(undefined);
+            img.onerror = () => resolve(undefined);
+            setTimeout(() => resolve(undefined), 3000); // Timeout after 3s
+          });
+        }));
 
-      pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
+        // Create canvas for this page
+        const canvas = await html2canvas(page, {
+          scale: 1.5,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: page.offsetWidth,
+          height: page.offsetHeight,
+          windowWidth: 1200,
+          windowHeight: 800,
+          scrollX: 0,
+          scrollY: 0
+        });
+
+        console.log(`Page ${i + 1} canvas:`, canvas.width, 'x', canvas.height);
+
+        if (canvas.width === 0 || canvas.height === 0) {
+          console.warn(`Page ${i + 1} has zero dimensions, skipping`);
+          continue;
+        }
+
+        // Add new page if not the first
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        // Calculate dimensions to fit A4
+        const imgData = canvas.toDataURL('image/png', 0.95);
+        const imgWidth = canvas.width * 0.264583; // Convert px to mm
+        const imgHeight = canvas.height * 0.264583;
+        
+        // Scale to fit A4 (210 x 297 mm)
+        const scale = Math.min(210 / imgWidth, 297 / imgHeight);
+        const scaledWidth = imgWidth * scale;
+        const scaledHeight = imgHeight * scale;
+        
+        // Center on page
+        const x = (210 - scaledWidth) / 2;
+        const y = (297 - scaledHeight) / 2;
+
+        pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
+      }
+
       pdf.save('Cybersecurity-Newsletter.pdf');
-      
-      console.log('PDF generated and saved successfully');
+      console.log('PDF generated successfully with', pages.length, 'pages');
       
     } catch (error) {
       console.error('PDF generation failed:', error);
-      alert('PDF download failed. Error: ' + error.message + '\nPlease check the console for more details.');
+      alert('PDF download failed: ' + error.message);
     }
   };
 
@@ -126,68 +118,75 @@ function App() {
 
     try {
       console.log('Starting PNG generation...');
-      console.log('Content element:', content);
-      console.log('Content dimensions:', content.offsetWidth, 'x', content.offsetHeight);
       
-      // Scroll to top to ensure full content is visible
+      // Scroll to top and wait
       window.scrollTo(0, 0);
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Wait for any animations or transitions to complete
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Get all newsletter pages
+      const pages = content.querySelectorAll('.newsletter-page');
+      console.log('Found newsletter pages:', pages.length);
       
-      // Ensure all images are loaded
-      const images = content.querySelectorAll('img');
-      console.log('Found images:', images.length);
-      
-      await Promise.all(Array.from(images).map((img, index) => {
-        console.log(`Image ${index + 1}:`, img.src, 'Complete:', img.complete);
+      if (pages.length === 0) {
+        throw new Error('No newsletter pages found');
+      }
+
+      // Create a container to hold all pages vertically
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      tempContainer.style.backgroundColor = '#ffffff';
+      tempContainer.style.width = '1200px';
+      document.body.appendChild(tempContainer);
+
+      // Clone all pages into the container
+      let totalHeight = 0;
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i] as HTMLElement;
+        const clone = page.cloneNode(true) as HTMLElement;
+        clone.style.position = 'relative';
+        clone.style.width = '1200px';
+        clone.style.height = '800px';
+        clone.style.display = 'block';
+        tempContainer.appendChild(clone);
+        totalHeight += 800;
+      }
+
+      tempContainer.style.height = totalHeight + 'px';
+
+      // Wait for images to load in cloned content
+      const allImages = tempContainer.querySelectorAll('img');
+      await Promise.all(Array.from(allImages).map(img => {
         if (img.complete) return Promise.resolve();
         return new Promise(resolve => {
-          img.onload = () => {
-            console.log(`Image ${index + 1} loaded`);
-            resolve(undefined);
-          };
-          img.onerror = () => {
-            console.log(`Image ${index + 1} failed to load`);
-            resolve(undefined);
-          };
+          img.onload = () => resolve(undefined);
+          img.onerror = () => resolve(undefined);
+          setTimeout(() => resolve(undefined), 3000);
         });
       }));
 
-      console.log('All images processed, creating canvas...');
-      
-      const canvas = await html2canvas(content, {
-        scale: 2, // Higher scale for PNG
+      // Create canvas of the entire container
+      const canvas = await html2canvas(tempContainer, {
+        scale: 2,
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
-        logging: true,
-        letterRendering: true,
-        foreignObjectRendering: false,
-        scrollX: 0,
-        scrollY: 0,
-        width: content.scrollWidth,
-        height: content.scrollHeight,
-        windowWidth: content.scrollWidth,
-        windowHeight: content.scrollHeight,
-        onclone: (clonedDoc) => {
-          console.log('Cloning document...');
-          const clonedContent = clonedDoc.querySelector('[data-newsletter-content]');
-          if (clonedContent) {
-            clonedContent.style.backgroundColor = '#ffffff';
-            clonedContent.style.transform = 'none';
-            clonedContent.style.position = 'static';
-          }
-        }
+        logging: false,
+        width: 1200,
+        height: totalHeight
       });
 
-      console.log('Canvas created successfully:', canvas.width, 'x', canvas.height);
+      // Clean up
+      document.body.removeChild(tempContainer);
+
+      console.log('Combined canvas:', canvas.width, 'x', canvas.height);
 
       if (canvas.width === 0 || canvas.height === 0) {
         throw new Error('Canvas has zero dimensions');
       }
 
-      // Create download link
+      // Download the image
       const link = document.createElement('a');
       link.download = 'Cybersecurity-Newsletter.png';
       link.href = canvas.toDataURL('image/png', 1.0);
@@ -195,11 +194,11 @@ function App() {
       link.click();
       document.body.removeChild(link);
       
-      console.log('PNG generated and downloaded successfully');
+      console.log('PNG generated successfully');
       
     } catch (error) {
       console.error('PNG generation failed:', error);
-      alert('PNG download failed. Error: ' + error.message + '\nPlease check the console for more details.');
+      alert('PNG download failed: ' + error.message);
     }
   };
 
@@ -217,11 +216,9 @@ function App() {
               <h2 className="text-xl font-semibold mb-4">Newsletter Preview</h2>
               <div
                 ref={printRef}
-                data-newsletter-content
                 className="border border-gray-300 rounded-lg overflow-hidden bg-white"
                 style={{ 
                   backgroundColor: 'white',
-                  minHeight: '800px',
                   position: 'relative'
                 }}
               >

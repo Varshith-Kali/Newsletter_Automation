@@ -9,9 +9,15 @@ const Newsletter: React.FC = () => {
   
   return (
     <div className="newsletter w-full">
-      <NewsletterCover />
-      <NewsletterThreats />
-      <NewsletterBestPractices />
+      <div className="newsletter-page newsletter-cover">
+        <NewsletterCover />
+      </div>
+      <div className="newsletter-page newsletter-threats">
+        <NewsletterThreats />
+      </div>
+      <div className="newsletter-page newsletter-best-practices">
+        <NewsletterBestPractices />
+      </div>
     </div>
   );
 };
