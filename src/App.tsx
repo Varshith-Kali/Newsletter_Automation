@@ -18,9 +18,9 @@ function App() {
     try {
       console.log('Starting PDF generation...');
       
-      // Scroll to top and wait
+      // Scroll to top and wait for everything to settle
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Get all newsletter pages
       const pages = content.querySelectorAll('.newsletter-page');
@@ -36,29 +36,29 @@ function App() {
         format: 'a4'
       });
 
-      // Process each page
+      // Process each page with enhanced settings
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement;
         console.log(`Processing page ${i + 1}/${pages.length}`);
         
-        // Ensure page is visible
+        // Ensure page is visible and properly rendered
         page.scrollIntoView({ behavior: 'instant', block: 'start' });
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Wait for images in this page to load
+        // Wait for all images in this page to fully load
         const images = page.querySelectorAll('img');
         await Promise.all(Array.from(images).map(img => {
           if (img.complete) return Promise.resolve();
           return new Promise(resolve => {
             img.onload = () => resolve(undefined);
             img.onerror = () => resolve(undefined);
-            setTimeout(() => resolve(undefined), 3000); // Timeout after 3s
+            setTimeout(() => resolve(undefined), 5000);
           });
         }));
 
-        // Create canvas for this page
+        // Enhanced canvas settings for better quality
         const canvas = await html2canvas(page, {
-          scale: 1.5,
+          scale: 2, // Higher quality
           useCORS: true,
           allowTaint: false,
           backgroundColor: '#ffffff',
@@ -68,7 +68,14 @@ function App() {
           windowWidth: 1200,
           windowHeight: 800,
           scrollX: 0,
-          scrollY: 0
+          scrollY: 0,
+          imageTimeout: 15000,
+          removeContainer: true,
+          foreignObjectRendering: false,
+          ignoreElements: (element) => {
+            // Skip any elements that might interfere
+            return element.classList?.contains('print:hidden') || false;
+          }
         });
 
         console.log(`Page ${i + 1} canvas:`, canvas.width, 'x', canvas.height);
@@ -83,13 +90,15 @@ function App() {
           pdf.addPage();
         }
 
-        // Calculate dimensions to fit A4
-        const imgData = canvas.toDataURL('image/png', 0.95);
+        // Calculate dimensions to fit A4 perfectly
+        const imgData = canvas.toDataURL('image/png', 1.0);
         const imgWidth = canvas.width * 0.264583; // Convert px to mm
         const imgHeight = canvas.height * 0.264583;
         
-        // Scale to fit A4 (210 x 297 mm)
-        const scale = Math.min(210 / imgWidth, 297 / imgHeight);
+        // Scale to fit A4 (210 x 297 mm) with proper margins
+        const maxWidth = 200; // Leave 5mm margin on each side
+        const maxHeight = 287; // Leave 5mm margin top/bottom
+        const scale = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
         const scaledWidth = imgWidth * scale;
         const scaledHeight = imgHeight * scale;
         
@@ -119,9 +128,9 @@ function App() {
     try {
       console.log('Starting PNG generation...');
       
-      // Scroll to top and wait
+      // Scroll to top and wait for everything to settle
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Get all newsletter pages
       const pages = content.querySelectorAll('.newsletter-page');
@@ -131,42 +140,51 @@ function App() {
         throw new Error('No newsletter pages found');
       }
 
-      // Create a container to hold all pages vertically
+      // Create a temporary container with exact styling
       const tempContainer = document.createElement('div');
       tempContainer.style.position = 'absolute';
       tempContainer.style.left = '-9999px';
       tempContainer.style.top = '0';
       tempContainer.style.backgroundColor = '#ffffff';
       tempContainer.style.width = '1200px';
+      tempContainer.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif';
       document.body.appendChild(tempContainer);
 
-      // Clone all pages into the container
+      // Clone all pages with exact styling
       let totalHeight = 0;
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement;
         const clone = page.cloneNode(true) as HTMLElement;
+        
+        // Ensure exact styling is preserved
         clone.style.position = 'relative';
         clone.style.width = '1200px';
         clone.style.height = '800px';
         clone.style.display = 'block';
+        clone.style.backgroundColor = page.style.backgroundColor || getComputedStyle(page).backgroundColor;
+        clone.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif';
+        
         tempContainer.appendChild(clone);
         totalHeight += 800;
       }
 
       tempContainer.style.height = totalHeight + 'px';
 
-      // Wait for images to load in cloned content
+      // Wait for all images to load in cloned content
       const allImages = tempContainer.querySelectorAll('img');
       await Promise.all(Array.from(allImages).map(img => {
         if (img.complete) return Promise.resolve();
         return new Promise(resolve => {
           img.onload = () => resolve(undefined);
           img.onerror = () => resolve(undefined);
-          setTimeout(() => resolve(undefined), 3000);
+          setTimeout(() => resolve(undefined), 5000);
         });
       }));
 
-      // Create canvas of the entire container
+      // Additional wait for fonts and styling to apply
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Create canvas with enhanced settings
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
         useCORS: true,
@@ -174,7 +192,10 @@ function App() {
         backgroundColor: '#ffffff',
         logging: false,
         width: 1200,
-        height: totalHeight
+        height: totalHeight,
+        imageTimeout: 15000,
+        removeContainer: true,
+        foreignObjectRendering: false
       });
 
       // Clean up
@@ -186,7 +207,7 @@ function App() {
         throw new Error('Canvas has zero dimensions');
       }
 
-      // Download the image
+      // Download the image with maximum quality
       const link = document.createElement('a');
       link.download = 'Cybersecurity-Newsletter.png';
       link.href = canvas.toDataURL('image/png', 1.0);
@@ -216,10 +237,11 @@ function App() {
               <h2 className="text-xl font-semibold mb-4">Newsletter Preview</h2>
               <div
                 ref={printRef}
-                className="border border-gray-300 rounded-lg overflow-hidden bg-white"
+                className="border border-gray-300 rounded-lg overflow-hidden"
                 style={{ 
                   backgroundColor: 'white',
-                  position: 'relative'
+                  position: 'relative',
+                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif'
                 }}
               >
                 <Newsletter />
