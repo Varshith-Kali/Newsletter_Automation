@@ -3,44 +3,77 @@ import NewsletterEditor from './components/NewsletterEditor';
 import Newsletter from './components/Newsletter';
 import { NewsletterProvider } from './context/NewsletterContext';
 import html2pdf from 'html2pdf.js';
+import html2canvas from 'html2canvas';
 
 function App() {
   const printRef = useRef<HTMLDivElement>(null);
 
-  const handlePrint = async () => {
+  const downloadAsPDF = async () => {
     const content = printRef.current;
-    if (content) {
-      try {
-        // Configure html2pdf options for high quality output
-        const options = {
-          margin: 0,
-          filename: 'Cybersecurity-Newsletter.pdf',
-          image: { type: 'jpeg', quality: 1.0 },
-          html2canvas: { 
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            letterRendering: true,
-            foreignObjectRendering: true
-          },
-          jsPDF: { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait',
-            compress: true
-          },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
+    if (!content) return;
 
-        // Generate and download PDF
-        await html2pdf().set(options).from(content).save();
-        
-      } catch (error) {
-        console.error('PDF generation failed:', error);
-        alert('PDF download failed. Please try again.');
-      }
+    try {
+      // Configure html2pdf options for exact preview replication
+      const options = {
+        margin: 0,
+        filename: 'Cybersecurity-Newsletter.pdf',
+        image: { type: 'jpeg', quality: 1.0 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          logging: false,
+          letterRendering: true,
+          foreignObjectRendering: true,
+          scrollX: 0,
+          scrollY: 0,
+          width: content.scrollWidth,
+          height: content.scrollHeight
+        },
+        jsPDF: { 
+          unit: 'px', 
+          format: [content.scrollWidth, content.scrollHeight],
+          orientation: content.scrollWidth > content.scrollHeight ? 'landscape' : 'portrait'
+        }
+      };
+
+      await html2pdf().set(options).from(content).save();
+      
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      alert('PDF download failed. Please try again.');
+    }
+  };
+
+  const downloadAsPNG = async () => {
+    const content = printRef.current;
+    if (!content) return;
+
+    try {
+      const canvas = await html2canvas(content, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        logging: false,
+        letterRendering: true,
+        foreignObjectRendering: true,
+        scrollX: 0,
+        scrollY: 0,
+        width: content.scrollWidth,
+        height: content.scrollHeight
+      });
+
+      // Create download link
+      const link = document.createElement('a');
+      link.download = 'Cybersecurity-Newsletter.png';
+      link.href = canvas.toDataURL('image/png', 1.0);
+      link.click();
+      
+    } catch (error) {
+      console.error('PNG generation failed:', error);
+      alert('PNG download failed. Please try again.');
     }
   };
 
@@ -59,15 +92,24 @@ function App() {
               <div
                 ref={printRef}
                 className="border border-gray-300 rounded-lg overflow-hidden"
+                style={{ backgroundColor: 'white' }}
               >
                 <Newsletter />
               </div>
-              <button
-                onClick={handlePrint}
-                className="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded shadow-lg block mx-auto print:hidden transition-colors"
-              >
-                📄 Download Newsletter (PDF)
-              </button>
+              <div className="mt-6 flex gap-4 justify-center print:hidden">
+                <button
+                  onClick={downloadAsPDF}
+                  className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded shadow-lg transition-colors"
+                >
+                  📄 Download as PDF
+                </button>
+                <button
+                  onClick={downloadAsPNG}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded shadow-lg transition-colors"
+                >
+                  🖼️ Download as PNG
+                </button>
+              </div>
             </div>
           </div>
         </div>

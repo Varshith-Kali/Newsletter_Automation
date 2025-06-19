@@ -36,6 +36,12 @@ const NewsletterThreats: React.FC = () => {
     return 'Recent';
   };
 
+  const handleThreatClick = (link?: string) => {
+    if (link) {
+      window.open(link, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className="newsletter-page newsletter-threats">
       <div className="min-h-screen bg-white text-black flex">
@@ -75,20 +81,13 @@ const NewsletterThreats: React.FC = () => {
               <div key={threat.id} className="mb-6">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-bold mb-2 flex items-center flex-1">
-                    {threat.link ? (
-                      <a 
-                        href={threat.link} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-700 hover:text-blue-900 underline hover:no-underline transition-colors cursor-pointer"
-                      >
-                        {index + 1}. {threat.title}
-                      </a>
-                    ) : (
-                      <span className="cursor-pointer text-blue-700 hover:text-blue-900 underline hover:no-underline transition-colors">
-                        {index + 1}. {threat.title}
-                      </span>
-                    )}
+                    <span 
+                      onClick={() => handleThreatClick(threat.link)}
+                      className="text-black hover:text-gray-700 cursor-pointer transition-colors"
+                      style={{ textDecoration: 'none' }}
+                    >
+                      {index + 1}. {threat.title}
+                    </span>
                     {getSeverityBadge(threat.severity)}
                   </h3>
                 </div>
