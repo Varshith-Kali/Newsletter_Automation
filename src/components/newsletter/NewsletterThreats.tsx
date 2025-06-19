@@ -89,11 +89,6 @@ const NewsletterThreats: React.FC = () => {
                     )}
                     {getSeverityBadge(threat.severity)}
                   </h3>
-                  <div className="ml-4 text-right flex-shrink-0">
-                    <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold border border-red-300">
-                      📅 {formatDate(threat.formattedDate, threat.pubDate)}
-                    </div>
-                  </div>
                 </div>
                 <p className="text-sm leading-relaxed mb-2">{threat.description}</p>
                 <div className="flex items-center justify-between text-xs text-gray-500">
@@ -106,12 +101,10 @@ const NewsletterThreats: React.FC = () => {
                         {threat.cves.join(', ')}
                       </span>
                     )}
-                  </div>
-                  {threat.pubDate && (
-                    <span className="text-gray-400">
-                      {new Date(threat.pubDate).toLocaleDateString()}
+                    <span className="text-gray-600">
+                      {formatDate(threat.formattedDate, threat.pubDate)}
                     </span>
-                  )}
+                  </div>
                 </div>
               </div>
             ))}

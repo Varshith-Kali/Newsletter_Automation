@@ -11,37 +11,20 @@ function App() {
     if (content) {
       const printWindow = window.open('', '_blank');
       if (printWindow) {
-        // Get all stylesheets from the current document
-        const styles = Array.from(document.styleSheets)
-          .map((styleSheet) => {
-            try {
-              return Array.from(styleSheet.cssRules)
-                .map((rule) => rule.cssText)
-                .join('');
-            } catch {
-              return '';
-            }
-          })
-          .join('');
-
-        // Get all external stylesheets
-        const linkTags = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
-          .map(link => link.outerHTML)
-          .join('');
-
         printWindow.document.write(`
           <html>
             <head>
               <title>Cybersecurity Newsletter</title>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              ${linkTags}
+              <script src="https://cdn.tailwindcss.com"></script>
               <style>
-                ${styles}
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
                 
-                @page {
+                * {
                   margin: 0;
-                  size: A4;
+                  padding: 0;
+                  box-sizing: border-box;
                 }
 
                 html, body {
@@ -52,6 +35,11 @@ function App() {
                   -webkit-print-color-adjust: exact !important;
                   print-color-adjust: exact !important;
                   color-adjust: exact !important;
+                }
+
+                @page {
+                  margin: 0;
+                  size: A4;
                 }
 
                 @media print {
@@ -129,52 +117,19 @@ function App() {
               <div class="newsletter-print-wrapper">
                 ${content.innerHTML}
               </div>
+              <script>
+                window.onload = function() {
+                  setTimeout(function() {
+                    window.print();
+                    window.close();
+                  }, 1000);
+                };
+              </script>
             </body>
           </html>
         `);
 
         printWindow.document.close();
-        
-        // Wait for images to load before printing
-        const images = printWindow.document.images;
-        let loadedImages = 0;
-        const totalImages = images.length;
-        
-        if (totalImages === 0) {
-          // No images, print immediately
-          setTimeout(() => {
-            printWindow.focus();
-            printWindow.print();
-            printWindow.close();
-          }, 500);
-        } else {
-          // Wait for all images to load
-          Array.from(images).forEach((img) => {
-            if (img.complete) {
-              loadedImages++;
-            } else {
-              img.onload = img.onerror = () => {
-                loadedImages++;
-                if (loadedImages === totalImages) {
-                  setTimeout(() => {
-                    printWindow.focus();
-                    printWindow.print();
-                    printWindow.close();
-                  }, 500);
-                }
-              };
-            }
-          });
-          
-          // If all images are already loaded
-          if (loadedImages === totalImages) {
-            setTimeout(() => {
-              printWindow.focus();
-              printWindow.print();
-              printWindow.close();
-            }, 500);
-          }
-        }
       }
     }
   };

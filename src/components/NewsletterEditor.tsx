@@ -255,8 +255,7 @@ const NewsletterEditor: React.FC = () => {
                       {threat.cves.join(', ')}
                     </span>
                   )}
-                  <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold border border-green-300 flex items-center">
-                    <Calendar size={12} className="mr-1" />
+                  <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold border border-green-300">
                     {formatThreatDate(threat.formattedDate, threat.pubDate)}
                   </div>
                 </div>
