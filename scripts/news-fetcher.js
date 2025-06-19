@@ -21,7 +21,12 @@ const RSS_FEEDS = [
   'https://www.zdnet.com/topic/security/rss.xml',
   'https://www.securitymagazine.com/rss/topic/2236-cyber-security',
   'https://www.helpnetsecurity.com/feed/',
-  'https://www.recordedfuture.com/feed'
+  'https://www.recordedfuture.com/feed',
+  'https://www.bankinfosecurity.com/rss.php',
+  'https://www.govinfosecurity.com/rss.php',
+  'https://feeds.feedburner.com/eset/blog',
+  'https://blog.malwarebytes.com/feed/',
+  'https://www.welivesecurity.com/feed/'
 ];
 
 const CACHE_FILE = 'src/data/news-cache.json';
@@ -83,15 +88,45 @@ function removeDuplicates(articles) {
   return unique;
 }
 
-// Check if article is from the last 7 days
-function isRecentArticle(pubDate) {
+// Enhanced date validation - strictly past 7 days only
+function isStrictlyRecentArticle(pubDate) {
+  if (!pubDate) return false;
+  
   const articleDate = new Date(pubDate);
-  const sevenDaysAgo = new Date(Date.now() - CACHE_DURATION);
-  return articleDate > sevenDaysAgo;
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - CACHE_DURATION);
+  
+  // Ensure the article is within the last 7 days and not in the future
+  return articleDate > sevenDaysAgo && articleDate <= now;
+}
+
+// Format date for display
+function formatArticleDate(pubDate) {
+  if (!pubDate) return 'Date unknown';
+  
+  const date = new Date(pubDate);
+  const now = new Date();
+  const diffTime = Math.abs(now - date);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+  
+  if (diffDays === 0) {
+    if (diffHours === 0) {
+      const diffMinutes = Math.floor(diffTime / (1000 * 60));
+      return `${diffMinutes} minutes ago`;
+    }
+    return `${diffHours} hours ago`;
+  } else if (diffDays === 1) {
+    return 'Yesterday';
+  } else {
+    return `${diffDays} days ago`;
+  }
 }
 
 export async function fetchCyberSecurityNews() {
-  console.log('🔍 Fetching latest cybersecurity news from past 7 days...');
+  console.log('🔍 Fetching STRICTLY latest cybersecurity news from past 7 days...');
+  console.log(`📅 Current time: ${new Date().toISOString()}`);
+  console.log(`📅 Cutoff time: ${new Date(Date.now() - CACHE_DURATION).toISOString()}`);
   
   // Load existing cache
   let cache = loadCache();
@@ -101,6 +136,7 @@ export async function fetchCyberSecurityNews() {
   
   const newArticles = [];
   let totalFetched = 0;
+  let validArticles = 0;
   
   for (const feedUrl of RSS_FEEDS) {
     try {
@@ -108,47 +144,57 @@ export async function fetchCyberSecurityNews() {
       const feed = await parser.parseURL(feedUrl);
       
       const recentArticles = feed.items
-        .filter(item => isRecentArticle(item.pubDate))
-        .slice(0, 10) // Limit per feed to avoid overwhelming
+        .filter(item => {
+          const isRecent = isStrictlyRecentArticle(item.pubDate);
+          if (isRecent) {
+            console.log(`✅ Valid article: ${item.title} - ${formatArticleDate(item.pubDate)}`);
+          }
+          return isRecent;
+        })
+        .slice(0, 8) // Limit per feed to avoid overwhelming
         .map(item => ({
           title: item.title?.trim() || 'Untitled',
           description: (item.contentSnippet || item.description || '').trim(),
           link: item.link,
           pubDate: item.pubDate,
+          formattedDate: formatArticleDate(item.pubDate),
           source: feed.title || feedUrl.replace(/https?:\/\//, '').split('/')[0],
           content: item.content || item.description || '',
           fetchedAt: Date.now()
         }));
       
       newArticles.push(...recentArticles);
-      totalFetched += recentArticles.length;
+      totalFetched += feed.items.length;
+      validArticles += recentArticles.length;
       
       // Add delay to be respectful to servers
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
     } catch (error) {
       console.warn(`⚠️ Failed to fetch from ${feedUrl}:`, error.message);
     }
   }
   
-  console.log(`📊 Fetched ${totalFetched} new articles from ${RSS_FEEDS.length} sources`);
+  console.log(`📊 Scanned ${totalFetched} total articles, found ${validArticles} valid recent articles`);
   
   // Combine with cached articles and remove duplicates
   const allArticles = [...cache.articles, ...newArticles];
   const uniqueArticles = removeDuplicates(allArticles);
   
-  // Sort by date (newest first)
-  uniqueArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  // Sort by date (newest first) and ensure they're all recent
+  const recentUniqueArticles = uniqueArticles
+    .filter(article => isStrictlyRecentArticle(article.pubDate))
+    .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
   
   // Update cache
-  cache.articles = uniqueArticles;
+  cache.articles = recentUniqueArticles;
   cache.lastCleanup = Date.now();
   saveCache(cache);
   
-  console.log(`✅ Total unique articles: ${uniqueArticles.length}`);
+  console.log(`✅ Final count: ${recentUniqueArticles.length} unique recent articles`);
   
   // Return the most recent articles for processing
-  return uniqueArticles.slice(0, 25);
+  return recentUniqueArticles.slice(0, 30);
 }
 
 export async function summarizeWithHuggingFace(text, maxLength = 120) {
@@ -210,17 +256,19 @@ export function classifyThreatSeverity(title, description) {
   
   const criticalKeywords = [
     'zero-day', 'zero day', 'critical', 'remote code execution', 'rce', 
-    'privilege escalation', 'unauthenticated', 'wormable', 'actively exploited'
+    'privilege escalation', 'unauthenticated', 'wormable', 'actively exploited',
+    'emergency patch', 'immediate action', 'urgent'
   ];
   
   const highKeywords = [
     'vulnerability', 'exploit', 'breach', 'ransomware', 'malware', 
-    'backdoor', 'trojan', 'apt', 'advanced persistent threat'
+    'backdoor', 'trojan', 'apt', 'advanced persistent threat', 'attack',
+    'compromise', 'infiltration'
   ];
   
   const mediumKeywords = [
     'phishing', 'scam', 'update', 'patch', 'security flaw', 
-    'data leak', 'exposure', 'misconfiguration'
+    'data leak', 'exposure', 'misconfiguration', 'warning'
   ];
   
   if (criticalKeywords.some(keyword => text.includes(keyword))) {
@@ -255,6 +303,10 @@ export function generateContextualBestPractices(threats) {
   
   if (allText.includes('zero-day') || allText.includes('exploit')) {
     practices.push('Deploy behavioral analysis and endpoint detection response (EDR) solutions for unknown threat detection.');
+  }
+  
+  if (allText.includes('supply chain') || allText.includes('third-party')) {
+    practices.push('Implement rigorous third-party risk assessment and supply chain security monitoring protocols.');
   }
   
   // Always include these fundamental practices
@@ -299,11 +351,16 @@ export function generateContextualTraining(threats) {
     trainingItems.push('Third-party risk management and supply chain security assessment methodologies.');
   }
   
+  if (allText.includes('zero-day') || allText.includes('exploit')) {
+    trainingItems.push('Advanced threat hunting and incident response training for zero-day attack scenarios.');
+  }
+  
   // Default training items
   const defaultTraining = [
     'Incident response tabletop exercises with cross-functional team coordination and communication protocols.',
     'Cloud security fundamentals workshop covering configuration management and access control best practices.',
-    'Mobile device and remote work security training including BYOD policies and secure connectivity.'
+    'Mobile device and remote work security training including BYOD policies and secure connectivity.',
+    'Security awareness training focused on current threat landscape and attack vectors.'
   ];
   
   const allTraining = [...trainingItems, ...defaultTraining];

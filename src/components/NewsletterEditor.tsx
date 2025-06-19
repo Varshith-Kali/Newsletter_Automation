@@ -1,6 +1,6 @@
 import React from 'react';
 import { Threat, useNewsletter } from '../context/NewsletterContext';
-import { Trash2, RefreshCw, Zap, Clock, TrendingUp, Shield, Users } from 'lucide-react';
+import { Trash2, RefreshCw, Zap, Clock, TrendingUp, Shield, Users, Calendar } from 'lucide-react';
 
 const NewsletterEditor: React.FC = () => {
   const {
@@ -54,6 +54,21 @@ const NewsletterEditor: React.FC = () => {
     }
   };
 
+  const formatThreatDate = (formattedDate?: string, pubDate?: string) => {
+    if (formattedDate) return formattedDate;
+    if (pubDate) {
+      const date = new Date(pubDate);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - date.getTime());
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) return 'Today';
+      if (diffDays === 1) return 'Yesterday';
+      return `${diffDays} days ago`;
+    }
+    return 'Recent';
+  };
+
   return (
     <div className="space-y-6 max-h-[800px] overflow-y-auto pr-4">
       {/* Enhanced AI Auto-Update Section */}
@@ -65,7 +80,7 @@ const NewsletterEditor: React.FC = () => {
             </div>
             <div>
               <h3 className="text-xl font-bold text-red-800">AI-Powered Threat Intelligence</h3>
-              <p className="text-sm text-red-600">Real-time cybersecurity incident monitoring</p>
+              <p className="text-sm text-red-600">Real-time cybersecurity incident monitoring (Past 7 days ONLY)</p>
             </div>
           </div>
           <button
@@ -78,7 +93,7 @@ const NewsletterEditor: React.FC = () => {
             }`}
           >
             <RefreshCw className={isUpdating ? 'animate-spin' : ''} size={18} />
-            <span>{isUpdating ? 'Updating...' : 'Fetch Latest Threats'}</span>
+            <span>{isUpdating ? 'Scanning Latest...' : 'Fetch Latest Threats'}</span>
           </button>
         </div>
         
@@ -89,9 +104,9 @@ const NewsletterEditor: React.FC = () => {
               <h4 className="font-semibold text-red-700">Live Monitoring</h4>
             </div>
             <ul className="space-y-1 text-sm text-red-600">
-              <li>• 15+ cybersecurity RSS feeds</li>
-              <li>• Past 7 days incidents only</li>
-              <li>• Duplicate elimination</li>
+              <li>• 20+ cybersecurity RSS feeds</li>
+              <li>• <strong>STRICTLY past 7 days</strong></li>
+              <li>• Smart duplicate elimination</li>
               <li>• CVE extraction & classification</li>
             </ul>
           </div>
@@ -105,20 +120,20 @@ const NewsletterEditor: React.FC = () => {
               <li>• Smart threat classification</li>
               <li>• Contextual best practices</li>
               <li>• Automated summarization</li>
-              <li>• Severity assessment</li>
+              <li>• <strong>Date extraction & display</strong></li>
             </ul>
           </div>
           
           <div className="bg-white p-4 rounded-lg border border-red-200">
             <div className="flex items-center space-x-2 mb-2">
-              <Users className="text-red-600" size={20} />
-              <h4 className="font-semibold text-red-700">Training Focus</h4>
+              <Calendar className="text-red-600" size={20} />
+              <h4 className="font-semibold text-red-700">Date Tracking</h4>
             </div>
             <ul className="space-y-1 text-sm text-red-600">
-              <li>• Threat-specific training</li>
-              <li>• Awareness programs</li>
-              <li>• Response procedures</li>
-              <li>• Best practice guidance</li>
+              <li>• Real publication dates</li>
+              <li>• "X hours/days ago" format</li>
+              <li>• Automatic date validation</li>
+              <li>• Weekly cache cleanup</li>
             </ul>
           </div>
         </div>
@@ -135,13 +150,16 @@ const NewsletterEditor: React.FC = () => {
               <span>📊 {generationStats.threatsGenerated} threats</span>
               <span>🔍 {generationStats.cveCount} CVEs</span>
               <span>📡 {generationStats.sourcesUsed} sources</span>
+              {generationStats.newestArticle && (
+                <span>📅 {generationStats.newestArticle} - {generationStats.oldestArticle}</span>
+              )}
             </div>
           )}
           
           {isUpdating && (
             <div className="flex items-center space-x-2 text-red-600">
               <div className="animate-pulse w-2 h-2 bg-red-600 rounded-full"></div>
-              <span>Scanning threat landscape...</span>
+              <span>Scanning latest incidents...</span>
             </div>
           )}
         </div>
@@ -211,7 +229,7 @@ const NewsletterEditor: React.FC = () => {
         <div className="flex justify-between items-center">
           <div>
             <h3 className="text-lg font-medium">Security Flaws, Zero-Day Attacks & Vulnerabilities</h3>
-            <p className="text-sm text-gray-600">Latest incidents from the past 7 days (minimum 4 required)</p>
+            <p className="text-sm text-gray-600">Latest incidents from the past 7 days with publication dates (minimum 4 required)</p>
           </div>
           <button
             onClick={addThreat}
@@ -224,7 +242,7 @@ const NewsletterEditor: React.FC = () => {
           {threats.map((threat, index) => (
             <div key={threat.id} className="p-4 border border-gray-300 rounded-lg bg-gray-50">
               <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-1">
                   <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
                   <label className="block text-sm font-medium text-gray-700">Title</label>
                   {threat.severity && (
@@ -237,6 +255,10 @@ const NewsletterEditor: React.FC = () => {
                       {threat.cves.join(', ')}
                     </span>
                   )}
+                  <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold border border-green-300 flex items-center">
+                    <Calendar size={12} className="mr-1" />
+                    {formatThreatDate(threat.formattedDate, threat.pubDate)}
+                  </div>
                 </div>
                 <button
                   onClick={() => removeThreat(threat.id)}
@@ -258,12 +280,26 @@ const NewsletterEditor: React.FC = () => {
                 rows={3}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
               />
-              {threat.source && (
-                <p className="mt-2 text-xs text-gray-500">Source: {threat.source}</p>
-              )}
-              {threat.pubDate && (
-                <p className="text-xs text-gray-500">Published: {new Date(threat.pubDate).toLocaleDateString()}</p>
-              )}
+              <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center space-x-4">
+                  {threat.source && (
+                    <span>Source: {threat.source}</span>
+                  )}
+                  {threat.pubDate && (
+                    <span>Published: {new Date(threat.pubDate).toLocaleDateString()}</span>
+                  )}
+                </div>
+                {threat.link && (
+                  <a 
+                    href={threat.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    View Original
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </div>
