@@ -36,10 +36,7 @@ const NewsletterThreats: React.FC = () => {
     return 'Recent';
   };
 
-  const handleThreatClick = (e: React.MouseEvent, link?: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
+  const handleThreatClick = (link?: string) => {
     if (link) {
       console.log('Opening link:', link);
       window.open(link, '_blank', 'noopener,noreferrer');
@@ -58,6 +55,7 @@ const NewsletterThreats: React.FC = () => {
               src="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
               alt="Cybersecurity" 
               className="w-full h-full object-cover grayscale"
+              crossOrigin="anonymous"
             />
           </div>
           <div className="h-1/3 overflow-hidden">
@@ -65,6 +63,7 @@ const NewsletterThreats: React.FC = () => {
               src="https://images.pexels.com/photos/1261427/pexels-photo-1261427.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
               alt="Hacker" 
               className="w-full h-full object-cover grayscale"
+              crossOrigin="anonymous"
             />
           </div>
           <div className="h-1/3 overflow-hidden">
@@ -72,6 +71,7 @@ const NewsletterThreats: React.FC = () => {
               src="https://images.pexels.com/photos/5380664/pexels-photo-5380664.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
               alt="Security" 
               className="w-full h-full object-cover grayscale"
+              crossOrigin="anonymous"
             />
           </div>
         </div>
@@ -88,9 +88,12 @@ const NewsletterThreats: React.FC = () => {
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-bold mb-2 flex items-center flex-1">
                     <span 
-                      onClick={(e) => handleThreatClick(e, threat.link)}
-                      className={`text-black transition-colors ${threat.link ? 'cursor-pointer hover:text-gray-700' : 'cursor-default'}`}
-                      style={{ textDecoration: 'none' }}
+                      onClick={() => handleThreatClick(threat.link)}
+                      className={`text-black transition-colors ${
+                        threat.link 
+                          ? 'cursor-pointer hover:text-gray-600 hover:underline' 
+                          : 'cursor-default'
+                      }`}
                       title={threat.link ? 'Click to read more' : 'No source link available'}
                     >
                       {index + 1}. {threat.title}

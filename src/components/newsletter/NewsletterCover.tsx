@@ -20,6 +20,7 @@ const NewsletterCover: React.FC = () => {
             src="https://images.pexels.com/photos/374074/pexels-photo-374074.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
             alt="Cybersecurity Background" 
             className="w-full h-full object-cover grayscale"
+            crossOrigin="anonymous"
           />
         </div>
         

@@ -18,24 +18,46 @@ function App() {
     try {
       console.log('Starting PDF generation...');
       
-      // Create canvas from the content
+      // Ensure all images are loaded
+      const images = content.querySelectorAll('img');
+      await Promise.all(Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
+
+      // Wait a bit for any remaining rendering
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create canvas from the content with high quality settings
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
-        logging: false,
+        logging: true,
         letterRendering: true,
         foreignObjectRendering: true,
         scrollX: 0,
         scrollY: 0,
         width: content.scrollWidth,
-        height: content.scrollHeight
+        height: content.scrollHeight,
+        onclone: (clonedDoc) => {
+          // Ensure styles are preserved in the clone
+          const clonedContent = clonedDoc.querySelector('[data-newsletter-content]');
+          if (clonedContent) {
+            clonedContent.style.backgroundColor = '#ffffff';
+          }
+        }
       });
+
+      console.log('Canvas created:', canvas.width, 'x', canvas.height);
 
       const imgData = canvas.toDataURL('image/png', 1.0);
       
-      // Calculate PDF dimensions
+      // Calculate PDF dimensions (A4 size)
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
       const ratio = imgWidth / imgHeight;
@@ -44,7 +66,7 @@ function App() {
       const pdf = new jsPDF({
         orientation: ratio > 1 ? 'landscape' : 'portrait',
         unit: 'px',
-        format: [imgWidth / 2, imgHeight / 2] // Scale down for PDF
+        format: [imgWidth / 2, imgHeight / 2]
       });
 
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth / 2, imgHeight / 2);
@@ -54,7 +76,7 @@ function App() {
       
     } catch (error) {
       console.error('PDF generation failed:', error);
-      alert('PDF download failed. Please try again.');
+      alert('PDF download failed. Please try again. Error: ' + error.message);
     }
   };
 
@@ -68,19 +90,41 @@ function App() {
     try {
       console.log('Starting PNG generation...');
       
+      // Ensure all images are loaded
+      const images = content.querySelectorAll('img');
+      await Promise.all(Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
+
+      // Wait a bit for any remaining rendering
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
-        logging: false,
+        logging: true,
         letterRendering: true,
         foreignObjectRendering: true,
         scrollX: 0,
         scrollY: 0,
         width: content.scrollWidth,
-        height: content.scrollHeight
+        height: content.scrollHeight,
+        onclone: (clonedDoc) => {
+          // Ensure styles are preserved in the clone
+          const clonedContent = clonedDoc.querySelector('[data-newsletter-content]');
+          if (clonedContent) {
+            clonedContent.style.backgroundColor = '#ffffff';
+          }
+        }
       });
+
+      console.log('Canvas created:', canvas.width, 'x', canvas.height);
 
       // Create download link
       const link = document.createElement('a');
@@ -94,7 +138,7 @@ function App() {
       
     } catch (error) {
       console.error('PNG generation failed:', error);
-      alert('PNG download failed. Please try again.');
+      alert('PNG download failed. Please try again. Error: ' + error.message);
     }
   };
 
@@ -112,6 +156,7 @@ function App() {
               <h2 className="text-xl font-semibold mb-4">Newsletter Preview</h2>
               <div
                 ref={printRef}
+                data-newsletter-content
                 className="border border-gray-300 rounded-lg overflow-hidden"
                 style={{ backgroundColor: 'white' }}
               >
