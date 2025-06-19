@@ -36,9 +36,15 @@ const NewsletterThreats: React.FC = () => {
     return 'Recent';
   };
 
-  const handleThreatClick = (link?: string) => {
+  const handleThreatClick = (e: React.MouseEvent, link?: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (link) {
+      console.log('Opening link:', link);
       window.open(link, '_blank', 'noopener,noreferrer');
+    } else {
+      console.log('No link available for this threat');
     }
   };
 
@@ -82,9 +88,10 @@ const NewsletterThreats: React.FC = () => {
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-bold mb-2 flex items-center flex-1">
                     <span 
-                      onClick={() => handleThreatClick(threat.link)}
-                      className="text-black hover:text-gray-700 cursor-pointer transition-colors"
+                      onClick={(e) => handleThreatClick(e, threat.link)}
+                      className={`text-black transition-colors ${threat.link ? 'cursor-pointer hover:text-gray-700' : 'cursor-default'}`}
                       style={{ textDecoration: 'none' }}
+                      title={threat.link ? 'Click to read more' : 'No source link available'}
                     >
                       {index + 1}. {threat.title}
                     </span>
@@ -102,7 +109,7 @@ const NewsletterThreats: React.FC = () => {
                         {threat.cves.join(', ')}
                       </span>
                     )}
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 font-medium">
                       {formatDate(threat.formattedDate, threat.pubDate)}
                     </span>
                   </div>
