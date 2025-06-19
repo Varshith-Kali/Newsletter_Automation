@@ -8,14 +8,14 @@ const Newsletter: React.FC = () => {
   const { title } = useNewsletter();
   
   return (
-    <div className="newsletter w-full" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif' }}>
-      <div className="newsletter-page newsletter-cover" style={{ width: '1200px', height: '800px', position: 'relative' }}>
+    <div className="newsletter w-full">
+      <div className="newsletter-page newsletter-cover">
         <NewsletterCover />
       </div>
-      <div className="newsletter-page newsletter-threats" style={{ width: '1200px', height: '800px', position: 'relative' }}>
+      <div className="newsletter-page newsletter-threats">
         <NewsletterThreats />
       </div>
-      <div className="newsletter-page newsletter-best-practices" style={{ width: '1200px', height: '800px', position: 'relative' }}>
+      <div className="newsletter-page newsletter-best-practices">
         <NewsletterBestPractices />
       </div>
     </div>

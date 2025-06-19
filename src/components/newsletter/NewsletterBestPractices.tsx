@@ -10,107 +10,48 @@ const NewsletterBestPractices: React.FC = () => {
   } = useNewsletter();
 
   return (
-    <div style={{ 
-      width: '100%', 
-      height: '100%', 
-      display: 'flex',
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif'
-    }}>
+    <div className="min-h-screen flex">
       {/* Left side with red background */}
-      <div style={{ 
-        width: '41.666667%', 
-        backgroundColor: '#b91c1c', 
-        color: 'white', 
-        padding: '32px', 
-        display: 'flex', 
-        flexDirection: 'column' 
-      }}>
+      <div className="w-5/12 bg-red-700 text-white p-8 flex flex-col">
         <div>
-          <h2 style={{ 
-            fontSize: '32px', 
-            fontWeight: 'bold', 
-            marginBottom: '8px',
-            margin: '0 0 8px 0'
-          }}>
+          <h2 className="text-2xl font-bold mb-2">
             BEST PRACTICES &<br />AWARENESS
           </h2>
-          <h3 style={{ 
-            fontSize: '24px', 
-            marginBottom: '32px',
-            margin: '0 0 32px 0'
-          }}>
+          <h3 className="text-xl mb-8">
             ACTIONABLE<br />RECOMMENDATIONS
           </h3>
-          <h4 style={{ 
-            textTransform: 'uppercase', 
-            fontSize: '14px', 
-            fontWeight: '500', 
-            marginBottom: '16px',
-            margin: '0 0 16px 0'
-          }}>
+          <h4 className="uppercase text-sm font-medium mb-4">
             STRENGTHENING SECURITY<br />WITH KNOWLEDGE AND ACTION
           </h4>
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', margin: '32px 0' }}>
+        <div className="space-y-4 my-8">
           {bestPractices.map((practice) => (
-            <p key={practice.id} style={{ 
-              fontSize: '14px', 
-              lineHeight: '1.5',
-              margin: 0
-            }}>
+            <p key={practice.id} className="text-sm leading-relaxed">
               {practice.content}
             </p>
           ))}
         </div>
         
-        <div style={{ marginTop: '32px' }}>
-          <h4 style={{ 
-            textTransform: 'uppercase', 
-            fontSize: '24px', 
-            fontWeight: 'bold', 
-            marginBottom: '16px',
-            margin: '0 0 16px 0'
-          }}>
-            TRAINING SPOTLIGHT
-          </h4>
-          <ul style={{ 
-            listStyle: 'none', 
-            padding: 0, 
-            margin: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '24px'
-          }}>
+        <div className="mt-8">
+          <h4 className="uppercase text-xl font-bold mb-4">TRAINING SPOTLIGHT</h4>
+          <ul className="space-y-6">
             {trainingItems.map((item) => (
-              <li key={item.id} style={{ display: 'flex', alignItems: 'flex-start' }}>
-                <span style={{ 
-                  width: '8px', 
-                  height: '8px', 
-                  backgroundColor: 'white', 
-                  borderRadius: '50%', 
-                  marginTop: '8px', 
-                  marginRight: '8px',
-                  flexShrink: 0
-                }}></span>
-                <span style={{ fontSize: '14px' }}>{item.content}</span>
+              <li key={item.id} className="flex items-start">
+                <span className="w-2 h-2 bg-white rounded-full mt-2 mr-2"></span>
+                <span className="text-sm">{item.content}</span>
               </li>
             ))}
           </ul>
         </div>
         
-        <div style={{ marginTop: 'auto' }}>
+        <div className="mt-auto">
           {/* Abstract security pattern */}
-          <div style={{ width: '100%', height: '192px', overflow: 'hidden' }}>
+          <div className="w-full h-48 overflow-hidden">
             <img 
               src="https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
               alt="Security Pattern" 
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                objectFit: 'cover',
-                filter: 'grayscale(100%)'
-              }}
+              className="w-full h-full object-cover grayscale"
               crossOrigin="anonymous"
             />
           </div>
@@ -118,77 +59,34 @@ const NewsletterBestPractices: React.FC = () => {
       </div>
       
       {/* Right side with images and quote */}
-      <div style={{ width: '58.333333%', backgroundColor: 'white', position: 'relative' }}>
+      <div className="w-7/12 bg-white relative">
         {/* Background city image */}
-        <div style={{ height: '66.666667%', overflow: 'hidden' }}>
+        <div className="h-2/3 overflow-hidden">
           <img 
             src="https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
             alt="Night City" 
-            style={{ 
-              width: '100%', 
-              height: '100%', 
-              objectFit: 'cover',
-              filter: 'grayscale(100%)'
-            }}
+            className="w-full h-full object-cover grayscale"
             crossOrigin="anonymous"
           />
           
           {/* Red overlay box */}
-          <div style={{ 
-            position: 'absolute', 
-            top: '32px', 
-            left: '32px', 
-            backgroundColor: '#b91c1c', 
-            padding: '24px', 
-            maxWidth: '384px', 
-            color: 'white' 
-          }}>
-            <h3 style={{ 
-              fontSize: '24px', 
-              fontWeight: 'bold', 
-              marginBottom: '16px',
-              margin: '0 0 16px 0'
-            }}>
-              THOUGHT OF THE DAY !!
-            </h3>
-            <p style={{ 
-              fontSize: '14px', 
-              fontStyle: 'italic',
-              margin: 0
-            }}>
-              {thoughtOfTheDay}
-            </p>
+          <div className="absolute top-8 left-8 bg-red-700 p-6 max-w-md text-white">
+            <h3 className="text-xl font-bold mb-4">THOUGHT OF THE DAY !!</h3>
+            <p className="text-sm italic">{thoughtOfTheDay}</p>
           </div>
         </div>
         
         {/* Bottom section with joke */}
-        <div style={{ height: '33.333333%', padding: '32px', display: 'flex' }}>
-          <div style={{ width: '50%', paddingRight: '16px' }}>
-            <h3 style={{ 
-              fontSize: '24px', 
-              fontWeight: 'bold', 
-              marginBottom: '8px',
-              margin: '0 0 8px 0'
-            }}>
-              SECURITY JOKE OF THE MONTH
-            </h3>
-            <p style={{ 
-              fontSize: '14px',
-              margin: 0
-            }}>
-              {securityJoke}
-            </p>
+        <div className="h-1/3 p-8 flex">
+          <div className="w-1/2 px-4">
+            <h3 className="text-xl font-bold mb-2">SECURITY JOKE OF THE MONTH</h3>
+            <p className="text-sm">{securityJoke}</p>
           </div>
-          <div style={{ width: '50%' }}>
+          <div className="w-1/2">
             <img 
               src="https://images.pexels.com/photos/3568520/pexels-photo-3568520.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
               alt="Person working" 
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                objectFit: 'cover',
-                filter: 'grayscale(100%)'
-              }}
+              className="w-full h-full object-cover grayscale"
               crossOrigin="anonymous"
             />
           </div>

@@ -12,80 +12,40 @@ const NewsletterCover: React.FC = () => {
   } = useNewsletter();
 
   return (
-    <div className="bg-black text-white relative overflow-hidden" style={{ width: '100%', height: '100%', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif' }}>
+    <div className="bg-black h-screen text-white relative overflow-hidden">
       {/* Background image - grayscale */}
-      <div className="absolute inset-0" style={{ opacity: 0.6 }}>
+      <div className="absolute inset-0 opacity-60">
         <img 
           src="https://images.pexels.com/photos/374074/pexels-photo-374074.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
           alt="Cybersecurity Background" 
-          className="w-full h-full object-cover"
-          style={{ 
-            filter: 'grayscale(100%)',
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover'
-          }}
+          className="w-full h-full object-cover grayscale"
           crossOrigin="anonymous"
         />
       </div>
       
       {/* Org Logo */}
-      <div className="absolute top-0 right-0 z-10" style={{ backgroundColor: '#b91c1c', padding: '20px' }}>
-        <h2 className="text-white" style={{ fontSize: '48px', fontWeight: 'bold', margin: 0 }}>
-          {organizationName.split(' ')[0]}
-        </h2>
+      <div className="absolute top-0 right-0 bg-red-700 p-5 z-10">
+        <h2 className="text-3xl font-bold text-white">{organizationName.split(' ')[0]}</h2>
       </div>
       
       {/* Main Content */}
       <div className="relative z-10 flex flex-col h-full">
-        <div style={{ marginTop: 'auto', marginLeft: '32px', marginBottom: '208px' }}>
+        <div className="mt-auto ml-8 mb-52">
           <div className="flex items-end">
-            <h1 style={{ 
-              fontSize: '128px', 
-              fontWeight: 'bold', 
-              lineHeight: '1', 
-              color: '#b91c1c', 
-              marginLeft: '-16px', 
-              marginRight: '16px',
-              textShadow: '1px 1px 3px rgba(0, 0, 0, 0.3)'
-            }}>
+            <h1 className="text-8xl font-bold leading-none text-red-700 -ml-4 mr-4">
               {year}
             </h1>
             <div>
-              <h1 style={{ 
-                fontSize: '96px', 
-                fontWeight: 'bold', 
-                lineHeight: '1.1', 
-                textTransform: 'uppercase', 
-                letterSpacing: '0.1em',
-                textShadow: '1px 1px 3px rgba(0, 0, 0, 0.3)',
-                margin: 0
-              }}>
+              <h1 className="text-5xl sm:text-6xl font-bold leading-tight uppercase tracking-wider">
                 {title}
               </h1>
-              <h2 style={{ 
-                fontSize: '48px', 
-                fontWeight: '500', 
-                marginTop: '8px', 
-                textTransform: 'uppercase',
-                textShadow: '1px 1px 3px rgba(0, 0, 0, 0.3)',
-                margin: '8px 0 0 0'
-              }}>
+              <h2 className="text-2xl sm:text-3xl font-medium mt-2 uppercase">
                 {subtitle}
               </h2>
             </div>
           </div>
-          <div style={{ 
-            marginTop: '40px', 
-            backgroundColor: '#b91c1c', 
-            display: 'inline-block', 
-            padding: '8px 16px' 
-          }}>
-            <h3 style={{ 
-              fontSize: '24px', 
-              fontWeight: '500',
-              margin: 0
-            }}>
+          <div className="mt-10 bg-red-700 inline-block py-2 px-4">
+            <h3 className="text-lg font-medium">
               CYBERSECURITY INSIGHTS FOR COMPREHENSIVE PROTECTION
             </h3>
           </div>
@@ -93,44 +53,26 @@ const NewsletterCover: React.FC = () => {
       </div>
       
       {/* Bottom section with contact details */}
-      <div className="absolute bottom-0 left-0 right-0 text-white z-10" style={{ padding: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-          <li className="flex items-center" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ 
-              width: '8px', 
-              height: '8px', 
-              backgroundColor: 'white', 
-              borderRadius: '50%', 
-              marginRight: '8px' 
-            }}></span>
+      <div className="absolute bottom-0 left-0 right-0 p-8 flex justify-between items-center text-white z-10">
+        <ul className="space-y-2">
+          <li className="flex items-center">
+            <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
             <span>Latest Cyber Threats and Vulnerability Alerts</span>
           </li>
-          <li className="flex items-center" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ 
-              width: '8px', 
-              height: '8px', 
-              backgroundColor: 'white', 
-              borderRadius: '50%', 
-              marginRight: '8px' 
-            }}></span>
+          <li className="flex items-center">
+            <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
             <span>Essential Security Best Practices for Protection</span>
           </li>
-          <li className="flex items-center" style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ 
-              width: '8px', 
-              height: '8px', 
-              backgroundColor: 'white', 
-              borderRadius: '50%', 
-              marginRight: '8px' 
-            }}></span>
+          <li className="flex items-center">
+            <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
             <span>Stay Ahead with Cybersecurity Insights & Updates</span>
           </li>
         </ul>
-        <div style={{ textAlign: 'right' }}>
-          <p style={{ margin: '0 0 4px 0' }}>Our Mail :</p>
-          <p style={{ margin: '0 0 8px 0' }}>{email}</p>
-          <p style={{ margin: '0 0 4px 0' }}>Our Website :</p>
-          <p style={{ margin: 0 }}>{website}</p>
+        <div className="text-right">
+          <p>Our Mail :</p>
+          <p>{email}</p>
+          <p className="mt-2">Our Website :</p>
+          <p>{website}</p>
         </div>
       </div>
     </div>
