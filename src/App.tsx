@@ -18,12 +18,9 @@ function App() {
     try {
       console.log('Starting PDF generation...');
       
-      // Force scroll to top and wait for full render
+      // Scroll to top and wait for rendering
       window.scrollTo(0, 0);
-      content.scrollIntoView({ behavior: 'instant', block: 'start' });
-      
-      // Extended wait for complete rendering
-      await new Promise(resolve => setTimeout(resolve, 4000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Get all newsletter pages
       const pages = content.querySelectorAll('.newsletter-page');
@@ -39,155 +36,103 @@ function App() {
         format: 'a4'
       });
 
-      // Process each page individually with maximum quality settings
+      // Process each page with simplified but effective approach
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement;
         console.log(`Processing page ${i + 1}/${pages.length}`);
         
-        // Ensure page is fully visible and rendered
+        // Ensure page is visible
         page.scrollIntoView({ behavior: 'instant', block: 'center' });
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Force all images to load with crossOrigin
+        // Wait for images to load
         const images = page.querySelectorAll('img');
-        for (const img of images) {
-          if (!img.complete || img.naturalWidth === 0) {
-            await new Promise<void>((resolve) => {
-              const timeout = setTimeout(() => resolve(), 10000);
-              img.onload = () => {
-                clearTimeout(timeout);
-                resolve();
-              };
-              img.onerror = () => {
-                clearTimeout(timeout);
-                resolve();
-              };
-              // Force reload with crossOrigin
-              if (!img.crossOrigin) {
-                img.crossOrigin = 'anonymous';
-                const src = img.src;
-                img.src = '';
-                img.src = src;
-              }
-            });
-          }
-        }
+        await Promise.all(Array.from(images).map(img => {
+          if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+          return new Promise(resolve => {
+            const timeout = setTimeout(() => resolve(undefined), 8000);
+            img.onload = () => {
+              clearTimeout(timeout);
+              resolve(undefined);
+            };
+            img.onerror = () => {
+              clearTimeout(timeout);
+              resolve(undefined);
+            };
+          });
+        }));
 
-        // Create canvas with maximum quality and exact style preservation
+        // Create canvas with optimized settings
         const canvas = await html2canvas(page, {
-          scale: 4, // Maximum scale for highest quality
+          scale: 2,
           useCORS: true,
           allowTaint: false,
-          backgroundColor: null,
-          logging: true,
+          backgroundColor: '#ffffff', // Force white background
+          logging: false,
           width: page.offsetWidth,
           height: page.offsetHeight,
-          windowWidth: 1920, // Fixed window width
-          windowHeight: 1080, // Fixed window height
+          windowWidth: window.innerWidth,
+          windowHeight: window.innerHeight,
           scrollX: 0,
           scrollY: 0,
-          foreignObjectRendering: true,
-          imageTimeout: 20000,
-          removeContainer: false,
+          foreignObjectRendering: false, // Disable to avoid conflicts
+          imageTimeout: 15000,
+          removeContainer: true,
           ignoreElements: (element) => {
-            return element.classList?.contains('print:hidden') || 
-                   element.tagName === 'SCRIPT' ||
-                   element.tagName === 'NOSCRIPT';
+            return element.classList?.contains('print:hidden');
           },
           onclone: (clonedDoc, element) => {
-            console.log('Cloning and applying styles...');
-            
-            // Copy all stylesheets first
-            const originalStylesheets = Array.from(document.styleSheets);
-            originalStylesheets.forEach(stylesheet => {
-              try {
-                const rules = Array.from(stylesheet.cssRules || stylesheet.rules || []);
-                const style = clonedDoc.createElement('style');
-                style.textContent = rules.map(rule => rule.cssText).join('\n');
-                clonedDoc.head.appendChild(style);
-              } catch (e) {
-                console.warn('Could not copy stylesheet:', e);
-              }
-            });
-            
-            // Copy all inline styles and computed styles
-            const allOriginalElements = element.querySelectorAll('*');
-            const allClonedElements = clonedDoc.querySelectorAll('*');
-            
-            allOriginalElements.forEach((originalEl, index) => {
-              const clonedEl = allClonedElements[index] as HTMLElement;
-              if (clonedEl && originalEl instanceof HTMLElement) {
-                const computedStyle = window.getComputedStyle(originalEl);
-                
-                // Copy ALL computed styles
-                const styleText = Array.from(computedStyle).map(prop => {
-                  const value = computedStyle.getPropertyValue(prop);
-                  return `${prop}: ${value} !important;`;
-                }).join(' ');
-                
-                clonedEl.style.cssText = styleText;
-                
-                // Special handling for different element types
-                if (originalEl.tagName === 'IMG') {
-                  const img = originalEl as HTMLImageElement;
-                  const clonedImg = clonedEl as HTMLImageElement;
-                  clonedImg.src = img.src;
-                  clonedImg.crossOrigin = 'anonymous';
+            // Simple and effective style preservation
+            const clonedPage = clonedDoc.querySelector('.newsletter-page');
+            if (clonedPage) {
+              // Ensure proper background
+              clonedDoc.body.style.backgroundColor = '#ffffff';
+              clonedDoc.body.style.margin = '0';
+              clonedDoc.body.style.padding = '0';
+              
+              // Copy critical styles only
+              const allElements = element.querySelectorAll('*');
+              const clonedElements = clonedPage.querySelectorAll('*');
+              
+              allElements.forEach((el, index) => {
+                if (clonedElements[index] && el instanceof HTMLElement) {
+                  const computedStyle = window.getComputedStyle(el);
+                  const clonedEl = clonedElements[index] as HTMLElement;
                   
-                  // Ensure image styling is preserved
-                  clonedImg.style.filter = computedStyle.filter;
-                  clonedImg.style.objectFit = computedStyle.objectFit;
-                  clonedImg.style.objectPosition = computedStyle.objectPosition;
-                  clonedImg.style.width = computedStyle.width;
-                  clonedImg.style.height = computedStyle.height;
-                }
-                
-                // Preserve background images
-                if (computedStyle.backgroundImage && computedStyle.backgroundImage !== 'none') {
+                  // Copy only essential visual styles
+                  clonedEl.style.color = computedStyle.color;
+                  clonedEl.style.backgroundColor = computedStyle.backgroundColor;
+                  clonedEl.style.fontSize = computedStyle.fontSize;
+                  clonedEl.style.fontFamily = computedStyle.fontFamily;
+                  clonedEl.style.fontWeight = computedStyle.fontWeight;
+                  clonedEl.style.textAlign = computedStyle.textAlign;
+                  clonedEl.style.display = computedStyle.display;
+                  clonedEl.style.position = computedStyle.position;
+                  clonedEl.style.width = computedStyle.width;
+                  clonedEl.style.height = computedStyle.height;
+                  clonedEl.style.minHeight = computedStyle.minHeight;
+                  clonedEl.style.padding = computedStyle.padding;
+                  clonedEl.style.margin = computedStyle.margin;
+                  clonedEl.style.border = computedStyle.border;
+                  clonedEl.style.borderRadius = computedStyle.borderRadius;
                   clonedEl.style.backgroundImage = computedStyle.backgroundImage;
                   clonedEl.style.backgroundSize = computedStyle.backgroundSize;
                   clonedEl.style.backgroundPosition = computedStyle.backgroundPosition;
                   clonedEl.style.backgroundRepeat = computedStyle.backgroundRepeat;
+                  clonedEl.style.filter = computedStyle.filter;
+                  clonedEl.style.objectFit = computedStyle.objectFit;
+                  clonedEl.style.objectPosition = computedStyle.objectPosition;
+                  
+                  // Handle images specifically
+                  if (el.tagName === 'IMG') {
+                    const img = el as HTMLImageElement;
+                    const clonedImg = clonedEl as HTMLImageElement;
+                    clonedImg.crossOrigin = 'anonymous';
+                    clonedImg.src = img.src;
+                  }
                 }
-                
-                // Preserve text styling
-                clonedEl.style.color = computedStyle.color;
-                clonedEl.style.fontSize = computedStyle.fontSize;
-                clonedEl.style.fontFamily = computedStyle.fontFamily;
-                clonedEl.style.fontWeight = computedStyle.fontWeight;
-                clonedEl.style.textAlign = computedStyle.textAlign;
-                clonedEl.style.lineHeight = computedStyle.lineHeight;
-                clonedEl.style.textShadow = computedStyle.textShadow;
-                
-                // Preserve layout
-                clonedEl.style.display = computedStyle.display;
-                clonedEl.style.position = computedStyle.position;
-                clonedEl.style.top = computedStyle.top;
-                clonedEl.style.left = computedStyle.left;
-                clonedEl.style.right = computedStyle.right;
-                clonedEl.style.bottom = computedStyle.bottom;
-                clonedEl.style.width = computedStyle.width;
-                clonedEl.style.height = computedStyle.height;
-                clonedEl.style.minHeight = computedStyle.minHeight;
-                clonedEl.style.padding = computedStyle.padding;
-                clonedEl.style.margin = computedStyle.margin;
-                
-                // Preserve visual effects
-                clonedEl.style.backgroundColor = computedStyle.backgroundColor;
-                clonedEl.style.border = computedStyle.border;
-                clonedEl.style.borderRadius = computedStyle.borderRadius;
-                clonedEl.style.boxShadow = computedStyle.boxShadow;
-                clonedEl.style.opacity = computedStyle.opacity;
-                clonedEl.style.transform = computedStyle.transform;
-                clonedEl.style.filter = computedStyle.filter;
-              }
-            });
-            
-            // Ensure body and html have proper styling
-            clonedDoc.body.style.margin = '0';
-            clonedDoc.body.style.padding = '0';
-            clonedDoc.documentElement.style.margin = '0';
-            clonedDoc.documentElement.style.padding = '0';
+              });
+            }
           }
         });
 
@@ -203,9 +148,9 @@ function App() {
           pdf.addPage();
         }
 
-        // Calculate dimensions to fit A4 perfectly
+        // Calculate dimensions to fit A4
         const imgData = canvas.toDataURL('image/png', 1.0);
-        const imgWidth = canvas.width * 0.264583; // Convert px to mm
+        const imgWidth = canvas.width * 0.264583;
         const imgHeight = canvas.height * 0.264583;
         
         // Scale to fit A4 while maintaining aspect ratio
@@ -239,12 +184,9 @@ function App() {
     try {
       console.log('Starting PNG generation...');
       
-      // Force scroll to top and ensure visibility
+      // Scroll to top and wait
       window.scrollTo(0, 0);
-      content.scrollIntoView({ behavior: 'instant', block: 'start' });
-      
-      // Extended wait for complete rendering
-      await new Promise(resolve => setTimeout(resolve, 4000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Get all newsletter pages
       const pages = content.querySelectorAll('.newsletter-page');
@@ -254,102 +196,85 @@ function App() {
         throw new Error('No newsletter pages found');
       }
 
-      // Force all images to load properly
+      // Wait for all images to load
       const allImages = content.querySelectorAll('img');
-      for (const img of allImages) {
-        if (!img.complete || img.naturalWidth === 0) {
-          await new Promise<void>((resolve) => {
-            const timeout = setTimeout(() => resolve(), 10000);
-            img.onload = () => {
-              clearTimeout(timeout);
-              resolve();
-            };
-            img.onerror = () => {
-              clearTimeout(timeout);
-              resolve();
-            };
-            // Force reload with crossOrigin
-            if (!img.crossOrigin) {
-              img.crossOrigin = 'anonymous';
-              const src = img.src;
-              img.src = '';
-              img.src = src;
-            }
-          });
-        }
-      }
+      await Promise.all(Array.from(allImages).map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(resolve => {
+          const timeout = setTimeout(() => resolve(undefined), 8000);
+          img.onload = () => {
+            clearTimeout(timeout);
+            resolve(undefined);
+          };
+          img.onerror = () => {
+            clearTimeout(timeout);
+            resolve(undefined);
+          };
+        });
+      }));
 
       // Additional wait for everything to settle
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Create canvas with maximum quality settings
+      // Create canvas with simplified settings
       const canvas = await html2canvas(content, {
-        scale: 4, // Maximum scale
+        scale: 2,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: null,
-        logging: true,
+        backgroundColor: '#ffffff', // Force white background
+        logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
-        windowWidth: 1920,
-        windowHeight: 1080,
-        foreignObjectRendering: true,
-        imageTimeout: 20000,
-        removeContainer: false,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+        foreignObjectRendering: false,
+        imageTimeout: 15000,
+        removeContainer: true,
         ignoreElements: (element) => {
-          return element.classList?.contains('print:hidden') || 
-                 element.tagName === 'SCRIPT' ||
-                 element.tagName === 'NOSCRIPT';
+          return element.classList?.contains('print:hidden');
         },
         onclone: (clonedDoc, element) => {
-          console.log('Cloning for PNG with exact styles...');
-          
-          // Copy all stylesheets
-          const originalStylesheets = Array.from(document.styleSheets);
-          originalStylesheets.forEach(stylesheet => {
-            try {
-              const rules = Array.from(stylesheet.cssRules || stylesheet.rules || []);
-              const style = clonedDoc.createElement('style');
-              style.textContent = rules.map(rule => rule.cssText).join('\n');
-              clonedDoc.head.appendChild(style);
-            } catch (e) {
-              console.warn('Could not copy stylesheet:', e);
-            }
-          });
-          
-          // Apply all computed styles exactly
-          const allOriginalElements = element.querySelectorAll('*');
-          const allClonedElements = clonedDoc.querySelectorAll('*');
-          
-          allOriginalElements.forEach((originalEl, index) => {
-            const clonedEl = allClonedElements[index] as HTMLElement;
-            if (clonedEl && originalEl instanceof HTMLElement) {
-              const computedStyle = window.getComputedStyle(originalEl);
-              
-              // Copy every single computed style property
-              for (let i = 0; i < computedStyle.length; i++) {
-                const prop = computedStyle[i];
-                const value = computedStyle.getPropertyValue(prop);
-                if (value) {
-                  clonedEl.style.setProperty(prop, value, 'important');
-                }
-              }
-              
-              // Special handling for images
-              if (originalEl.tagName === 'IMG') {
-                const img = originalEl as HTMLImageElement;
-                const clonedImg = clonedEl as HTMLImageElement;
-                clonedImg.src = img.src;
-                clonedImg.crossOrigin = 'anonymous';
-              }
-            }
-          });
-          
-          // Ensure proper document styling
+          // Simple style preservation for PNG
+          clonedDoc.body.style.backgroundColor = '#ffffff';
           clonedDoc.body.style.margin = '0';
           clonedDoc.body.style.padding = '0';
-          clonedDoc.documentElement.style.margin = '0';
-          clonedDoc.documentElement.style.padding = '0';
+          
+          const allElements = element.querySelectorAll('*');
+          const clonedElements = clonedDoc.querySelectorAll('*');
+          
+          allElements.forEach((el, index) => {
+            if (clonedElements[index] && el instanceof HTMLElement) {
+              const computedStyle = window.getComputedStyle(el);
+              const clonedEl = clonedElements[index] as HTMLElement;
+              
+              // Copy essential styles
+              clonedEl.style.color = computedStyle.color;
+              clonedEl.style.backgroundColor = computedStyle.backgroundColor;
+              clonedEl.style.fontSize = computedStyle.fontSize;
+              clonedEl.style.fontFamily = computedStyle.fontFamily;
+              clonedEl.style.fontWeight = computedStyle.fontWeight;
+              clonedEl.style.textAlign = computedStyle.textAlign;
+              clonedEl.style.display = computedStyle.display;
+              clonedEl.style.width = computedStyle.width;
+              clonedEl.style.height = computedStyle.height;
+              clonedEl.style.minHeight = computedStyle.minHeight;
+              clonedEl.style.padding = computedStyle.padding;
+              clonedEl.style.margin = computedStyle.margin;
+              clonedEl.style.backgroundImage = computedStyle.backgroundImage;
+              clonedEl.style.backgroundSize = computedStyle.backgroundSize;
+              clonedEl.style.backgroundPosition = computedStyle.backgroundPosition;
+              clonedEl.style.filter = computedStyle.filter;
+              clonedEl.style.objectFit = computedStyle.objectFit;
+              
+              // Handle images
+              if (el.tagName === 'IMG') {
+                const img = el as HTMLImageElement;
+                const clonedImg = clonedEl as HTMLImageElement;
+                clonedImg.crossOrigin = 'anonymous';
+                clonedImg.src = img.src;
+              }
+            }
+          });
         }
       });
 
