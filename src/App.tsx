@@ -16,28 +16,19 @@ function App() {
     }
 
     try {
-      console.log('🎯 Starting EXACT layout preservation...');
+      console.log('🎯 Starting PERFECT PDF generation...');
       
-      // Force browser to render everything properly
+      // Force complete rendering
       window.scrollTo(0, 0);
       content.scrollIntoView({ behavior: 'instant', block: 'start' });
       
-      // Wait for complete rendering
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Wait for complete layout stabilization
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Get all newsletter pages
-      const pages = content.querySelectorAll('.newsletter-page');
-      console.log('📄 Found pages:', pages.length);
-      
-      if (pages.length === 0) {
-        throw new Error('No newsletter pages found');
-      }
-
-      // Force all images to load completely
+      // Force all images to load
       const allImages = content.querySelectorAll('img');
-      console.log('🖼️ Loading images:', allImages.length);
+      console.log('🖼️ Ensuring all images are loaded:', allImages.length);
       
-      // Wait for all images to be fully loaded
       await Promise.all(Array.from(allImages).map(img => {
         return new Promise<void>((resolve) => {
           if (img.complete && img.naturalWidth > 0) {
@@ -45,7 +36,7 @@ function App() {
             return;
           }
           
-          const timeout = setTimeout(() => resolve(), 10000);
+          const timeout = setTimeout(() => resolve(), 15000);
           
           img.onload = () => {
             clearTimeout(timeout);
@@ -57,17 +48,15 @@ function App() {
             resolve();
           };
           
-          // Force reload if needed
-          if (!img.complete) {
-            const src = img.src;
-            img.src = '';
-            img.src = src;
-          }
+          // Force reload
+          const src = img.src;
+          img.src = '';
+          img.src = src;
         });
       }));
 
-      // Additional wait for layout stabilization
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Additional stabilization
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -75,26 +64,29 @@ function App() {
         format: 'a4'
       });
 
-      // Process each page with maximum fidelity
+      // Get all newsletter pages
+      const pages = content.querySelectorAll('.newsletter-page');
+      console.log('📄 Processing pages:', pages.length);
+
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement;
         console.log(`🔧 Processing page ${i + 1}/${pages.length}`);
         
-        // Ensure page is in viewport
+        // Ensure page is visible and stable
         page.scrollIntoView({ behavior: 'instant', block: 'start' });
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Force repaint
+        // Force layout recalculation
         page.style.transform = 'translateZ(0)';
         await new Promise(resolve => setTimeout(resolve, 500));
         page.style.transform = '';
 
-        // Create canvas with maximum quality settings
+        // Create canvas with MAXIMUM quality and exact styling
         const canvas = await html2canvas(page, {
-          scale: 4, // Maximum scale for highest quality
+          scale: 3, // High quality
           useCORS: true,
           allowTaint: false,
-          backgroundColor: '#ffffff',
+          backgroundColor: null, // Preserve transparency
           logging: false,
           width: page.offsetWidth,
           height: page.offsetHeight,
@@ -102,83 +94,99 @@ function App() {
           windowHeight: window.innerHeight,
           scrollX: 0,
           scrollY: 0,
-          foreignObjectRendering: false,
-          imageTimeout: 15000,
+          foreignObjectRendering: true, // Better text rendering
+          imageTimeout: 20000,
           removeContainer: false,
           ignoreElements: (element) => {
-            return element.classList?.contains('print:hidden') || false;
+            // Don't ignore any elements - capture everything
+            return false;
           },
           onclone: (clonedDoc, element) => {
-            console.log('🎨 Applying exact styling...');
+            console.log('🎨 Applying EXACT styling preservation...');
             
-            // Remove any existing stylesheets that might interfere
+            // Remove any conflicting styles
             const existingStyles = clonedDoc.querySelectorAll('style, link[rel="stylesheet"]');
-            existingStyles.forEach(style => style.remove());
+            existingStyles.forEach(style => {
+              if (!style.textContent?.includes('tailwind') && !style.textContent?.includes('index.css')) {
+                style.remove();
+              }
+            });
             
-            // Create comprehensive style sheet that matches exactly
-            const masterStyle = clonedDoc.createElement('style');
-            masterStyle.textContent = `
-              /* Reset and base styles */
+            // Create master style that EXACTLY matches the preview
+            const exactStyle = clonedDoc.createElement('style');
+            exactStyle.textContent = `
+              /* EXACT PREVIEW REPLICATION */
               * {
-                margin: 0 !important;
-                padding: 0 !important;
                 box-sizing: border-box !important;
                 -webkit-font-smoothing: antialiased !important;
                 -moz-osx-font-smoothing: grayscale !important;
               }
               
-              /* Exact layout preservation */
+              /* Newsletter container */
               .newsletter-page {
                 width: 100% !important;
                 height: 100vh !important;
                 min-height: 100vh !important;
                 position: relative !important;
                 overflow: hidden !important;
+                display: block !important;
               }
               
-              /* Cover page styles */
+              /* Cover page - BLACK background with RED accents */
               .newsletter-cover {
                 background-color: #000000 !important;
                 color: #ffffff !important;
                 position: relative !important;
                 height: 100vh !important;
+                min-height: 100vh !important;
                 overflow: hidden !important;
               }
               
-              .newsletter-cover .absolute {
-                position: absolute !important;
-              }
-              
-              .newsletter-cover .inset-0 {
-                top: 0 !important;
-                right: 0 !important;
-                bottom: 0 !important;
-                left: 0 !important;
-              }
-              
-              .newsletter-cover .opacity-60 {
-                opacity: 0.6 !important;
-              }
-              
+              /* Cover page images - GRAYSCALE */
               .newsletter-cover img {
                 width: 100% !important;
                 height: 100% !important;
                 object-fit: cover !important;
                 filter: grayscale(100%) !important;
+                display: block !important;
               }
               
-              /* Red header box */
-              .newsletter-cover .bg-red-700 {
+              /* RED header box */
+              .bg-red-700 {
                 background-color: #b91c1c !important;
                 color: #ffffff !important;
               }
               
-              /* Typography */
+              /* BLACK background */
+              .bg-black {
+                background-color: #000000 !important;
+                color: #ffffff !important;
+              }
+              
+              /* WHITE background */
+              .bg-white {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+              }
+              
+              /* Text colors */
+              .text-white {
+                color: #ffffff !important;
+              }
+              
+              .text-black {
+                color: #000000 !important;
+              }
+              
+              .text-red-700 {
+                color: #b91c1c !important;
+              }
+              
+              /* Typography - EXACT sizes */
               .text-8xl {
                 font-size: 6rem !important;
                 line-height: 1 !important;
                 font-weight: 700 !important;
-                color: #b91c1c !important;
               }
               
               .text-6xl {
@@ -189,7 +197,7 @@ function App() {
               
               .text-5xl {
                 font-size: 3rem !important;
-                line-height: 1 !important;
+                line-height: 1.2 !important;
                 font-weight: 700 !important;
               }
               
@@ -202,13 +210,13 @@ function App() {
               .text-2xl {
                 font-size: 1.5rem !important;
                 line-height: 2rem !important;
-                font-weight: 500 !important;
+                font-weight: 600 !important;
               }
               
               .text-xl {
                 font-size: 1.25rem !important;
                 line-height: 1.75rem !important;
-                font-weight: 500 !important;
+                font-weight: 600 !important;
               }
               
               .text-lg {
@@ -226,6 +234,7 @@ function App() {
                 line-height: 1rem !important;
               }
               
+              /* Font weights */
               .font-bold {
                 font-weight: 700 !important;
               }
@@ -238,6 +247,7 @@ function App() {
                 font-weight: 500 !important;
               }
               
+              /* Text transforms */
               .uppercase {
                 text-transform: uppercase !important;
               }
@@ -246,38 +256,13 @@ function App() {
                 font-style: italic !important;
               }
               
-              /* Colors */
-              .text-white {
-                color: #ffffff !important;
-              }
-              
-              .text-black {
-                color: #000000 !important;
-              }
-              
-              .text-red-700 {
-                color: #b91c1c !important;
-              }
-              
-              .bg-red-700 {
-                background-color: #b91c1c !important;
-              }
-              
-              .bg-black {
-                background-color: #000000 !important;
-              }
-              
-              .bg-white {
-                background-color: #ffffff !important;
-              }
-              
-              .bg-gray-50 {
-                background-color: #f9fafb !important;
-              }
-              
               /* Layout */
               .flex {
                 display: flex !important;
+              }
+              
+              .flex-col {
+                flex-direction: column !important;
               }
               
               .relative {
@@ -301,11 +286,11 @@ function App() {
                 height: 100% !important;
               }
               
-              .h-1\/3 {
+              .h-1\\/3 {
                 height: 33.333333% !important;
               }
               
-              .h-2\/3 {
+              .h-2\\/3 {
                 height: 66.666667% !important;
               }
               
@@ -313,124 +298,19 @@ function App() {
                 width: 100% !important;
               }
               
-              .w-5\/12 {
+              .w-5\\/12 {
                 width: 41.666667% !important;
               }
               
-              .w-7\/12 {
+              .w-7\\/12 {
                 width: 58.333333% !important;
               }
               
-              .w-1\/2 {
+              .w-1\\/2 {
                 width: 50% !important;
               }
               
-              /* Spacing */
-              .p-8 {
-                padding: 2rem !important;
-              }
-              
-              .p-6 {
-                padding: 1.5rem !important;
-              }
-              
-              .p-5 {
-                padding: 1.25rem !important;
-              }
-              
-              .p-4 {
-                padding: 1rem !important;
-              }
-              
-              .py-2 {
-                padding-top: 0.5rem !important;
-                padding-bottom: 0.5rem !important;
-              }
-              
-              .px-4 {
-                padding-left: 1rem !important;
-                padding-right: 1rem !important;
-              }
-              
-              .px-2 {
-                padding-left: 0.5rem !important;
-                padding-right: 0.5rem !important;
-              }
-              
-              .py-1 {
-                padding-top: 0.25rem !important;
-                padding-bottom: 0.25rem !important;
-              }
-              
-              .ml-8 {
-                margin-left: 2rem !important;
-              }
-              
-              .mb-52 {
-                margin-bottom: 13rem !important;
-              }
-              
-              .mb-8 {
-                margin-bottom: 2rem !important;
-              }
-              
-              .mb-4 {
-                margin-bottom: 1rem !important;
-              }
-              
-              .mb-2 {
-                margin-bottom: 0.5rem !important;
-              }
-              
-              .mt-10 {
-                margin-top: 2.5rem !important;
-              }
-              
-              .mt-8 {
-                margin-top: 2rem !important;
-              }
-              
-              .mt-2 {
-                margin-top: 0.5rem !important;
-              }
-              
-              .mr-4 {
-                margin-right: 1rem !important;
-              }
-              
-              .mr-2 {
-                margin-right: 0.5rem !important;
-              }
-              
-              .-ml-4 {
-                margin-left: -1rem !important;
-              }
-              
               /* Positioning */
-              .top-0 {
-                top: 0 !important;
-              }
-              
-              .right-0 {
-                right: 0 !important;
-              }
-              
-              .bottom-0 {
-                bottom: 0 !important;
-              }
-              
-              .left-0 {
-                left: 0 !important;
-              }
-              
-              .top-8 {
-                top: 2rem !important;
-              }
-              
-              .left-8 {
-                left: 2rem !important;
-              }
-              
               .inset-0 {
                 top: 0 !important;
                 right: 0 !important;
@@ -438,122 +318,76 @@ function App() {
                 left: 0 !important;
               }
               
-              /* Flex properties */
-              .flex-col {
-                flex-direction: column !important;
-              }
+              .top-0 { top: 0 !important; }
+              .right-0 { right: 0 !important; }
+              .bottom-0 { bottom: 0 !important; }
+              .left-0 { left: 0 !important; }
+              .top-8 { top: 2rem !important; }
+              .left-8 { left: 2rem !important; }
               
-              .items-center {
-                align-items: center !important;
-              }
+              /* Spacing */
+              .p-8 { padding: 2rem !important; }
+              .p-6 { padding: 1.5rem !important; }
+              .p-5 { padding: 1.25rem !important; }
+              .p-4 { padding: 1rem !important; }
+              .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+              .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+              .px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+              .py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
               
-              .items-start {
-                align-items: flex-start !important;
-              }
+              .ml-8 { margin-left: 2rem !important; }
+              .mb-52 { margin-bottom: 13rem !important; }
+              .mb-8 { margin-bottom: 2rem !important; }
+              .mb-4 { margin-bottom: 1rem !important; }
+              .mb-2 { margin-bottom: 0.5rem !important; }
+              .mt-10 { margin-top: 2.5rem !important; }
+              .mt-8 { margin-top: 2rem !important; }
+              .mt-2 { margin-top: 0.5rem !important; }
+              .mr-4 { margin-right: 1rem !important; }
+              .mr-2 { margin-right: 0.5rem !important; }
+              .-ml-4 { margin-left: -1rem !important; }
               
-              .items-end {
-                align-items: flex-end !important;
-              }
-              
-              .justify-between {
-                justify-content: space-between !important;
-              }
-              
-              .justify-center {
-                justify-content: center !important;
-              }
+              /* Flex alignment */
+              .items-center { align-items: center !important; }
+              .items-start { align-items: flex-start !important; }
+              .items-end { align-items: flex-end !important; }
+              .justify-between { justify-content: space-between !important; }
+              .justify-center { justify-content: center !important; }
               
               /* Misc */
-              .overflow-hidden {
-                overflow: hidden !important;
-              }
+              .overflow-hidden { overflow: hidden !important; }
+              .rounded-full { border-radius: 9999px !important; }
+              .rounded-lg { border-radius: 0.5rem !important; }
+              .leading-none { line-height: 1 !important; }
+              .leading-tight { line-height: 1.25 !important; }
+              .leading-relaxed { line-height: 1.625 !important; }
+              .tracking-wider { letter-spacing: 0.05em !important; }
+              .inline-block { display: inline-block !important; }
+              .block { display: block !important; }
+              .max-w-md { max-width: 28rem !important; }
+              .z-10 { z-index: 10 !important; }
+              .opacity-60 { opacity: 0.6 !important; }
               
-              .rounded-full {
-                border-radius: 9999px !important;
-              }
+              /* Spacing utilities */
+              .space-y-2 > * + * { margin-top: 0.5rem !important; }
+              .space-y-4 > * + * { margin-top: 1rem !important; }
+              .space-y-6 > * + * { margin-top: 1.5rem !important; }
+              .space-y-8 > * + * { margin-top: 2rem !important; }
               
-              .rounded-lg {
-                border-radius: 0.5rem !important;
-              }
-              
-              .leading-none {
-                line-height: 1 !important;
-              }
-              
-              .leading-tight {
-                line-height: 1.25 !important;
-              }
-              
-              .leading-relaxed {
-                line-height: 1.625 !important;
-              }
-              
-              .tracking-wider {
-                letter-spacing: 0.05em !important;
-              }
-              
-              .inline-block {
-                display: inline-block !important;
-              }
-              
-              .block {
-                display: block !important;
-              }
-              
-              .space-y-2 > * + * {
-                margin-top: 0.5rem !important;
-              }
-              
-              .space-y-4 > * + * {
-                margin-top: 1rem !important;
-              }
-              
-              .space-y-6 > * + * {
-                margin-top: 1.5rem !important;
-              }
-              
-              .space-y-8 > * + * {
-                margin-top: 2rem !important;
-              }
-              
-              .max-w-md {
-                max-width: 28rem !important;
-              }
-              
-              .z-10 {
-                z-index: 10 !important;
-              }
-              
-              .opacity-60 {
-                opacity: 0.6 !important;
-              }
-              
-              /* Image specific */
+              /* CRITICAL: All images MUST be grayscale */
               img {
-                display: block !important;
-                object-fit: cover !important;
                 filter: grayscale(100%) !important;
+                object-fit: cover !important;
+                display: block !important;
+                width: 100% !important;
+                height: 100% !important;
               }
               
               .grayscale {
                 filter: grayscale(100%) !important;
               }
               
-              /* Threats page specific */
-              .newsletter-threats {
-                background-color: #ffffff !important;
-                color: #000000 !important;
-                height: 100vh !important;
-                display: flex !important;
-              }
-              
-              /* Best practices page specific */
-              .newsletter-best-practices {
-                height: 100vh !important;
-                display: flex !important;
-              }
-              
-              /* Text shadows for cover */
+              /* Text shadows for cover page */
               .newsletter-cover h1,
               .newsletter-cover h2 {
                 text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3) !important;
@@ -572,52 +406,96 @@ function App() {
               .newsletter-cover .z-10 {
                 z-index: 10 !important;
               }
+              
+              /* Page-specific styles */
+              .newsletter-threats {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                height: 100vh !important;
+                display: flex !important;
+              }
+              
+              .newsletter-best-practices {
+                height: 100vh !important;
+                display: flex !important;
+              }
             `;
             
-            clonedDoc.head.appendChild(masterStyle);
+            clonedDoc.head.appendChild(exactStyle);
             
-            // Force apply styles to all elements
+            // Force apply computed styles to ALL elements
             const allElements = element.querySelectorAll('*');
             allElements.forEach((el) => {
               if (el instanceof HTMLElement) {
                 const computedStyle = window.getComputedStyle(el);
                 
-                // Copy critical layout properties
+                // Copy ALL critical properties
                 const criticalProps = [
                   'position', 'top', 'left', 'right', 'bottom',
                   'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
-                  'margin', 'padding', 'border', 'background', 'color',
-                  'font-family', 'font-size', 'font-weight', 'line-height',
-                  'display', 'flex-direction', 'justify-content', 'align-items',
-                  'z-index', 'opacity', 'overflow', 'transform'
+                  'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+                  'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+                  'border', 'background', 'background-color', 'color',
+                  'font-family', 'font-size', 'font-weight', 'line-height', 'letter-spacing',
+                  'display', 'flex-direction', 'justify-content', 'align-items', 'flex',
+                  'z-index', 'opacity', 'overflow', 'transform', 'text-transform',
+                  'border-radius', 'box-sizing', 'object-fit', 'filter'
                 ];
                 
                 criticalProps.forEach(prop => {
                   const value = computedStyle.getPropertyValue(prop);
-                  if (value && value !== 'initial' && value !== 'auto') {
+                  if (value && value !== 'initial' && value !== 'auto' && value !== 'normal') {
                     el.style.setProperty(prop, value, 'important');
                   }
                 });
                 
-                // Special handling for images
+                // Special handling for images - FORCE grayscale
                 if (el.tagName === 'IMG') {
-                  const img = el as HTMLImageElement;
-                  img.style.setProperty('object-fit', 'cover', 'important');
-                  img.style.setProperty('filter', 'grayscale(100%)', 'important');
-                  img.style.setProperty('width', '100%', 'important');
-                  img.style.setProperty('height', '100%', 'important');
+                  el.style.setProperty('filter', 'grayscale(100%)', 'important');
+                  el.style.setProperty('object-fit', 'cover', 'important');
+                  el.style.setProperty('width', '100%', 'important');
+                  el.style.setProperty('height', '100%', 'important');
+                }
+                
+                // Special handling for backgrounds
+                if (el.classList.contains('bg-red-700')) {
+                  el.style.setProperty('background-color', '#b91c1c', 'important');
+                  el.style.setProperty('color', '#ffffff', 'important');
+                }
+                
+                if (el.classList.contains('bg-black')) {
+                  el.style.setProperty('background-color', '#000000', 'important');
+                  el.style.setProperty('color', '#ffffff', 'important');
+                }
+                
+                if (el.classList.contains('bg-white')) {
+                  el.style.setProperty('background-color', '#ffffff', 'important');
+                  el.style.setProperty('color', '#000000', 'important');
+                }
+                
+                // Force text colors
+                if (el.classList.contains('text-red-700')) {
+                  el.style.setProperty('color', '#b91c1c', 'important');
+                }
+                
+                if (el.classList.contains('text-white')) {
+                  el.style.setProperty('color', '#ffffff', 'important');
+                }
+                
+                if (el.classList.contains('text-black')) {
+                  el.style.setProperty('color', '#000000', 'important');
                 }
               }
             });
             
-            console.log('✅ Exact styling applied');
+            console.log('✅ EXACT styling applied to all elements');
           }
         });
 
         console.log(`📸 Canvas created: ${canvas.width}x${canvas.height}`);
 
         if (canvas.width === 0 || canvas.height === 0) {
-          console.warn(`⚠️ Page ${i + 1} has zero dimensions`);
+          console.warn(`⚠️ Page ${i + 1} has zero dimensions, skipping`);
           continue;
         }
 
@@ -631,7 +509,7 @@ function App() {
         const pdfWidth = 210; // A4 width in mm
         const pdfHeight = 297; // A4 height in mm
         
-        // Scale to fit A4 while maintaining aspect ratio
+        // Scale to fit A4 perfectly
         const canvasRatio = canvas.width / canvas.height;
         const pageRatio = pdfWidth / pdfHeight;
         
@@ -650,11 +528,11 @@ function App() {
         }
 
         pdf.addImage(imgData, 'PNG', x, y, width, height, undefined, 'FAST');
-        console.log(`✅ Page ${i + 1} added to PDF`);
+        console.log(`✅ Page ${i + 1} added to PDF with perfect dimensions`);
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🎉 PDF generated with EXACT layout!');
+      console.log('🎉 PERFECT PDF generated with EXACT preview copy!');
       
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -670,12 +548,12 @@ function App() {
     }
 
     try {
-      console.log('🎯 Starting EXACT PNG generation...');
+      console.log('🎯 Starting PERFECT PNG generation...');
       
       // Same preparation as PDF
       window.scrollTo(0, 0);
       content.scrollIntoView({ behavior: 'instant', block: 'start' });
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
       // Load all images
       const allImages = content.querySelectorAll('img');
@@ -686,7 +564,7 @@ function App() {
             return;
           }
           
-          const timeout = setTimeout(() => resolve(), 10000);
+          const timeout = setTimeout(() => resolve(), 15000);
           
           img.onload = () => {
             clearTimeout(timeout);
@@ -697,50 +575,85 @@ function App() {
             clearTimeout(timeout);
             resolve();
           };
+          
+          const src = img.src;
+          img.src = '';
+          img.src = src;
         });
       }));
 
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Use EXACT same canvas settings as PDF
+      // Use EXACT same canvas settings as PDF for consistency
       const canvas = await html2canvas(content, {
-        scale: 4,
+        scale: 3,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: '#ffffff',
+        backgroundColor: null,
         logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
         windowWidth: window.innerWidth,
         windowHeight: window.innerHeight,
-        foreignObjectRendering: false,
-        imageTimeout: 15000,
+        foreignObjectRendering: true,
+        imageTimeout: 20000,
         removeContainer: false,
-        ignoreElements: (element) => {
-          return element.classList?.contains('print:hidden') || false;
-        },
+        ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
           // Use EXACT same styling logic as PDF
           const existingStyles = clonedDoc.querySelectorAll('style, link[rel="stylesheet"]');
-          existingStyles.forEach(style => style.remove());
+          existingStyles.forEach(style => {
+            if (!style.textContent?.includes('tailwind') && !style.textContent?.includes('index.css')) {
+              style.remove();
+            }
+          });
           
-          const masterStyle = clonedDoc.createElement('style');
-          masterStyle.textContent = `
+          const exactStyle = clonedDoc.createElement('style');
+          exactStyle.textContent = `
             * { box-sizing: border-box !important; }
-            .bg-red-700 { background-color: #b91c1c !important; }
-            .bg-black { background-color: #000000 !important; }
-            .bg-white { background-color: #ffffff !important; }
+            .bg-red-700 { background-color: #b91c1c !important; color: #ffffff !important; }
+            .bg-black { background-color: #000000 !important; color: #ffffff !important; }
+            .bg-white { background-color: #ffffff !important; color: #000000 !important; }
             .text-white { color: #ffffff !important; }
             .text-black { color: #000000 !important; }
             .text-red-700 { color: #b91c1c !important; }
-            img { object-fit: cover !important; filter: grayscale(100%) !important; }
+            img { filter: grayscale(100%) !important; object-fit: cover !important; width: 100% !important; height: 100% !important; }
             .min-h-screen { min-height: 100vh !important; height: 100vh !important; }
             .flex { display: flex !important; }
             .relative { position: relative !important; }
             .absolute { position: absolute !important; }
             .inset-0 { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; }
+            .newsletter-page { width: 100% !important; height: 100vh !important; overflow: hidden !important; }
           `;
-          clonedDoc.head.appendChild(masterStyle);
+          clonedDoc.head.appendChild(exactStyle);
+          
+          // Apply exact same element styling as PDF
+          const allElements = element.querySelectorAll('*');
+          allElements.forEach((el) => {
+            if (el instanceof HTMLElement) {
+              const computedStyle = window.getComputedStyle(el);
+              
+              const criticalProps = [
+                'position', 'top', 'left', 'right', 'bottom',
+                'width', 'height', 'background-color', 'color',
+                'font-size', 'font-weight', 'display', 'flex-direction',
+                'justify-content', 'align-items', 'padding', 'margin',
+                'filter', 'object-fit'
+              ];
+              
+              criticalProps.forEach(prop => {
+                const value = computedStyle.getPropertyValue(prop);
+                if (value && value !== 'initial' && value !== 'auto') {
+                  el.style.setProperty(prop, value, 'important');
+                }
+              });
+              
+              if (el.tagName === 'IMG') {
+                el.style.setProperty('filter', 'grayscale(100%)', 'important');
+                el.style.setProperty('object-fit', 'cover', 'important');
+              }
+            }
+          });
         }
       });
 
@@ -758,7 +671,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
       
-      console.log('🎉 PNG generated with EXACT layout!');
+      console.log('🎉 PERFECT PNG generated with EXACT preview copy!');
       
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
