@@ -778,12 +778,15 @@ function App() {
             </div>
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Newsletter Preview</h2>
+              {/* 🎯 WRAPPED NEWSLETTER CONTENT - Everything under Newsletter Preview */}
               <div
                 ref={printRef}
-                className="border border-gray-300 rounded-lg overflow-hidden bg-white"
+                className="newsletter-container border border-gray-300 rounded-lg overflow-hidden bg-white"
                 style={{ 
                   backgroundColor: 'white',
-                  position: 'relative'
+                  position: 'relative',
+                  width: '100%',
+                  height: 'auto'
                 }}
               >
                 <Newsletter />
