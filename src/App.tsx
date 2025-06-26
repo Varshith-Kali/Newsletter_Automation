@@ -16,59 +16,58 @@ function App() {
     }
 
     try {
-      console.log('🔧 Starting EXACT PDF generation...');
+      console.log('🎯 Starting EXACT layout preservation...');
       
-      // Force scroll to top and ensure visibility
+      // Force browser to render everything properly
       window.scrollTo(0, 0);
       content.scrollIntoView({ behavior: 'instant', block: 'start' });
       
-      // Wait for layout stabilization
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for complete rendering
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Get all newsletter pages
       const pages = content.querySelectorAll('.newsletter-page');
-      console.log('🔧 Found pages:', pages.length);
+      console.log('📄 Found pages:', pages.length);
       
       if (pages.length === 0) {
         throw new Error('No newsletter pages found');
       }
 
-      // Pre-load ALL images with proper error handling
-      console.log('🔧 Pre-loading all images...');
+      // Force all images to load completely
       const allImages = content.querySelectorAll('img');
-      console.log('🔧 Found images:', allImages.length);
+      console.log('🖼️ Loading images:', allImages.length);
       
-      await Promise.all(Array.from(allImages).map((img, index) => {
+      // Wait for all images to be fully loaded
+      await Promise.all(Array.from(allImages).map(img => {
         return new Promise<void>((resolve) => {
-          console.log(`🔧 Loading image ${index + 1}:`, img.src);
-          
           if (img.complete && img.naturalWidth > 0) {
-            console.log(`🔧 Image ${index + 1} already loaded`);
             resolve();
             return;
           }
           
-          const timeout = setTimeout(() => {
-            console.log(`🔧 Image ${index + 1} timeout - continuing`);
-            resolve();
-          }, 8000);
+          const timeout = setTimeout(() => resolve(), 10000);
           
           img.onload = () => {
-            console.log(`🔧 Image ${index + 1} loaded successfully`);
             clearTimeout(timeout);
             resolve();
           };
           
           img.onerror = () => {
-            console.log(`🔧 Image ${index + 1} failed to load - continuing`);
             clearTimeout(timeout);
             resolve();
           };
+          
+          // Force reload if needed
+          if (!img.complete) {
+            const src = img.src;
+            img.src = '';
+            img.src = src;
+          }
         });
       }));
 
-      console.log('🔧 All images processed, waiting for final render...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Additional wait for layout stabilization
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -76,23 +75,26 @@ function App() {
         format: 'a4'
       });
 
-      // Process each page with EXACT layout preservation
+      // Process each page with maximum fidelity
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement;
         console.log(`🔧 Processing page ${i + 1}/${pages.length}`);
         
-        // Ensure page is visible and properly positioned
+        // Ensure page is in viewport
         page.scrollIntoView({ behavior: 'instant', block: 'start' });
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        console.log(`🔧 Page ${i + 1} dimensions:`, page.offsetWidth, 'x', page.offsetHeight);
+        // Force repaint
+        page.style.transform = 'translateZ(0)';
+        await new Promise(resolve => setTimeout(resolve, 500));
+        page.style.transform = '';
 
-        // Create canvas with EXACT layout preservation
+        // Create canvas with maximum quality settings
         const canvas = await html2canvas(page, {
-          scale: 3, // Higher scale for better quality
+          scale: 4, // Maximum scale for highest quality
           useCORS: true,
           allowTaint: false,
-          backgroundColor: null,
+          backgroundColor: '#ffffff',
           logging: false,
           width: page.offsetWidth,
           height: page.offsetHeight,
@@ -101,297 +103,561 @@ function App() {
           scrollX: 0,
           scrollY: 0,
           foreignObjectRendering: false,
-          imageTimeout: 10000,
+          imageTimeout: 15000,
           removeContainer: false,
           ignoreElements: (element) => {
             return element.classList?.contains('print:hidden') || false;
           },
           onclone: (clonedDoc, element) => {
-            console.log('🔧 Cloning document for EXACT layout preservation');
+            console.log('🎨 Applying exact styling...');
             
-            // Force all elements to maintain exact positioning and sizing
-            const allElements = element.querySelectorAll('*');
-            const clonedElements = clonedDoc.querySelectorAll('*');
+            // Remove any existing stylesheets that might interfere
+            const existingStyles = clonedDoc.querySelectorAll('style, link[rel="stylesheet"]');
+            existingStyles.forEach(style => style.remove());
             
-            allElements.forEach((originalEl, index) => {
-              const clonedEl = clonedElements[index] as HTMLElement;
-              if (clonedEl && originalEl instanceof HTMLElement) {
-                const computedStyle = window.getComputedStyle(originalEl);
-                const rect = originalEl.getBoundingClientRect();
-                
-                // Copy ALL computed styles with maximum priority
-                for (let j = 0; j < computedStyle.length; j++) {
-                  const prop = computedStyle[j];
-                  const value = computedStyle.getPropertyValue(prop);
-                  if (value && value !== 'initial' && value !== 'inherit' && value !== 'auto') {
-                    clonedEl.style.setProperty(prop, value, 'important');
-                  }
-                }
-                
-                // Force exact positioning and dimensions
-                const criticalStyles = {
-                  'position': computedStyle.position,
-                  'top': computedStyle.top,
-                  'left': computedStyle.left,
-                  'right': computedStyle.right,
-                  'bottom': computedStyle.bottom,
-                  'width': computedStyle.width,
-                  'height': computedStyle.height,
-                  'min-width': computedStyle.minWidth,
-                  'min-height': computedStyle.minHeight,
-                  'max-width': computedStyle.maxWidth,
-                  'max-height': computedStyle.maxHeight,
-                  'margin': computedStyle.margin,
-                  'margin-top': computedStyle.marginTop,
-                  'margin-right': computedStyle.marginRight,
-                  'margin-bottom': computedStyle.marginBottom,
-                  'margin-left': computedStyle.marginLeft,
-                  'padding': computedStyle.padding,
-                  'padding-top': computedStyle.paddingTop,
-                  'padding-right': computedStyle.paddingRight,
-                  'padding-bottom': computedStyle.paddingBottom,
-                  'padding-left': computedStyle.paddingLeft,
-                  'border': computedStyle.border,
-                  'border-width': computedStyle.borderWidth,
-                  'border-style': computedStyle.borderStyle,
-                  'border-color': computedStyle.borderColor,
-                  'border-radius': computedStyle.borderRadius,
-                  'background': computedStyle.background,
-                  'background-color': computedStyle.backgroundColor,
-                  'background-image': computedStyle.backgroundImage,
-                  'background-size': computedStyle.backgroundSize,
-                  'background-position': computedStyle.backgroundPosition,
-                  'background-repeat': computedStyle.backgroundRepeat,
-                  'color': computedStyle.color,
-                  'font-family': computedStyle.fontFamily,
-                  'font-size': computedStyle.fontSize,
-                  'font-weight': computedStyle.fontWeight,
-                  'font-style': computedStyle.fontStyle,
-                  'line-height': computedStyle.lineHeight,
-                  'text-align': computedStyle.textAlign,
-                  'text-decoration': computedStyle.textDecoration,
-                  'text-transform': computedStyle.textTransform,
-                  'letter-spacing': computedStyle.letterSpacing,
-                  'word-spacing': computedStyle.wordSpacing,
-                  'display': computedStyle.display,
-                  'flex': computedStyle.flex,
-                  'flex-direction': computedStyle.flexDirection,
-                  'flex-wrap': computedStyle.flexWrap,
-                  'justify-content': computedStyle.justifyContent,
-                  'align-items': computedStyle.alignItems,
-                  'align-content': computedStyle.alignContent,
-                  'flex-grow': computedStyle.flexGrow,
-                  'flex-shrink': computedStyle.flexShrink,
-                  'flex-basis': computedStyle.flexBasis,
-                  'order': computedStyle.order,
-                  'z-index': computedStyle.zIndex,
-                  'opacity': computedStyle.opacity,
-                  'visibility': computedStyle.visibility,
-                  'overflow': computedStyle.overflow,
-                  'overflow-x': computedStyle.overflowX,
-                  'overflow-y': computedStyle.overflowY,
-                  'white-space': computedStyle.whiteSpace,
-                  'word-wrap': computedStyle.wordWrap,
-                  'word-break': computedStyle.wordBreak,
-                  'box-sizing': computedStyle.boxSizing,
-                  'box-shadow': computedStyle.boxShadow,
-                  'transform': computedStyle.transform,
-                  'transform-origin': computedStyle.transformOrigin,
-                  'transition': computedStyle.transition,
-                  'filter': computedStyle.filter,
-                  'backdrop-filter': computedStyle.backdropFilter
-                };
-                
-                Object.entries(criticalStyles).forEach(([prop, value]) => {
-                  if (value && value !== 'none' && value !== 'initial' && value !== 'auto' && value !== 'normal') {
-                    clonedEl.style.setProperty(prop, value, 'important');
-                  }
-                });
-                
-                // Special handling for images to maintain exact appearance
-                if (originalEl.tagName === 'IMG') {
-                  const img = originalEl as HTMLImageElement;
-                  const clonedImg = clonedEl as HTMLImageElement;
-                  clonedImg.src = img.src;
-                  clonedImg.crossOrigin = 'anonymous';
-                  
-                  // Force exact image styling
-                  clonedImg.style.setProperty('width', computedStyle.width, 'important');
-                  clonedImg.style.setProperty('height', computedStyle.height, 'important');
-                  clonedImg.style.setProperty('object-fit', computedStyle.objectFit, 'important');
-                  clonedImg.style.setProperty('object-position', computedStyle.objectPosition, 'important');
-                  clonedImg.style.setProperty('filter', computedStyle.filter, 'important');
-                  clonedImg.style.setProperty('opacity', computedStyle.opacity, 'important');
-                }
-                
-                // Force specific color schemes
-                if (computedStyle.backgroundColor.includes('rgb(185, 28, 28)') || 
-                    computedStyle.backgroundColor.includes('rgb(153, 27, 27)') ||
-                    originalEl.classList.contains('bg-red-700')) {
-                  clonedEl.style.setProperty('background-color', '#b91c1c', 'important');
-                }
-                
-                if (computedStyle.backgroundColor.includes('rgb(0, 0, 0)') ||
-                    originalEl.classList.contains('bg-black')) {
-                  clonedEl.style.setProperty('background-color', '#000000', 'important');
-                }
-                
-                if (computedStyle.color.includes('rgb(255, 255, 255)') ||
-                    originalEl.classList.contains('text-white')) {
-                  clonedEl.style.setProperty('color', '#ffffff', 'important');
-                }
-                
-                if (computedStyle.color.includes('rgb(0, 0, 0)') ||
-                    originalEl.classList.contains('text-black')) {
-                  clonedEl.style.setProperty('color', '#000000', 'important');
-                }
-              }
-            });
-            
-            // Inject comprehensive CSS to ensure exact styling
-            const additionalCSS = clonedDoc.createElement('style');
-            additionalCSS.textContent = `
-              * { 
-                box-sizing: border-box !important; 
+            // Create comprehensive style sheet that matches exactly
+            const masterStyle = clonedDoc.createElement('style');
+            masterStyle.textContent = `
+              /* Reset and base styles */
+              * {
+                margin: 0 !important;
+                padding: 0 !important;
+                box-sizing: border-box !important;
                 -webkit-font-smoothing: antialiased !important;
                 -moz-osx-font-smoothing: grayscale !important;
               }
               
-              /* Force exact Tailwind classes */
-              .bg-red-700 { background-color: #b91c1c !important; }
-              .bg-black { background-color: #000000 !important; }
-              .bg-white { background-color: #ffffff !important; }
-              .text-white { color: #ffffff !important; }
-              .text-black { color: #000000 !important; }
-              .text-red-700 { color: #b91c1c !important; }
+              /* Exact layout preservation */
+              .newsletter-page {
+                width: 100% !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
+                position: relative !important;
+                overflow: hidden !important;
+              }
               
-              /* Force image styling */
-              img { 
-                object-fit: cover !important; 
+              /* Cover page styles */
+              .newsletter-cover {
+                background-color: #000000 !important;
+                color: #ffffff !important;
+                position: relative !important;
+                height: 100vh !important;
+                overflow: hidden !important;
+              }
+              
+              .newsletter-cover .absolute {
+                position: absolute !important;
+              }
+              
+              .newsletter-cover .inset-0 {
+                top: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                left: 0 !important;
+              }
+              
+              .newsletter-cover .opacity-60 {
+                opacity: 0.6 !important;
+              }
+              
+              .newsletter-cover img {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: cover !important;
                 filter: grayscale(100%) !important;
+              }
+              
+              /* Red header box */
+              .newsletter-cover .bg-red-700 {
+                background-color: #b91c1c !important;
+                color: #ffffff !important;
+              }
+              
+              /* Typography */
+              .text-8xl {
+                font-size: 6rem !important;
+                line-height: 1 !important;
+                font-weight: 700 !important;
+                color: #b91c1c !important;
+              }
+              
+              .text-6xl {
+                font-size: 3.75rem !important;
+                line-height: 1 !important;
+                font-weight: 700 !important;
+              }
+              
+              .text-5xl {
+                font-size: 3rem !important;
+                line-height: 1 !important;
+                font-weight: 700 !important;
+              }
+              
+              .text-3xl {
+                font-size: 1.875rem !important;
+                line-height: 2.25rem !important;
+                font-weight: 700 !important;
+              }
+              
+              .text-2xl {
+                font-size: 1.5rem !important;
+                line-height: 2rem !important;
+                font-weight: 500 !important;
+              }
+              
+              .text-xl {
+                font-size: 1.25rem !important;
+                line-height: 1.75rem !important;
+                font-weight: 500 !important;
+              }
+              
+              .text-lg {
+                font-size: 1.125rem !important;
+                line-height: 1.75rem !important;
+              }
+              
+              .text-sm {
+                font-size: 0.875rem !important;
+                line-height: 1.25rem !important;
+              }
+              
+              .text-xs {
+                font-size: 0.75rem !important;
+                line-height: 1rem !important;
+              }
+              
+              .font-bold {
+                font-weight: 700 !important;
+              }
+              
+              .font-semibold {
+                font-weight: 600 !important;
+              }
+              
+              .font-medium {
+                font-weight: 500 !important;
+              }
+              
+              .uppercase {
+                text-transform: uppercase !important;
+              }
+              
+              .italic {
+                font-style: italic !important;
+              }
+              
+              /* Colors */
+              .text-white {
+                color: #ffffff !important;
+              }
+              
+              .text-black {
+                color: #000000 !important;
+              }
+              
+              .text-red-700 {
+                color: #b91c1c !important;
+              }
+              
+              .bg-red-700 {
+                background-color: #b91c1c !important;
+              }
+              
+              .bg-black {
+                background-color: #000000 !important;
+              }
+              
+              .bg-white {
+                background-color: #ffffff !important;
+              }
+              
+              .bg-gray-50 {
+                background-color: #f9fafb !important;
+              }
+              
+              /* Layout */
+              .flex {
+                display: flex !important;
+              }
+              
+              .relative {
+                position: relative !important;
+              }
+              
+              .absolute {
+                position: absolute !important;
+              }
+              
+              .min-h-screen {
+                min-height: 100vh !important;
+                height: 100vh !important;
+              }
+              
+              .h-screen {
+                height: 100vh !important;
+              }
+              
+              .h-full {
+                height: 100% !important;
+              }
+              
+              .h-1\/3 {
+                height: 33.333333% !important;
+              }
+              
+              .h-2\/3 {
+                height: 66.666667% !important;
+              }
+              
+              .w-full {
+                width: 100% !important;
+              }
+              
+              .w-5\/12 {
+                width: 41.666667% !important;
+              }
+              
+              .w-7\/12 {
+                width: 58.333333% !important;
+              }
+              
+              .w-1\/2 {
+                width: 50% !important;
+              }
+              
+              /* Spacing */
+              .p-8 {
+                padding: 2rem !important;
+              }
+              
+              .p-6 {
+                padding: 1.5rem !important;
+              }
+              
+              .p-5 {
+                padding: 1.25rem !important;
+              }
+              
+              .p-4 {
+                padding: 1rem !important;
+              }
+              
+              .py-2 {
+                padding-top: 0.5rem !important;
+                padding-bottom: 0.5rem !important;
+              }
+              
+              .px-4 {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+              }
+              
+              .px-2 {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+              }
+              
+              .py-1 {
+                padding-top: 0.25rem !important;
+                padding-bottom: 0.25rem !important;
+              }
+              
+              .ml-8 {
+                margin-left: 2rem !important;
+              }
+              
+              .mb-52 {
+                margin-bottom: 13rem !important;
+              }
+              
+              .mb-8 {
+                margin-bottom: 2rem !important;
+              }
+              
+              .mb-4 {
+                margin-bottom: 1rem !important;
+              }
+              
+              .mb-2 {
+                margin-bottom: 0.5rem !important;
+              }
+              
+              .mt-10 {
+                margin-top: 2.5rem !important;
+              }
+              
+              .mt-8 {
+                margin-top: 2rem !important;
+              }
+              
+              .mt-2 {
+                margin-top: 0.5rem !important;
+              }
+              
+              .mr-4 {
+                margin-right: 1rem !important;
+              }
+              
+              .mr-2 {
+                margin-right: 0.5rem !important;
+              }
+              
+              .-ml-4 {
+                margin-left: -1rem !important;
+              }
+              
+              /* Positioning */
+              .top-0 {
+                top: 0 !important;
+              }
+              
+              .right-0 {
+                right: 0 !important;
+              }
+              
+              .bottom-0 {
+                bottom: 0 !important;
+              }
+              
+              .left-0 {
+                left: 0 !important;
+              }
+              
+              .top-8 {
+                top: 2rem !important;
+              }
+              
+              .left-8 {
+                left: 2rem !important;
+              }
+              
+              .inset-0 {
+                top: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                left: 0 !important;
+              }
+              
+              /* Flex properties */
+              .flex-col {
+                flex-direction: column !important;
+              }
+              
+              .items-center {
+                align-items: center !important;
+              }
+              
+              .items-start {
+                align-items: flex-start !important;
+              }
+              
+              .items-end {
+                align-items: flex-end !important;
+              }
+              
+              .justify-between {
+                justify-content: space-between !important;
+              }
+              
+              .justify-center {
+                justify-content: center !important;
+              }
+              
+              /* Misc */
+              .overflow-hidden {
+                overflow: hidden !important;
+              }
+              
+              .rounded-full {
+                border-radius: 9999px !important;
+              }
+              
+              .rounded-lg {
+                border-radius: 0.5rem !important;
+              }
+              
+              .leading-none {
+                line-height: 1 !important;
+              }
+              
+              .leading-tight {
+                line-height: 1.25 !important;
+              }
+              
+              .leading-relaxed {
+                line-height: 1.625 !important;
+              }
+              
+              .tracking-wider {
+                letter-spacing: 0.05em !important;
+              }
+              
+              .inline-block {
+                display: inline-block !important;
+              }
+              
+              .block {
                 display: block !important;
               }
-              .grayscale { filter: grayscale(100%) !important; }
               
-              /* Force layout classes */
-              .min-h-screen { min-height: 100vh !important; height: 100vh !important; }
-              .h-screen { height: 100vh !important; }
-              .flex { display: flex !important; }
-              .relative { position: relative !important; }
-              .absolute { position: absolute !important; }
-              .inset-0 { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; }
+              .space-y-2 > * + * {
+                margin-top: 0.5rem !important;
+              }
               
-              /* Force exact spacing */
-              .p-8 { padding: 2rem !important; }
-              .p-6 { padding: 1.5rem !important; }
-              .p-4 { padding: 1rem !important; }
-              .m-8 { margin: 2rem !important; }
-              .mb-8 { margin-bottom: 2rem !important; }
-              .mt-8 { margin-top: 2rem !important; }
-              .ml-8 { margin-left: 2rem !important; }
+              .space-y-4 > * + * {
+                margin-top: 1rem !important;
+              }
               
-              /* Force exact widths */
-              .w-5\/12 { width: 41.666667% !important; }
-              .w-7\/12 { width: 58.333333% !important; }
-              .w-1\/2 { width: 50% !important; }
-              .w-1\/3 { width: 33.333333% !important; }
-              .w-2\/3 { width: 66.666667% !important; }
-              .w-full { width: 100% !important; }
+              .space-y-6 > * + * {
+                margin-top: 1.5rem !important;
+              }
               
-              /* Force exact heights */
-              .h-1\/3 { height: 33.333333% !important; }
-              .h-2\/3 { height: 66.666667% !important; }
-              .h-full { height: 100% !important; }
+              .space-y-8 > * + * {
+                margin-top: 2rem !important;
+              }
               
-              /* Force typography */
-              .text-8xl { font-size: 6rem !important; line-height: 1 !important; }
-              .text-6xl { font-size: 3.75rem !important; line-height: 1 !important; }
-              .text-5xl { font-size: 3rem !important; line-height: 1 !important; }
-              .text-3xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
-              .text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
-              .text-xl { font-size: 1.25rem !important; line-height: 1.75rem !important; }
-              .text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
-              .text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
-              .text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
+              .max-w-md {
+                max-width: 28rem !important;
+              }
               
-              .font-bold { font-weight: 700 !important; }
-              .font-semibold { font-weight: 600 !important; }
-              .font-medium { font-weight: 500 !important; }
+              .z-10 {
+                z-index: 10 !important;
+              }
               
-              .uppercase { text-transform: uppercase !important; }
-              .italic { font-style: italic !important; }
+              .opacity-60 {
+                opacity: 0.6 !important;
+              }
               
-              /* Force exact positioning */
-              .top-0 { top: 0 !important; }
-              .right-0 { right: 0 !important; }
-              .bottom-0 { bottom: 0 !important; }
-              .left-0 { left: 0 !important; }
+              /* Image specific */
+              img {
+                display: block !important;
+                object-fit: cover !important;
+                filter: grayscale(100%) !important;
+              }
               
-              /* Force opacity */
-              .opacity-60 { opacity: 0.6 !important; }
+              .grayscale {
+                filter: grayscale(100%) !important;
+              }
               
-              /* Force overflow */
-              .overflow-hidden { overflow: hidden !important; }
+              /* Threats page specific */
+              .newsletter-threats {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                height: 100vh !important;
+                display: flex !important;
+              }
               
-              /* Force rounded corners */
-              .rounded-full { border-radius: 9999px !important; }
-              .rounded-lg { border-radius: 0.5rem !important; }
+              /* Best practices page specific */
+              .newsletter-best-practices {
+                height: 100vh !important;
+                display: flex !important;
+              }
               
-              /* Force shadows */
-              .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; }
+              /* Text shadows for cover */
+              .newsletter-cover h1,
+              .newsletter-cover h2 {
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3) !important;
+              }
+              
+              /* Ensure proper stacking */
+              .newsletter-cover > * {
+                position: relative !important;
+                z-index: 1 !important;
+              }
+              
+              .newsletter-cover .absolute {
+                z-index: 0 !important;
+              }
+              
+              .newsletter-cover .z-10 {
+                z-index: 10 !important;
+              }
             `;
-            clonedDoc.head.appendChild(additionalCSS);
             
-            console.log('🔧 Enhanced styling applied for exact layout preservation');
+            clonedDoc.head.appendChild(masterStyle);
+            
+            // Force apply styles to all elements
+            const allElements = element.querySelectorAll('*');
+            allElements.forEach((el) => {
+              if (el instanceof HTMLElement) {
+                const computedStyle = window.getComputedStyle(el);
+                
+                // Copy critical layout properties
+                const criticalProps = [
+                  'position', 'top', 'left', 'right', 'bottom',
+                  'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
+                  'margin', 'padding', 'border', 'background', 'color',
+                  'font-family', 'font-size', 'font-weight', 'line-height',
+                  'display', 'flex-direction', 'justify-content', 'align-items',
+                  'z-index', 'opacity', 'overflow', 'transform'
+                ];
+                
+                criticalProps.forEach(prop => {
+                  const value = computedStyle.getPropertyValue(prop);
+                  if (value && value !== 'initial' && value !== 'auto') {
+                    el.style.setProperty(prop, value, 'important');
+                  }
+                });
+                
+                // Special handling for images
+                if (el.tagName === 'IMG') {
+                  const img = el as HTMLImageElement;
+                  img.style.setProperty('object-fit', 'cover', 'important');
+                  img.style.setProperty('filter', 'grayscale(100%)', 'important');
+                  img.style.setProperty('width', '100%', 'important');
+                  img.style.setProperty('height', '100%', 'important');
+                }
+              }
+            });
+            
+            console.log('✅ Exact styling applied');
           }
         });
 
-        console.log(`🔧 Page ${i + 1} canvas created:`, canvas.width, 'x', canvas.height);
+        console.log(`📸 Canvas created: ${canvas.width}x${canvas.height}`);
 
         if (canvas.width === 0 || canvas.height === 0) {
-          console.warn(`🔧 Page ${i + 1} has zero dimensions, skipping`);
+          console.warn(`⚠️ Page ${i + 1} has zero dimensions`);
           continue;
         }
 
-        // Add new page if not the first
+        // Add page to PDF
         if (i > 0) {
           pdf.addPage();
         }
 
-        // Calculate dimensions to fit A4 perfectly while maintaining exact proportions
+        // Calculate perfect fit for A4
         const imgData = canvas.toDataURL('image/png', 1.0);
         const pdfWidth = 210; // A4 width in mm
         const pdfHeight = 297; // A4 height in mm
         
-        // Calculate scaling to fit page while maintaining aspect ratio
-        const canvasAspectRatio = canvas.width / canvas.height;
-        const pageAspectRatio = pdfWidth / pdfHeight;
+        // Scale to fit A4 while maintaining aspect ratio
+        const canvasRatio = canvas.width / canvas.height;
+        const pageRatio = pdfWidth / pdfHeight;
         
-        let finalWidth, finalHeight, x, y;
+        let width, height, x, y;
         
-        if (canvasAspectRatio > pageAspectRatio) {
-          // Canvas is wider than page ratio - fit to width
-          finalWidth = pdfWidth;
-          finalHeight = pdfWidth / canvasAspectRatio;
+        if (canvasRatio > pageRatio) {
+          width = pdfWidth;
+          height = pdfWidth / canvasRatio;
           x = 0;
-          y = (pdfHeight - finalHeight) / 2;
+          y = (pdfHeight - height) / 2;
         } else {
-          // Canvas is taller than page ratio - fit to height
-          finalHeight = pdfHeight;
-          finalWidth = pdfHeight * canvasAspectRatio;
-          x = (pdfWidth - finalWidth) / 2;
+          height = pdfHeight;
+          width = pdfHeight * canvasRatio;
+          x = (pdfWidth - width) / 2;
           y = 0;
         }
 
-        pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight, undefined, 'FAST');
-        console.log(`🔧 Page ${i + 1} added to PDF with exact proportions`);
+        pdf.addImage(imgData, 'PNG', x, y, width, height, undefined, 'FAST');
+        console.log(`✅ Page ${i + 1} added to PDF`);
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🔧 PDF generated with EXACT layout preservation');
+      console.log('🎉 PDF generated with EXACT layout!');
       
     } catch (error) {
-      console.error('🔧 PDF generation failed:', error);
+      console.error('❌ PDF generation failed:', error);
       alert('PDF download failed: ' + error.message);
     }
   };
@@ -404,14 +670,14 @@ function App() {
     }
 
     try {
-      console.log('🔧 Starting EXACT PNG generation...');
+      console.log('🎯 Starting EXACT PNG generation...');
       
-      // Force scroll to top
+      // Same preparation as PDF
       window.scrollTo(0, 0);
       content.scrollIntoView({ behavior: 'instant', block: 'start' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Pre-load all images with same logic as PDF
+      // Load all images
       const allImages = content.querySelectorAll('img');
       await Promise.all(Array.from(allImages).map(img => {
         return new Promise<void>((resolve) => {
@@ -420,7 +686,7 @@ function App() {
             return;
           }
           
-          const timeout = setTimeout(() => resolve(), 8000);
+          const timeout = setTimeout(() => resolve(), 10000);
           
           img.onload = () => {
             clearTimeout(timeout);
@@ -434,94 +700,57 @@ function App() {
         });
       }));
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
-      // Create canvas with EXACT same settings as PDF
+      // Use EXACT same canvas settings as PDF
       const canvas = await html2canvas(content, {
-        scale: 3,
+        scale: 4,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: null,
+        backgroundColor: '#ffffff',
         logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
         windowWidth: window.innerWidth,
         windowHeight: window.innerHeight,
         foreignObjectRendering: false,
-        imageTimeout: 10000,
+        imageTimeout: 15000,
         removeContainer: false,
         ignoreElements: (element) => {
           return element.classList?.contains('print:hidden') || false;
         },
         onclone: (clonedDoc, element) => {
-          // Use EXACT same cloning logic as PDF
-          const allElements = element.querySelectorAll('*');
-          const clonedElements = clonedDoc.querySelectorAll('*');
+          // Use EXACT same styling logic as PDF
+          const existingStyles = clonedDoc.querySelectorAll('style, link[rel="stylesheet"]');
+          existingStyles.forEach(style => style.remove());
           
-          allElements.forEach((originalEl, index) => {
-            const clonedEl = clonedElements[index] as HTMLElement;
-            if (clonedEl && originalEl instanceof HTMLElement) {
-              const computedStyle = window.getComputedStyle(originalEl);
-              
-              // Copy all computed styles
-              for (let i = 0; i < computedStyle.length; i++) {
-                const prop = computedStyle[i];
-                const value = computedStyle.getPropertyValue(prop);
-                if (value && value !== 'initial' && value !== 'inherit' && value !== 'auto') {
-                  clonedEl.style.setProperty(prop, value, 'important');
-                }
-              }
-              
-              // Apply same critical styles as PDF
-              if (originalEl.tagName === 'IMG') {
-                const img = originalEl as HTMLImageElement;
-                const clonedImg = clonedEl as HTMLImageElement;
-                clonedImg.src = img.src;
-                clonedImg.crossOrigin = 'anonymous';
-                clonedImg.style.setProperty('filter', 'grayscale(100%)', 'important');
-              }
-              
-              // Force same color schemes as PDF
-              if (originalEl.classList.contains('bg-red-700')) {
-                clonedEl.style.setProperty('background-color', '#b91c1c', 'important');
-              }
-              if (originalEl.classList.contains('bg-black')) {
-                clonedEl.style.setProperty('background-color', '#000000', 'important');
-              }
-              if (originalEl.classList.contains('text-white')) {
-                clonedEl.style.setProperty('color', '#ffffff', 'important');
-              }
-            }
-          });
-          
-          // Apply same additional CSS as PDF
-          const additionalCSS = clonedDoc.createElement('style');
-          additionalCSS.textContent = `
+          const masterStyle = clonedDoc.createElement('style');
+          masterStyle.textContent = `
             * { box-sizing: border-box !important; }
             .bg-red-700 { background-color: #b91c1c !important; }
             .bg-black { background-color: #000000 !important; }
             .bg-white { background-color: #ffffff !important; }
             .text-white { color: #ffffff !important; }
             .text-black { color: #000000 !important; }
+            .text-red-700 { color: #b91c1c !important; }
             img { object-fit: cover !important; filter: grayscale(100%) !important; }
-            .grayscale { filter: grayscale(100%) !important; }
             .min-h-screen { min-height: 100vh !important; height: 100vh !important; }
             .flex { display: flex !important; }
             .relative { position: relative !important; }
             .absolute { position: absolute !important; }
             .inset-0 { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; }
           `;
-          clonedDoc.head.appendChild(additionalCSS);
+          clonedDoc.head.appendChild(masterStyle);
         }
       });
 
-      console.log('🔧 PNG canvas:', canvas.width, 'x', canvas.height);
+      console.log(`📸 PNG canvas: ${canvas.width}x${canvas.height}`);
 
       if (canvas.width === 0 || canvas.height === 0) {
         throw new Error('Canvas has zero dimensions');
       }
 
-      // Download with maximum quality
+      // Download PNG
       const link = document.createElement('a');
       link.download = 'Cybersecurity-Newsletter.png';
       link.href = canvas.toDataURL('image/png', 1.0);
@@ -529,10 +758,10 @@ function App() {
       link.click();
       document.body.removeChild(link);
       
-      console.log('🔧 PNG generated with EXACT layout preservation');
+      console.log('🎉 PNG generated with EXACT layout!');
       
     } catch (error) {
-      console.error('🔧 PNG generation failed:', error);
+      console.error('❌ PNG generation failed:', error);
       alert('PNG download failed: ' + error.message);
     }
   };
