@@ -14,15 +14,9 @@ const NewsletterBestPractices: React.FC = () => {
       {/* Left side with red background */}
       <div className="w-5/12 bg-red-700 text-white p-8 flex flex-col">
         <div>
-          <h2 className="text-2xl font-bold mb-2">
+          <h2 className="text-2xl font-bold mb-8">
             BEST PRACTICES &<br />AWARENESS
           </h2>
-          <h3 className="text-xl mb-8">
-            ACTIONABLE<br />RECOMMENDATIONS
-          </h3>
-          <h4 className="uppercase text-sm font-medium mb-4">
-            STRENGTHENING SECURITY<br />WITH KNOWLEDGE AND ACTION
-          </h4>
         </div>
         
         <div className="space-y-4 my-8">
