@@ -8,6 +8,38 @@ import { jsPDF } from 'jspdf';
 function App() {
   const printRef = useRef<HTMLDivElement>(null);
 
+  // Function to convert image to grayscale canvas
+  const convertImageToGrayscale = (img: HTMLImageElement): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      
+      if (ctx) {
+        // Draw the original image
+        ctx.drawImage(img, 0, 0);
+        
+        // Get image data and convert to grayscale
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+          const gray = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+          data[i] = gray;     // Red
+          data[i + 1] = gray; // Green
+          data[i + 2] = gray; // Blue
+          // Alpha channel (data[i + 3]) remains unchanged
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+      }
+      
+      resolve(canvas.toDataURL('image/png'));
+    });
+  };
+
   const downloadAsPDF = async () => {
     const content = printRef.current;
     if (!content) {
@@ -16,18 +48,53 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PDF with exact preview styling...');
+      console.log('📄 Generating PDF with FORCED grayscale images...');
       
-      // Simple preparation - just ensure visibility
+      // Prepare the content
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Use minimal canvas options to preserve existing styling
+      // Pre-process all images to grayscale BEFORE canvas capture
+      const allImages = content.querySelectorAll('img');
+      console.log(`🖼️ Converting ${allImages.length} images to grayscale...`);
+      
+      const imagePromises = Array.from(allImages).map(async (img) => {
+        if (img instanceof HTMLImageElement) {
+          try {
+            // Wait for image to load if not already loaded
+            if (!img.complete) {
+              await new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve;
+              });
+            }
+            
+            // Convert to grayscale
+            const grayscaleDataUrl = await convertImageToGrayscale(img);
+            
+            // Store original src and replace with grayscale version
+            img.dataset.originalSrc = img.src;
+            img.src = grayscaleDataUrl;
+            
+            console.log('✅ Image converted to grayscale');
+          } catch (error) {
+            console.warn('⚠️ Failed to convert image:', error);
+          }
+        }
+      });
+      
+      // Wait for all images to be converted
+      await Promise.all(imagePromises);
+      
+      // Additional wait to ensure DOM updates
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Now capture with html2canvas
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: '#ffffff', // White background instead of null
+        backgroundColor: '#ffffff',
         logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
@@ -35,68 +102,21 @@ function App() {
         windowHeight: window.innerHeight,
         scrollX: 0,
         scrollY: 0,
-        foreignObjectRendering: false, // Use standard rendering
-        imageTimeout: 10000,
+        foreignObjectRendering: false,
+        imageTimeout: 15000,
         removeContainer: false,
-        ignoreElements: () => false,
-        // Enhanced onclone to ensure proper grayscale
-        onclone: (clonedDoc, element) => {
-          console.log('🎨 Applying grayscale to images...');
-          
-          // Add comprehensive grayscale styles
-          const grayscaleStyle = clonedDoc.createElement('style');
-          grayscaleStyle.textContent = `
-            /* Force grayscale on ALL images with maximum specificity */
-            img, 
-            .newsletter-cover img,
-            .newsletter-threats img,
-            .newsletter-best-practices img {
-              filter: grayscale(100%) brightness(1) contrast(1) !important;
-              -webkit-filter: grayscale(100%) brightness(1) contrast(1) !important;
-            }
-            
-            /* Ensure opacity is preserved */
-            .opacity-60 {
-              opacity: 0.6 !important;
-            }
-            
-            /* Ensure all existing classes work */
-            .grayscale {
-              filter: grayscale(100%) !important;
-              -webkit-filter: grayscale(100%) !important;
-            }
-          `;
-          
-          clonedDoc.head.appendChild(grayscaleStyle);
-          
-          // Force grayscale on every single image element
-          const allImages = element.querySelectorAll('img');
-          console.log(`🖼️ Found ${allImages.length} images to convert to grayscale`);
-          
-          allImages.forEach((img, index) => {
-            if (img instanceof HTMLElement) {
-              console.log(`Converting image ${index + 1} to grayscale`);
-              
-              // Apply multiple methods to ensure grayscale
-              img.style.setProperty('filter', 'grayscale(100%) brightness(1) contrast(1)', 'important');
-              img.style.setProperty('-webkit-filter', 'grayscale(100%) brightness(1) contrast(1)', 'important');
-              
-              // Add grayscale class
-              img.classList.add('grayscale');
-              
-              // Set inline style as backup
-              img.setAttribute('style', 
-                (img.getAttribute('style') || '') + 
-                '; filter: grayscale(100%) brightness(1) contrast(1) !important; -webkit-filter: grayscale(100%) brightness(1) contrast(1) !important;'
-              );
-            }
-          });
-          
-          console.log('✅ Grayscale applied to all images');
-        }
+        ignoreElements: () => false
       });
 
       console.log(`📸 Canvas created: ${canvas.width}x${canvas.height}`);
+
+      // Restore original images after capture
+      allImages.forEach((img) => {
+        if (img instanceof HTMLImageElement && img.dataset.originalSrc) {
+          img.src = img.dataset.originalSrc;
+          delete img.dataset.originalSrc;
+        }
+      });
 
       if (canvas.width === 0 || canvas.height === 0) {
         throw new Error('Canvas has zero dimensions');
@@ -128,7 +148,7 @@ function App() {
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🎉 PDF generated successfully with grayscale images!');
+      console.log('🎉 PDF generated successfully with FORCED grayscale images!');
       
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -144,13 +164,48 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with exact preview styling...');
+      console.log('🖼️ Generating PNG with FORCED grayscale images...');
       
-      // Simple preparation
+      // Prepare the content
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Use same enhanced approach as PDF
+      // Pre-process all images to grayscale BEFORE canvas capture
+      const allImages = content.querySelectorAll('img');
+      console.log(`🖼️ Converting ${allImages.length} images to grayscale...`);
+      
+      const imagePromises = Array.from(allImages).map(async (img) => {
+        if (img instanceof HTMLImageElement) {
+          try {
+            // Wait for image to load if not already loaded
+            if (!img.complete) {
+              await new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve;
+              });
+            }
+            
+            // Convert to grayscale
+            const grayscaleDataUrl = await convertImageToGrayscale(img);
+            
+            // Store original src and replace with grayscale version
+            img.dataset.originalSrc = img.src;
+            img.src = grayscaleDataUrl;
+            
+            console.log('✅ Image converted to grayscale');
+          } catch (error) {
+            console.warn('⚠️ Failed to convert image:', error);
+          }
+        }
+      });
+      
+      // Wait for all images to be converted
+      await Promise.all(imagePromises);
+      
+      // Additional wait to ensure DOM updates
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Now capture with html2canvas
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
@@ -164,57 +219,20 @@ function App() {
         scrollX: 0,
         scrollY: 0,
         foreignObjectRendering: false,
-        imageTimeout: 10000,
+        imageTimeout: 15000,
         removeContainer: false,
-        ignoreElements: () => false,
-        onclone: (clonedDoc, element) => {
-          console.log('🎨 Applying grayscale to images...');
-          
-          // Same comprehensive grayscale approach as PDF
-          const grayscaleStyle = clonedDoc.createElement('style');
-          grayscaleStyle.textContent = `
-            img, 
-            .newsletter-cover img,
-            .newsletter-threats img,
-            .newsletter-best-practices img {
-              filter: grayscale(100%) brightness(1) contrast(1) !important;
-              -webkit-filter: grayscale(100%) brightness(1) contrast(1) !important;
-            }
-            
-            .opacity-60 {
-              opacity: 0.6 !important;
-            }
-            
-            .grayscale {
-              filter: grayscale(100%) !important;
-              -webkit-filter: grayscale(100%) !important;
-            }
-          `;
-          clonedDoc.head.appendChild(grayscaleStyle);
-          
-          const allImages = element.querySelectorAll('img');
-          console.log(`🖼️ Found ${allImages.length} images to convert to grayscale`);
-          
-          allImages.forEach((img, index) => {
-            if (img instanceof HTMLElement) {
-              console.log(`Converting image ${index + 1} to grayscale`);
-              
-              img.style.setProperty('filter', 'grayscale(100%) brightness(1) contrast(1)', 'important');
-              img.style.setProperty('-webkit-filter', 'grayscale(100%) brightness(1) contrast(1)', 'important');
-              img.classList.add('grayscale');
-              
-              img.setAttribute('style', 
-                (img.getAttribute('style') || '') + 
-                '; filter: grayscale(100%) brightness(1) contrast(1) !important; -webkit-filter: grayscale(100%) brightness(1) contrast(1) !important;'
-              );
-            }
-          });
-          
-          console.log('✅ Grayscale applied to all images');
-        }
+        ignoreElements: () => false
       });
 
       console.log(`📸 PNG canvas: ${canvas.width}x${canvas.height}`);
+
+      // Restore original images after capture
+      allImages.forEach((img) => {
+        if (img instanceof HTMLImageElement && img.dataset.originalSrc) {
+          img.src = img.dataset.originalSrc;
+          delete img.dataset.originalSrc;
+        }
+      });
 
       if (canvas.width === 0 || canvas.height === 0) {
         throw new Error('Canvas has zero dimensions');
@@ -227,7 +245,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
       
-      console.log('🎉 PNG generated successfully with grayscale images!');
+      console.log('🎉 PNG generated successfully with FORCED grayscale images!');
       
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
