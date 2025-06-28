@@ -38,8 +38,9 @@ const NewsletterThreats: React.FC = () => {
 
   const handleThreatClick = (threat: any, event: React.MouseEvent) => {
     event.preventDefault();
+    event.stopPropagation();
     
-    console.log('🔗 Threat clicked:', {
+    console.log('🔗 Threat title clicked:', {
       title: threat.title,
       link: threat.link,
       source: threat.source
@@ -58,7 +59,7 @@ const NewsletterThreats: React.FC = () => {
         // Validate URL
         new URL(url);
         
-        console.log('✅ Opening valid URL:', url);
+        console.log('✅ Opening source article:', url);
         window.open(url, '_blank', 'noopener,noreferrer');
       } catch (error) {
         console.error('❌ Invalid URL format:', url, error);
@@ -115,7 +116,7 @@ const NewsletterThreats: React.FC = () => {
                     onClick={(e) => handleThreatClick(threat, e)}
                     className={`text-black transition-all duration-200 ${
                       threat.link && threat.link.trim() !== ''
-                        ? 'cursor-pointer hover:text-red-600 hover:underline hover:scale-105 transform' 
+                        ? 'cursor-pointer hover:text-red-600 hover:underline hover:scale-[1.02] transform' 
                         : 'cursor-default'
                     }`}
                     title={
@@ -123,9 +124,6 @@ const NewsletterThreats: React.FC = () => {
                         ? `Click to read full article: ${threat.link}` 
                         : 'No source link available'
                     }
-                    style={{
-                      textDecoration: threat.link && threat.link.trim() !== '' ? 'none' : 'initial'
-                    }}
                   >
                     {index + 1}. {threat.title}
                   </span>
@@ -146,18 +144,10 @@ const NewsletterThreats: React.FC = () => {
                   <span className="text-gray-600 font-medium">
                     {formatDate(threat.formattedDate, threat.pubDate)}
                   </span>
+                  {threat.link && threat.link.trim() !== '' && (
+                    <span className="text-green-600 font-medium">🔗 Click title to read more</span>
+                  )}
                 </div>
-                {threat.link && threat.link.trim() !== '' && (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-green-600 font-medium">🔗 Source Available</span>
-                    <button
-                      onClick={(e) => handleThreatClick(threat, e)}
-                      className="text-blue-600 hover:text-blue-800 underline text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition-colors"
-                    >
-                      Read Full Article
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           ))}
@@ -186,7 +176,7 @@ const NewsletterThreats: React.FC = () => {
             </div>
           </div>
           <div className="mt-3 text-xs text-gray-500">
-            <span className="font-medium">Links Available:</span> {threats.filter(t => t.link && t.link.trim() !== '').length} of {threats.length} incidents
+            <span className="font-medium">Clickable Links:</span> {threats.filter(t => t.link && t.link.trim() !== '').length} of {threats.length} incidents
           </div>
         </div>
       </div>
