@@ -16,9 +16,11 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PDF...');
+      console.log('📄 Generating PDF with exact preview styling...');
       
-      // Simple, direct canvas capture
+      // Wait for images to load and apply styles
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
@@ -27,7 +29,49 @@ function App() {
         width: content.scrollWidth,
         height: content.scrollHeight,
         scrollX: 0,
-        scrollY: 0
+        scrollY: 0,
+        onclone: (clonedDoc, element) => {
+          // Force grayscale on ALL images in the cloned document
+          const allImages = clonedDoc.querySelectorAll('img');
+          allImages.forEach(img => {
+            img.style.filter = 'grayscale(100%) !important';
+            img.style.setProperty('filter', 'grayscale(100%)', 'important');
+          });
+          
+          // Ensure all elements with grayscale class are properly styled
+          const grayscaleElements = clonedDoc.querySelectorAll('.grayscale');
+          grayscaleElements.forEach(el => {
+            if (el instanceof HTMLElement) {
+              el.style.filter = 'grayscale(100%) !important';
+              el.style.setProperty('filter', 'grayscale(100%)', 'important');
+            }
+          });
+          
+          // Force background colors to match exactly
+          const redBgElements = clonedDoc.querySelectorAll('.bg-red-700');
+          redBgElements.forEach(el => {
+            if (el instanceof HTMLElement) {
+              el.style.backgroundColor = '#b91c1c !important';
+              el.style.setProperty('background-color', '#b91c1c', 'important');
+            }
+          });
+          
+          const blackBgElements = clonedDoc.querySelectorAll('.bg-black');
+          blackBgElements.forEach(el => {
+            if (el instanceof HTMLElement) {
+              el.style.backgroundColor = '#000000 !important';
+              el.style.setProperty('background-color', '#000000', 'important');
+            }
+          });
+          
+          const whiteBgElements = clonedDoc.querySelectorAll('.bg-white');
+          whiteBgElements.forEach(el => {
+            if (el instanceof HTMLElement) {
+              el.style.backgroundColor = '#ffffff !important';
+              el.style.setProperty('background-color', '#ffffff', 'important');
+            }
+          });
+        }
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -56,7 +100,7 @@ function App() {
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('✅ PDF downloaded');
+      console.log('✅ PDF downloaded with exact grayscale styling');
       
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -72,9 +116,11 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG...');
+      console.log('🖼️ Generating PNG with exact preview styling...');
       
-      // Simple, direct canvas capture
+      // Wait for images to load and apply styles
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
@@ -83,7 +129,49 @@ function App() {
         width: content.scrollWidth,
         height: content.scrollHeight,
         scrollX: 0,
-        scrollY: 0
+        scrollY: 0,
+        onclone: (clonedDoc, element) => {
+          // Force grayscale on ALL images in the cloned document
+          const allImages = clonedDoc.querySelectorAll('img');
+          allImages.forEach(img => {
+            img.style.filter = 'grayscale(100%) !important';
+            img.style.setProperty('filter', 'grayscale(100%)', 'important');
+          });
+          
+          // Ensure all elements with grayscale class are properly styled
+          const grayscaleElements = clonedDoc.querySelectorAll('.grayscale');
+          grayscaleElements.forEach(el => {
+            if (el instanceof HTMLElement) {
+              el.style.filter = 'grayscale(100%) !important';
+              el.style.setProperty('filter', 'grayscale(100%)', 'important');
+            }
+          });
+          
+          // Force background colors to match exactly
+          const redBgElements = clonedDoc.querySelectorAll('.bg-red-700');
+          redBgElements.forEach(el => {
+            if (el instanceof HTMLElement) {
+              el.style.backgroundColor = '#b91c1c !important';
+              el.style.setProperty('background-color', '#b91c1c', 'important');
+            }
+          });
+          
+          const blackBgElements = clonedDoc.querySelectorAll('.bg-black');
+          blackBgElements.forEach(el => {
+            if (el instanceof HTMLElement) {
+              el.style.backgroundColor = '#000000 !important';
+              el.style.setProperty('background-color', '#000000', 'important');
+            }
+          });
+          
+          const whiteBgElements = clonedDoc.querySelectorAll('.bg-white');
+          whiteBgElements.forEach(el => {
+            if (el instanceof HTMLElement) {
+              el.style.backgroundColor = '#ffffff !important';
+              el.style.setProperty('background-color', '#ffffff', 'important');
+            }
+          });
+        }
       });
 
       const link = document.createElement('a');
@@ -93,7 +181,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
       
-      console.log('✅ PNG downloaded');
+      console.log('✅ PNG downloaded with exact grayscale styling');
       
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
