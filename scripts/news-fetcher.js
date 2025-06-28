@@ -29,6 +29,30 @@ const RSS_FEEDS = [
   'https://www.welivesecurity.com/feed/'
 ];
 
+// Mapping of RSS feed URLs to their main website URLs for reliable linking
+const FEED_TO_WEBSITE_MAP = {
+  'https://feeds.feedburner.com/TheHackersNews': 'https://thehackernews.com',
+  'https://krebsonsecurity.com/feed/': 'https://krebsonsecurity.com',
+  'https://www.bleepingcomputer.com/feed/': 'https://www.bleepingcomputer.com',
+  'https://threatpost.com/feed/': 'https://threatpost.com',
+  'https://www.darkreading.com/rss.xml': 'https://www.darkreading.com',
+  'https://www.securityweek.com/feed': 'https://www.securityweek.com',
+  'https://www.infosecurity-magazine.com/rss/news/': 'https://www.infosecurity-magazine.com',
+  'https://www.csoonline.com/index.rss': 'https://www.csoonline.com',
+  'https://www.scmagazine.com/feed': 'https://www.scmagazine.com',
+  'https://cybersecuritynews.com/feed/': 'https://cybersecuritynews.com',
+  'https://www.cyberscoop.com/feed/': 'https://www.cyberscoop.com',
+  'https://www.zdnet.com/topic/security/rss.xml': 'https://www.zdnet.com/topic/security/',
+  'https://www.securitymagazine.com/rss/topic/2236-cyber-security': 'https://www.securitymagazine.com',
+  'https://www.helpnetsecurity.com/feed/': 'https://www.helpnetsecurity.com',
+  'https://www.recordedfuture.com/feed': 'https://www.recordedfuture.com',
+  'https://www.bankinfosecurity.com/rss.php': 'https://www.bankinfosecurity.com',
+  'https://www.govinfosecurity.com/rss.php': 'https://www.govinfosecurity.com',
+  'https://feeds.feedburner.com/eset/blog': 'https://www.welivesecurity.com',
+  'https://blog.malwarebytes.com/feed/': 'https://blog.malwarebytes.com',
+  'https://www.welivesecurity.com/feed/': 'https://www.welivesecurity.com'
+};
+
 const CACHE_FILE = 'src/data/news-cache.json';
 const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
@@ -123,6 +147,34 @@ function formatArticleDate(pubDate) {
   }
 }
 
+// Get reliable website URL for a feed
+function getReliableWebsiteUrl(feedUrl, originalLink) {
+  // First try to use the mapped website URL
+  const mappedUrl = FEED_TO_WEBSITE_MAP[feedUrl];
+  if (mappedUrl) {
+    return mappedUrl;
+  }
+  
+  // If original link exists and looks valid, try to extract domain
+  if (originalLink && originalLink.startsWith('http')) {
+    try {
+      const url = new URL(originalLink);
+      return `${url.protocol}//${url.hostname}`;
+    } catch (error) {
+      console.warn('⚠️ Could not parse original link:', originalLink);
+    }
+  }
+  
+  // Fallback to extracting domain from feed URL
+  try {
+    const url = new URL(feedUrl);
+    return `${url.protocol}//${url.hostname}`;
+  } catch (error) {
+    console.warn('⚠️ Could not parse feed URL:', feedUrl);
+    return 'https://www.cisa.gov/news-events/alerts'; // Ultimate fallback
+  }
+}
+
 export async function fetchCyberSecurityNews() {
   console.log('🔍 Fetching STRICTLY latest cybersecurity news from past 7 days...');
   console.log(`📅 Current time: ${new Date().toISOString()}`);
@@ -155,12 +207,14 @@ export async function fetchCyberSecurityNews() {
         .map(item => ({
           title: item.title?.trim() || 'Untitled',
           description: (item.contentSnippet || item.description || '').trim(),
-          link: item.link,
+          link: getReliableWebsiteUrl(feedUrl, item.link), // Use reliable website URL
           pubDate: item.pubDate,
           formattedDate: formatArticleDate(item.pubDate),
           source: feed.title || feedUrl.replace(/https?:\/\//, '').split('/')[0],
           content: item.content || item.description || '',
-          fetchedAt: Date.now()
+          fetchedAt: Date.now(),
+          originalLink: item.link, // Keep original for reference
+          feedUrl: feedUrl
         }));
       
       newArticles.push(...recentArticles);
@@ -192,6 +246,7 @@ export async function fetchCyberSecurityNews() {
   saveCache(cache);
   
   console.log(`✅ Final count: ${recentUniqueArticles.length} unique recent articles`);
+  console.log(`🔗 All articles now link to reliable source websites`);
   
   // Return the most recent articles for processing
   return recentUniqueArticles.slice(0, 30);

@@ -90,7 +90,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       source: 'Microsoft Security Response Center',
       formattedDate: 'Today',
       pubDate: new Date().toISOString(),
-      link: 'https://msrc.microsoft.com/update-guide/en-US/vulnerability/CVE-2024-21410'
+      link: 'https://msrc.microsoft.com/update-guide/en-US/security-updates'
     },
     {
       id: '2',
@@ -181,7 +181,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     } catch (error) {
       console.error('❌ Error updating content:', error);
       
-      // Fallback: Generate some realistic current threats with REAL working links
+      // Fallback: Generate some realistic current threats with RELIABLE working links
       const now = new Date();
       const fallbackThreats = [
         {
@@ -192,7 +192,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           source: 'Microsoft Security Response Center',
           formattedDate: 'Today',
           pubDate: now.toISOString(),
-          link: 'https://msrc.microsoft.com/update-guide/en-US/vulnerability/CVE-2024-21410'
+          link: 'https://msrc.microsoft.com/update-guide/en-US/security-updates'
         },
         {
           id: '2',
