@@ -43,32 +43,45 @@ const NewsletterThreats: React.FC = () => {
     console.log('🔗 Threat title clicked:', {
       title: threat.title,
       link: threat.link,
+      linkType: threat.linkType,
       source: threat.source
     });
     
     if (threat.link && threat.link.trim() !== '') {
-      // Validate URL format
-      let url = threat.link.trim();
-      
-      // Add protocol if missing
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-      }
-      
       try {
-        // Validate URL
-        new URL(url);
+        // Validate URL format
+        new URL(threat.link);
         
-        console.log('✅ Opening source article:', url);
-        window.open(url, '_blank', 'noopener,noreferrer');
+        console.log(`✅ Opening ${threat.linkType === 'fallback' ? 'search results for' : 'article'}: ${threat.link}`);
+        
+        // Show user what type of link they're opening
+        if (threat.linkType === 'fallback') {
+          console.log('🔄 Note: Opening search results as original article link was not accessible');
+        }
+        
+        window.open(threat.link, '_blank', 'noopener,noreferrer');
       } catch (error) {
-        console.error('❌ Invalid URL format:', url, error);
-        alert(`Invalid URL format: ${url}`);
+        console.error('❌ Invalid URL format:', threat.link, error);
+        alert(`Invalid URL format: ${threat.link}`);
       }
     } else {
       console.warn('⚠️ No valid link available for this threat');
       alert('No source link available for this incident');
     }
+  };
+
+  const getLinkTypeIcon = (linkType?: string) => {
+    if (linkType === 'fallback') {
+      return '🔍'; // Search icon for fallback links
+    }
+    return '🔗'; // Direct link icon
+  };
+
+  const getLinkTypeTooltip = (linkType?: string, source?: string) => {
+    if (linkType === 'fallback') {
+      return `Click to search for this article on ${source || 'the web'}`;
+    }
+    return 'Click to read the full article';
   };
 
   return (
@@ -119,13 +132,9 @@ const NewsletterThreats: React.FC = () => {
                         ? 'cursor-pointer hover:text-red-600 hover:underline hover:scale-[1.02] transform' 
                         : 'cursor-default'
                     }`}
-                    title={
-                      threat.link && threat.link.trim() !== ''
-                        ? `Click to read full article: ${threat.link}` 
-                        : 'No source link available'
-                    }
+                    title={getLinkTypeTooltip(threat.linkType, threat.source)}
                   >
-                    {index + 1}. {threat.title}
+                    {getLinkTypeIcon(threat.linkType)} {index + 1}. {threat.title}
                   </span>
                   {getSeverityBadge(threat.severity)}
                 </h3>
@@ -144,6 +153,11 @@ const NewsletterThreats: React.FC = () => {
                   <span className="text-gray-600 font-medium">
                     {formatDate(threat.formattedDate, threat.pubDate)}
                   </span>
+                  {threat.linkType === 'fallback' && (
+                    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                      Search Link
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -173,7 +187,17 @@ const NewsletterThreats: React.FC = () => {
             </div>
           </div>
           <div className="mt-3 text-xs text-gray-500">
-            <span className="font-medium">Clickable Links:</span> {threats.filter(t => t.link && t.link.trim() !== '').length} of {threats.length} incidents
+            <div className="flex items-center justify-between">
+              <span>
+                <span className="font-medium">Direct Links:</span> {threats.filter(t => t.linkType === 'direct').length} of {threats.length}
+              </span>
+              <span>
+                <span className="font-medium">Search Links:</span> {threats.filter(t => t.linkType === 'fallback').length} of {threats.length}
+              </span>
+            </div>
+            <div className="mt-1 text-xs text-gray-400">
+              🔗 = Direct article link | 🔍 = Search results (original link unavailable)
+            </div>
           </div>
         </div>
       </div>

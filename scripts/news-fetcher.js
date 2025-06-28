@@ -123,8 +123,8 @@ function formatArticleDate(pubDate) {
   }
 }
 
-// Validate and clean article URL
-async function validateAndCleanUrl(url, feedUrl) {
+// Advanced URL validation with real-time checking
+async function validateAndTestUrl(url, feedUrl, timeout = 5000) {
   if (!url || typeof url !== 'string') {
     console.warn('⚠️ Invalid URL provided:', url);
     return null;
@@ -156,7 +156,7 @@ async function validateAndCleanUrl(url, feedUrl) {
     const cleanParams = new URLSearchParams();
     for (const [key, value] of urlObj.searchParams) {
       // Keep essential parameters, remove tracking ones
-      if (!key.match(/^(utm_|fbclid|gclid|_ga|ref|source|medium|campaign)/i)) {
+      if (!key.match(/^(utm_|fbclid|gclid|_ga|ref|source|medium|campaign|mc_)/i)) {
         cleanParams.set(key, value);
       }
     }
@@ -164,12 +164,63 @@ async function validateAndCleanUrl(url, feedUrl) {
     urlObj.search = cleanParams.toString();
     const finalUrl = urlObj.toString();
     
-    console.log(`✅ Validated URL: ${finalUrl}`);
-    return finalUrl;
+    // Test if URL is actually accessible
+    try {
+      console.log(`🔍 Testing URL accessibility: ${finalUrl}`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+      
+      const response = await fetch(finalUrl, {
+        method: 'HEAD',
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; NewsBot/1.0)'
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok || response.status === 405) { // 405 = Method Not Allowed (HEAD not supported)
+        console.log(`✅ URL accessible: ${finalUrl} (Status: ${response.status})`);
+        return finalUrl;
+      } else {
+        console.warn(`⚠️ URL returned error status ${response.status}: ${finalUrl}`);
+        return null;
+      }
+      
+    } catch (fetchError) {
+      console.warn(`⚠️ URL not accessible: ${finalUrl} - ${fetchError.message}`);
+      return null;
+    }
     
   } catch (error) {
     console.warn('⚠️ Invalid URL format:', cleanUrl, error.message);
     return null;
+  }
+}
+
+// Generate fallback search URL for topics
+function generateFallbackSearchUrl(title, source) {
+  const searchQuery = encodeURIComponent(title.substring(0, 100));
+  const sourceQuery = encodeURIComponent(source || '');
+  
+  // Try to create a search URL based on the source
+  if (source && source.toLowerCase().includes('bleeping')) {
+    return `https://www.bleepingcomputer.com/search/?q=${searchQuery}`;
+  } else if (source && source.toLowerCase().includes('krebs')) {
+    return `https://krebsonsecurity.com/?s=${searchQuery}`;
+  } else if (source && source.toLowerCase().includes('dark reading')) {
+    return `https://www.darkreading.com/search?query=${searchQuery}`;
+  } else if (source && source.toLowerCase().includes('security week')) {
+    return `https://www.securityweek.com/search/?q=${searchQuery}`;
+  } else if (source && source.toLowerCase().includes('cisa')) {
+    return `https://www.cisa.gov/news-events/cybersecurity-advisories`;
+  } else if (source && source.toLowerCase().includes('microsoft')) {
+    return `https://msrc.microsoft.com/update-guide/en-US/security-updates`;
+  } else {
+    // Generic cybersecurity search
+    return `https://www.google.com/search?q=${searchQuery}+cybersecurity+vulnerability`;
   }
 }
 
@@ -188,6 +239,7 @@ export async function fetchCyberSecurityNews() {
   let totalFetched = 0;
   let validArticles = 0;
   let validLinks = 0;
+  let fallbackLinks = 0;
   
   for (const feedUrl of RSS_FEEDS) {
     try {
@@ -196,42 +248,60 @@ export async function fetchCyberSecurityNews() {
       
       const recentArticles = [];
       
-      for (const item of feed.items.slice(0, 10)) { // Check more items per feed
+      for (const item of feed.items.slice(0, 12)) { // Check more items per feed
         const isRecent = isStrictlyRecentArticle(item.pubDate);
         if (isRecent) {
           console.log(`✅ Valid article: ${item.title} - ${formatArticleDate(item.pubDate)}`);
           
-          // Validate and clean the article URL
-          const validatedLink = await validateAndCleanUrl(item.link, feedUrl);
+          // Test multiple potential URLs for the article
+          let validatedLink = null;
+          const potentialUrls = [
+            item.link,
+            item.guid,
+            item.url,
+            item.permalink
+          ].filter(Boolean);
           
-          if (validatedLink) {
-            validLinks++;
-            console.log(`🔗 Valid link: ${validatedLink}`);
-          } else {
-            console.warn(`⚠️ Invalid link for article: ${item.title}`);
+          // Try each potential URL
+          for (const testUrl of potentialUrls) {
+            validatedLink = await validateAndTestUrl(testUrl, feedUrl);
+            if (validatedLink) {
+              validLinks++;
+              console.log(`🔗 Valid link found: ${validatedLink}`);
+              break;
+            }
+          }
+          
+          // If no valid link found, create a fallback search URL
+          if (!validatedLink) {
+            validatedLink = generateFallbackSearchUrl(item.title, feed.title);
+            fallbackLinks++;
+            console.log(`🔄 Using fallback search URL: ${validatedLink}`);
           }
           
           recentArticles.push({
             title: item.title?.trim() || 'Untitled',
             description: (item.contentSnippet || item.description || '').trim(),
-            link: validatedLink, // Use validated exact article link
+            link: validatedLink, // Always has a working link (validated or fallback)
             pubDate: item.pubDate,
             formattedDate: formatArticleDate(item.pubDate),
             source: feed.title || feedUrl.replace(/https?:\/\//, '').split('/')[0],
             content: item.content || item.description || '',
             fetchedAt: Date.now(),
             originalLink: item.link, // Keep original for debugging
-            feedUrl: feedUrl
+            feedUrl: feedUrl,
+            linkType: validatedLink === item.link ? 'direct' : 'fallback'
           });
+          
+          validArticles++;
         }
       }
       
       newArticles.push(...recentArticles);
       totalFetched += feed.items.length;
-      validArticles += recentArticles.length;
       
-      // Add delay to be respectful to servers
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Add delay to be respectful to servers and avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
     } catch (error) {
       console.warn(`⚠️ Failed to fetch from ${feedUrl}:`, error.message);
@@ -239,7 +309,8 @@ export async function fetchCyberSecurityNews() {
   }
   
   console.log(`📊 Scanned ${totalFetched} total articles, found ${validArticles} valid recent articles`);
-  console.log(`🔗 Validated ${validLinks} article links`);
+  console.log(`🔗 Direct links validated: ${validLinks}`);
+  console.log(`🔄 Fallback search links created: ${fallbackLinks}`);
   
   // Combine with cached articles and remove duplicates
   const allArticles = [...cache.articles, ...newArticles];
@@ -256,7 +327,7 @@ export async function fetchCyberSecurityNews() {
   saveCache(cache);
   
   console.log(`✅ Final count: ${recentUniqueArticles.length} unique recent articles`);
-  console.log(`🔗 Articles with valid links: ${recentUniqueArticles.filter(a => a.link).length}`);
+  console.log(`🔗 All articles have working links (${recentUniqueArticles.filter(a => a.linkType === 'direct').length} direct, ${recentUniqueArticles.filter(a => a.linkType === 'fallback').length} fallback)`);
   
   // Return the most recent articles for processing
   return recentUniqueArticles.slice(0, 30);

@@ -8,7 +8,8 @@
       "source": "Microsoft Security Response Center",
       "formattedDate": "Today",
       "pubDate": "2025-01-11T15:30:00.000Z",
-      "link": "https://msrc.microsoft.com/update-guide/en-US/security-updates"
+      "link": "https://msrc.microsoft.com/update-guide/en-US/security-updates",
+      "linkType": "direct"
     },
     {
       "id": "2", 
@@ -18,7 +19,8 @@
       "source": "CISA Security Advisory",
       "formattedDate": "Yesterday",
       "pubDate": "2025-01-10T12:15:00.000Z",
-      "link": "https://www.cisa.gov/news-events/cybersecurity-advisories"
+      "link": "https://www.cisa.gov/news-events/cybersecurity-advisories",
+      "linkType": "direct"
     },
     {
       "id": "3",
@@ -28,7 +30,8 @@
       "source": "GitHub Security Advisory",
       "formattedDate": "2 days ago",
       "pubDate": "2025-01-09T09:45:00.000Z",
-      "link": "https://github.com/advisories"
+      "link": "https://github.com/advisories",
+      "linkType": "direct"
     },
     {
       "id": "4",
@@ -38,7 +41,8 @@
       "source": "Cybersecurity and Infrastructure Security Agency",
       "formattedDate": "3 days ago",
       "pubDate": "2025-01-08T14:20:00.000Z",
-      "link": "https://www.cisa.gov/news-events/alerts"
+      "link": "https://www.cisa.gov/news-events/alerts",
+      "linkType": "direct"
     }
   ],
   "bestPractices": [
