@@ -16,7 +16,7 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PDF with grayscale images and fixed text...');
+      console.log('📄 Generating PDF with FORCED grayscale images...');
 
       // Prepare for capture
       window.scrollTo(0, 0);
@@ -36,13 +36,13 @@ function App() {
         scrollX: 0,
         scrollY: 0,
         foreignObjectRendering: false,
-        imageTimeout: 10000,
+        imageTimeout: 15000,
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          console.log('🎨 Applying grayscale to all images and fixing text rendering...');
+          console.log('🎨 FORCING grayscale on all images with multiple methods...');
           
-          // COMPREHENSIVE STYLE INJECTION
+          // COMPREHENSIVE STYLE INJECTION WITH AGGRESSIVE GRAYSCALE
           const comprehensiveStyle = clonedDoc.createElement('style');
           comprehensiveStyle.textContent = `
             /* FORCE LIGHT THEME */
@@ -91,11 +91,26 @@ function App() {
               color: #6b7280 !important;
             }
             
-            /* FORCE GRAYSCALE ON ALL IMAGES */
-            img {
+            /* AGGRESSIVE GRAYSCALE ON ALL IMAGES - MULTIPLE METHODS */
+            img, 
+            img[src],
+            .newsletter img,
+            .newsletter-page img,
+            div img,
+            * img {
+              filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -webkit-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -moz-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -ms-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -o-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              opacity: 1 !important;
+              mix-blend-mode: luminosity !important;
+            }
+            
+            /* FORCE GRAYSCALE ON BACKGROUND IMAGES TOO */
+            [style*="background-image"] {
               filter: grayscale(100%) !important;
               -webkit-filter: grayscale(100%) !important;
-              opacity: 1 !important;
             }
             
             /* LAYOUT */
@@ -223,23 +238,60 @@ function App() {
           
           clonedDoc.head.appendChild(comprehensiveStyle);
           
-          // FORCE GRAYSCALE ON ALL IMAGES DIRECTLY
+          // ULTRA-AGGRESSIVE GRAYSCALE APPLICATION ON ALL IMAGES
           const allImages = element.querySelectorAll('img');
-          allImages.forEach((img) => {
+          console.log(`Found ${allImages.length} images to convert to grayscale`);
+          
+          allImages.forEach((img, index) => {
             if (img instanceof HTMLElement) {
-              // Apply multiple grayscale methods to ensure it works
-              img.style.setProperty('filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-webkit-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-moz-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-ms-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-o-filter', 'grayscale(100%)', 'important');
+              console.log(`Processing image ${index + 1}: ${img.src}`);
               
-              // Also try setting the attribute
-              img.setAttribute('style', (img.getAttribute('style') || '') + '; filter: grayscale(100%) !important;');
+              // Method 1: Multiple filter properties
+              img.style.setProperty('filter', 'grayscale(100%) contrast(1.2) brightness(0.9)', 'important');
+              img.style.setProperty('-webkit-filter', 'grayscale(100%) contrast(1.2) brightness(0.9)', 'important');
+              img.style.setProperty('-moz-filter', 'grayscale(100%) contrast(1.2) brightness(0.9)', 'important');
+              img.style.setProperty('-ms-filter', 'grayscale(100%) contrast(1.2) brightness(0.9)', 'important');
+              img.style.setProperty('-o-filter', 'grayscale(100%) contrast(1.2) brightness(0.9)', 'important');
               
-              console.log('Applied grayscale to image:', img.src);
+              // Method 2: Mix blend mode
+              img.style.setProperty('mix-blend-mode', 'luminosity', 'important');
+              
+              // Method 3: Direct style attribute manipulation
+              const currentStyle = img.getAttribute('style') || '';
+              img.setAttribute('style', currentStyle + '; filter: grayscale(100%) contrast(1.2) brightness(0.9) !important; -webkit-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important; mix-blend-mode: luminosity !important;');
+              
+              // Method 4: Add CSS class
+              img.classList.add('force-grayscale');
+              
+              // Method 5: Set CSS custom property
+              img.style.setProperty('--grayscale', '100%');
+              
+              console.log(`✅ Applied multiple grayscale methods to image ${index + 1}`);
             }
           });
+          
+          // ALSO HANDLE BACKGROUND IMAGES
+          const elementsWithBgImages = element.querySelectorAll('[style*="background-image"]');
+          elementsWithBgImages.forEach((el) => {
+            if (el instanceof HTMLElement) {
+              el.style.setProperty('filter', 'grayscale(100%)', 'important');
+              el.style.setProperty('-webkit-filter', 'grayscale(100%)', 'important');
+            }
+          });
+          
+          // ADD ADDITIONAL CSS CLASS FOR GRAYSCALE
+          const additionalGrayscaleStyle = clonedDoc.createElement('style');
+          additionalGrayscaleStyle.textContent = `
+            .force-grayscale {
+              filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -webkit-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -moz-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -ms-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -o-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              mix-blend-mode: luminosity !important;
+            }
+          `;
+          clonedDoc.head.appendChild(additionalGrayscaleStyle);
           
           // SPECIFICALLY FIX THE PROBLEMATIC TEXT ELEMENT
           const redBoxes = element.querySelectorAll('.bg-red-700');
@@ -388,7 +440,7 @@ function App() {
             }
           });
           
-          console.log(`✅ Applied grayscale to ${allImages.length} images and fixed text rendering`);
+          console.log(`✅ Applied AGGRESSIVE grayscale to ${allImages.length} images and fixed text rendering`);
         }
       });
 
@@ -424,7 +476,7 @@ function App() {
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🎉 PDF generated with grayscale images and fixed text!');
+      console.log('🎉 PDF generated with FORCED grayscale images!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -440,13 +492,13 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with grayscale images and fixed text...');
+      console.log('🖼️ Generating PNG with FORCED grayscale images...');
 
       // Prepare for capture
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Use same comprehensive approach as PDF
+      // Use same ultra-aggressive approach as PDF
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
@@ -460,11 +512,11 @@ function App() {
         scrollX: 0,
         scrollY: 0,
         foreignObjectRendering: false,
-        imageTimeout: 10000,
+        imageTimeout: 15000,
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          // Same comprehensive styling as PDF
+          // Same ultra-aggressive styling as PDF
           const comprehensiveStyle = clonedDoc.createElement('style');
           comprehensiveStyle.textContent = `
             html, body { background-color: #ffffff !important; color: #000000 !important; }
@@ -477,11 +529,37 @@ function App() {
             .text-gray-700 { color: #374151 !important; }
             .text-gray-600 { color: #4b5563 !important; }
             .text-gray-500 { color: #6b7280 !important; }
-            img { 
-              filter: grayscale(100%) !important; 
-              -webkit-filter: grayscale(100%) !important;
-              opacity: 1 !important; 
+            
+            /* ULTRA-AGGRESSIVE GRAYSCALE */
+            img, 
+            img[src],
+            .newsletter img,
+            .newsletter-page img,
+            div img,
+            * img {
+              filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -webkit-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -moz-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -ms-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -o-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              opacity: 1 !important;
+              mix-blend-mode: luminosity !important;
             }
+            
+            [style*="background-image"] {
+              filter: grayscale(100%) !important;
+              -webkit-filter: grayscale(100%) !important;
+            }
+            
+            .force-grayscale {
+              filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -webkit-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -moz-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -ms-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              -o-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+              mix-blend-mode: luminosity !important;
+            }
+            
             .min-h-screen { min-height: 100vh !important; }
             .h-screen { height: 100vh !important; }
             .absolute { position: absolute !important; }
@@ -514,16 +592,38 @@ function App() {
           `;
           clonedDoc.head.appendChild(comprehensiveStyle);
           
-          // Same image and element processing as PDF
+          // Same ultra-aggressive image processing as PDF
           const allImages = element.querySelectorAll('img');
-          allImages.forEach((img) => {
+          console.log(`Found ${allImages.length} images to convert to grayscale`);
+          
+          allImages.forEach((img, index) => {
             if (img instanceof HTMLElement) {
-              img.style.setProperty('filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-webkit-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-moz-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-ms-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-o-filter', 'grayscale(100%)', 'important');
-              img.setAttribute('style', (img.getAttribute('style') || '') + '; filter: grayscale(100%) !important;');
+              console.log(`Processing image ${index + 1}: ${img.src}`);
+              
+              // Multiple grayscale methods
+              img.style.setProperty('filter', 'grayscale(100%) contrast(1.2) brightness(0.9)', 'important');
+              img.style.setProperty('-webkit-filter', 'grayscale(100%) contrast(1.2) brightness(0.9)', 'important');
+              img.style.setProperty('-moz-filter', 'grayscale(100%) contrast(1.2) brightness(0.9)', 'important');
+              img.style.setProperty('-ms-filter', 'grayscale(100%) contrast(1.2) brightness(0.9)', 'important');
+              img.style.setProperty('-o-filter', 'grayscale(100%) contrast(1.2) brightness(0.9)', 'important');
+              img.style.setProperty('mix-blend-mode', 'luminosity', 'important');
+              
+              const currentStyle = img.getAttribute('style') || '';
+              img.setAttribute('style', currentStyle + '; filter: grayscale(100%) contrast(1.2) brightness(0.9) !important; -webkit-filter: grayscale(100%) contrast(1.2) brightness(0.9) !important; mix-blend-mode: luminosity !important;');
+              
+              img.classList.add('force-grayscale');
+              img.style.setProperty('--grayscale', '100%');
+              
+              console.log(`✅ Applied multiple grayscale methods to image ${index + 1}`);
+            }
+          });
+          
+          // Handle background images
+          const elementsWithBgImages = element.querySelectorAll('[style*="background-image"]');
+          elementsWithBgImages.forEach((el) => {
+            if (el instanceof HTMLElement) {
+              el.style.setProperty('filter', 'grayscale(100%)', 'important');
+              el.style.setProperty('-webkit-filter', 'grayscale(100%)', 'important');
             }
           });
           
@@ -663,7 +763,7 @@ function App() {
             }
           });
           
-          console.log(`✅ Applied grayscale to ${allImages.length} images and fixed text rendering`);
+          console.log(`✅ Applied ULTRA-AGGRESSIVE grayscale to ${allImages.length} images and fixed text rendering`);
         }
       });
 
@@ -680,7 +780,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated with grayscale images and fixed text!');
+      console.log('🎉 PNG generated with FORCED grayscale images!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
