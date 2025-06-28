@@ -16,7 +16,7 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PDF with grayscale images...');
+      console.log('📄 Generating PDF with grayscale images and fixed text...');
 
       // Prepare for capture
       window.scrollTo(0, 0);
@@ -40,11 +40,11 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          console.log('🎨 Applying grayscale to all images and fixing overlays...');
+          console.log('🎨 Applying grayscale to all images and fixing text rendering...');
           
-          // FORCE LIGHT THEME AND GRAYSCALE IMAGES
-          const lightThemeStyle = clonedDoc.createElement('style');
-          lightThemeStyle.textContent = `
+          // COMPREHENSIVE STYLE INJECTION
+          const comprehensiveStyle = clonedDoc.createElement('style');
+          comprehensiveStyle.textContent = `
             /* FORCE LIGHT THEME */
             html, body {
               background-color: #ffffff !important;
@@ -121,6 +121,10 @@ function App() {
               z-index: 10 !important;
             }
             
+            .z-20 {
+              z-index: 20 !important;
+            }
+            
             /* ENSURE POSITIONING VALUES */
             .top-8 {
               top: 2rem !important;
@@ -154,6 +158,46 @@ function App() {
               max-width: 28rem !important;
             }
             
+            /* ENSURE INLINE-BLOCK WORKS */
+            .inline-block {
+              display: inline-block !important;
+            }
+            
+            /* ENSURE PADDING WORKS */
+            .py-2 {
+              padding-top: 0.5rem !important;
+              padding-bottom: 0.5rem !important;
+            }
+            
+            .px-4 {
+              padding-left: 1rem !important;
+              padding-right: 1rem !important;
+            }
+            
+            .mt-10 {
+              margin-top: 2.5rem !important;
+            }
+            
+            /* ENSURE TEXT SIZING WORKS */
+            .text-lg {
+              font-size: 1.125rem !important;
+              line-height: 1.75rem !important;
+            }
+            
+            .font-medium {
+              font-weight: 500 !important;
+            }
+            
+            /* FORCE TEXT VISIBILITY IN RED BOXES */
+            .bg-red-700 h3,
+            .bg-red-700 .text-white,
+            .bg-red-700 * {
+              color: #ffffff !important;
+              opacity: 1 !important;
+              visibility: visible !important;
+              display: block !important;
+            }
+            
             /* REMOVE ANY DARK THEME OVERRIDES */
             * {
               opacity: 1 !important;
@@ -170,9 +214,14 @@ function App() {
             .opacity-60 {
               opacity: 0.6 !important;
             }
+            
+            /* ENSURE WHITE SPACE HANDLING */
+            .whitespace-nowrap {
+              white-space: nowrap !important;
+            }
           `;
           
-          clonedDoc.head.appendChild(lightThemeStyle);
+          clonedDoc.head.appendChild(comprehensiveStyle);
           
           // FORCE GRAYSCALE ON ALL IMAGES DIRECTLY
           const allImages = element.querySelectorAll('img');
@@ -189,6 +238,35 @@ function App() {
               img.setAttribute('style', (img.getAttribute('style') || '') + '; filter: grayscale(100%) !important;');
               
               console.log('Applied grayscale to image:', img.src);
+            }
+          });
+          
+          // SPECIFICALLY FIX THE PROBLEMATIC TEXT ELEMENT
+          const redBoxes = element.querySelectorAll('.bg-red-700');
+          redBoxes.forEach((box) => {
+            if (box instanceof HTMLElement) {
+              // Force red background and white text
+              box.style.setProperty('background-color', '#b91c1c', 'important');
+              box.style.setProperty('color', '#ffffff', 'important');
+              
+              // Find all text elements inside and force white color
+              const textElements = box.querySelectorAll('*');
+              textElements.forEach((textEl) => {
+                if (textEl instanceof HTMLElement) {
+                  textEl.style.setProperty('color', '#ffffff', 'important');
+                  textEl.style.setProperty('opacity', '1', 'important');
+                  textEl.style.setProperty('visibility', 'visible', 'important');
+                  textEl.style.setProperty('display', 'block', 'important');
+                  
+                  // If it's the specific h3 element, ensure it's visible
+                  if (textEl.tagName === 'H3') {
+                    textEl.style.setProperty('font-size', '1.125rem', 'important');
+                    textEl.style.setProperty('font-weight', '500', 'important');
+                    textEl.style.setProperty('line-height', '1.75rem', 'important');
+                    textEl.style.setProperty('white-space', 'nowrap', 'important');
+                  }
+                }
+              });
             }
           });
           
@@ -241,6 +319,10 @@ function App() {
                 el.style.setProperty('z-index', '10', 'important');
               }
               
+              if (el.classList.contains('z-20')) {
+                el.style.setProperty('z-index', '20', 'important');
+              }
+              
               // Fix positioning values
               if (el.classList.contains('top-8')) {
                 el.style.setProperty('top', '2rem', 'important');
@@ -273,10 +355,40 @@ function App() {
               if (el.classList.contains('max-w-md')) {
                 el.style.setProperty('max-width', '28rem', 'important');
               }
+              
+              // Fix inline-block
+              if (el.classList.contains('inline-block')) {
+                el.style.setProperty('display', 'inline-block', 'important');
+              }
+              
+              // Fix padding
+              if (el.classList.contains('py-2')) {
+                el.style.setProperty('padding-top', '0.5rem', 'important');
+                el.style.setProperty('padding-bottom', '0.5rem', 'important');
+              }
+              
+              if (el.classList.contains('px-4')) {
+                el.style.setProperty('padding-left', '1rem', 'important');
+                el.style.setProperty('padding-right', '1rem', 'important');
+              }
+              
+              if (el.classList.contains('mt-10')) {
+                el.style.setProperty('margin-top', '2.5rem', 'important');
+              }
+              
+              // Fix text sizing
+              if (el.classList.contains('text-lg')) {
+                el.style.setProperty('font-size', '1.125rem', 'important');
+                el.style.setProperty('line-height', '1.75rem', 'important');
+              }
+              
+              if (el.classList.contains('font-medium')) {
+                el.style.setProperty('font-weight', '500', 'important');
+              }
             }
           });
           
-          console.log(`✅ Applied grayscale to ${allImages.length} images and fixed positioning`);
+          console.log(`✅ Applied grayscale to ${allImages.length} images and fixed text rendering`);
         }
       });
 
@@ -312,7 +424,7 @@ function App() {
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🎉 PDF generated with grayscale images and fixed overlays!');
+      console.log('🎉 PDF generated with grayscale images and fixed text!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -328,13 +440,13 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with grayscale images...');
+      console.log('🖼️ Generating PNG with grayscale images and fixed text...');
 
       // Prepare for capture
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Use same approach as PDF
+      // Use same comprehensive approach as PDF
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
@@ -352,9 +464,9 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          // Same light theme forcing as PDF
-          const lightThemeStyle = clonedDoc.createElement('style');
-          lightThemeStyle.textContent = `
+          // Same comprehensive styling as PDF
+          const comprehensiveStyle = clonedDoc.createElement('style');
+          comprehensiveStyle.textContent = `
             html, body { background-color: #ffffff !important; color: #000000 !important; }
             .bg-red-700 { background-color: #b91c1c !important; color: #ffffff !important; }
             .bg-black { background-color: #000000 !important; color: #ffffff !important; }
@@ -375,6 +487,7 @@ function App() {
             .absolute { position: absolute !important; }
             .relative { position: relative !important; }
             .z-10 { z-index: 10 !important; }
+            .z-20 { z-index: 20 !important; }
             .top-8 { top: 2rem !important; }
             .left-8 { left: 2rem !important; }
             .right-0 { right: 0 !important; }
@@ -382,13 +495,26 @@ function App() {
             .bottom-0 { bottom: 0 !important; }
             .inset-0 { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; }
             .max-w-md { max-width: 28rem !important; }
+            .inline-block { display: inline-block !important; }
+            .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+            .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+            .mt-10 { margin-top: 2.5rem !important; }
+            .text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
+            .font-medium { font-weight: 500 !important; }
+            .bg-red-700 h3, .bg-red-700 .text-white, .bg-red-700 * { 
+              color: #ffffff !important; 
+              opacity: 1 !important; 
+              visibility: visible !important; 
+              display: block !important; 
+            }
             * { opacity: 1 !important; }
             .newsletter-container, .newsletter, .newsletter-page { background-color: #ffffff !important; }
             .opacity-60 { opacity: 0.6 !important; }
+            .whitespace-nowrap { white-space: nowrap !important; }
           `;
-          clonedDoc.head.appendChild(lightThemeStyle);
+          clonedDoc.head.appendChild(comprehensiveStyle);
           
-          // FORCE GRAYSCALE ON ALL IMAGES DIRECTLY (same as PDF)
+          // Same image and element processing as PDF
           const allImages = element.querySelectorAll('img');
           allImages.forEach((img) => {
             if (img instanceof HTMLElement) {
@@ -401,7 +527,33 @@ function App() {
             }
           });
           
-          // Apply same element styling as PDF including positioning fixes
+          // Same red box text fixing as PDF
+          const redBoxes = element.querySelectorAll('.bg-red-700');
+          redBoxes.forEach((box) => {
+            if (box instanceof HTMLElement) {
+              box.style.setProperty('background-color', '#b91c1c', 'important');
+              box.style.setProperty('color', '#ffffff', 'important');
+              
+              const textElements = box.querySelectorAll('*');
+              textElements.forEach((textEl) => {
+                if (textEl instanceof HTMLElement) {
+                  textEl.style.setProperty('color', '#ffffff', 'important');
+                  textEl.style.setProperty('opacity', '1', 'important');
+                  textEl.style.setProperty('visibility', 'visible', 'important');
+                  textEl.style.setProperty('display', 'block', 'important');
+                  
+                  if (textEl.tagName === 'H3') {
+                    textEl.style.setProperty('font-size', '1.125rem', 'important');
+                    textEl.style.setProperty('font-weight', '500', 'important');
+                    textEl.style.setProperty('line-height', '1.75rem', 'important');
+                    textEl.style.setProperty('white-space', 'nowrap', 'important');
+                  }
+                }
+              });
+            }
+          });
+          
+          // Same comprehensive element styling as PDF
           const allElements = element.querySelectorAll('*');
           allElements.forEach((el) => {
             if (el instanceof HTMLElement && el.tagName !== 'IMG') {
@@ -434,7 +586,7 @@ function App() {
                 el.style.setProperty('color', '#b91c1c', 'important');
               }
               
-              // Fix positioning (same as PDF)
+              // All the same positioning and styling fixes as PDF...
               if (el.classList.contains('absolute')) {
                 el.style.setProperty('position', 'absolute', 'important');
               }
@@ -445,6 +597,10 @@ function App() {
               
               if (el.classList.contains('z-10')) {
                 el.style.setProperty('z-index', '10', 'important');
+              }
+              
+              if (el.classList.contains('z-20')) {
+                el.style.setProperty('z-index', '20', 'important');
               }
               
               if (el.classList.contains('top-8')) {
@@ -477,10 +633,37 @@ function App() {
               if (el.classList.contains('max-w-md')) {
                 el.style.setProperty('max-width', '28rem', 'important');
               }
+              
+              if (el.classList.contains('inline-block')) {
+                el.style.setProperty('display', 'inline-block', 'important');
+              }
+              
+              if (el.classList.contains('py-2')) {
+                el.style.setProperty('padding-top', '0.5rem', 'important');
+                el.style.setProperty('padding-bottom', '0.5rem', 'important');
+              }
+              
+              if (el.classList.contains('px-4')) {
+                el.style.setProperty('padding-left', '1rem', 'important');
+                el.style.setProperty('padding-right', '1rem', 'important');
+              }
+              
+              if (el.classList.contains('mt-10')) {
+                el.style.setProperty('margin-top', '2.5rem', 'important');
+              }
+              
+              if (el.classList.contains('text-lg')) {
+                el.style.setProperty('font-size', '1.125rem', 'important');
+                el.style.setProperty('line-height', '1.75rem', 'important');
+              }
+              
+              if (el.classList.contains('font-medium')) {
+                el.style.setProperty('font-weight', '500', 'important');
+              }
             }
           });
           
-          console.log(`✅ Applied grayscale to ${allImages.length} images and fixed positioning`);
+          console.log(`✅ Applied grayscale to ${allImages.length} images and fixed text rendering`);
         }
       });
 
@@ -497,7 +680,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated with grayscale images and fixed overlays!');
+      console.log('🎉 PNG generated with grayscale images and fixed text!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
