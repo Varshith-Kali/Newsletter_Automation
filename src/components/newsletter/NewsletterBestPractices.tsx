@@ -46,12 +46,12 @@ const NewsletterBestPractices: React.FC = () => {
         </div>
         
         <div className="mt-auto">
-          {/* Abstract security pattern */}
+          {/* Abstract security pattern - full color in preview */}
           <div className="w-full h-48 overflow-hidden">
             <img 
               src="https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
               alt="Security Pattern" 
-              className="w-full h-full object-cover grayscale"
+              className="w-full h-full object-cover"
               crossOrigin="anonymous"
             />
           </div>
@@ -60,12 +60,12 @@ const NewsletterBestPractices: React.FC = () => {
       
       {/* Right side with images and quote */}
       <div className="w-7/12 bg-white relative">
-        {/* Background city image */}
+        {/* Background city image - full color in preview */}
         <div className="h-2/3 overflow-hidden">
           <img 
             src="https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
             alt="Night City" 
-            className="w-full h-full object-cover grayscale"
+            className="w-full h-full object-cover"
             crossOrigin="anonymous"
           />
           
@@ -86,7 +86,7 @@ const NewsletterBestPractices: React.FC = () => {
             <img 
               src="https://images.pexels.com/photos/3568520/pexels-photo-3568520.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
               alt="Person working" 
-              className="w-full h-full object-cover grayscale"
+              className="w-full h-full object-cover"
               crossOrigin="anonymous"
             />
           </div>

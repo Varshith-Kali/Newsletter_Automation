@@ -13,12 +13,12 @@ const NewsletterCover: React.FC = () => {
 
   return (
     <div className="bg-black h-screen text-white relative overflow-hidden">
-      {/* Background image - grayscale */}
+      {/* Background image - full color in preview */}
       <div className="absolute inset-0 opacity-60">
         <img 
           src="https://images.pexels.com/photos/374074/pexels-photo-374074.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
           alt="Cybersecurity Background" 
-          className="w-full h-full object-cover grayscale"
+          className="w-full h-full object-cover"
           crossOrigin="anonymous"
         />
       </div>
