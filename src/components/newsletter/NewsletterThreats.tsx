@@ -47,13 +47,13 @@ const NewsletterThreats: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white text-black flex">
-      {/* Left red sidebar with images - full color in preview */}
+      {/* Left red sidebar with images */}
       <div className="w-5/12 bg-red-700 relative">
         <div className="h-1/3 overflow-hidden">
           <img 
             src="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
             alt="Cybersecurity" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover grayscale"
             crossOrigin="anonymous"
           />
         </div>
@@ -61,7 +61,7 @@ const NewsletterThreats: React.FC = () => {
           <img 
             src="https://images.pexels.com/photos/1261427/pexels-photo-1261427.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
             alt="Hacker" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover grayscale"
             crossOrigin="anonymous"
           />
         </div>
@@ -69,7 +69,7 @@ const NewsletterThreats: React.FC = () => {
           <img 
             src="https://images.pexels.com/photos/5380664/pexels-photo-5380664.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
             alt="Security" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover grayscale"
             crossOrigin="anonymous"
           />
         </div>
