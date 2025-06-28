@@ -16,19 +16,18 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PERFECT PDF with exact preview styling...');
+      console.log('📄 Generating PDF with forced light theme...');
 
-      // Force complete rendering and stabilization
+      // Prepare for capture
       window.scrollTo(0, 0);
-      content.scrollIntoView({ behavior: 'instant', block: 'start' });
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Use enhanced canvas options for perfect quality
+      // Force light theme and capture
       const canvas = await html2canvas(content, {
-        scale: 3, // Higher scale for better quality
+        scale: 2,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: null, // No background to avoid overlay effects
+        backgroundColor: '#ffffff', // FORCE WHITE BACKGROUND
         logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
@@ -36,266 +35,105 @@ function App() {
         windowHeight: window.innerHeight,
         scrollX: 0,
         scrollY: 0,
-        foreignObjectRendering: true,
-        imageTimeout: 15000,
+        foreignObjectRendering: false,
+        imageTimeout: 10000,
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          console.log('🎨 Applying EXACT color and style preservation...');
-
-          // Remove any existing conflicting styles
-          const existingStyles = clonedDoc.querySelectorAll('style');
-          existingStyles.forEach(style => {
-            if (!style.textContent?.includes('tailwind')) {
-              style.remove();
-            }
-          });
+          console.log('🎨 Forcing light theme and exact colors...');
           
-          // Create a comprehensive style override
-          const perfectStyle = clonedDoc.createElement('style');
-          perfectStyle.textContent = `
-            /* FORCE EXACT COLORS AND REMOVE ANY OPACITY/DIM EFFECTS */
-            * {
-              box-sizing: border-box !important;
-              opacity: 1 !important;
-              filter: none !important;
+          // FORCE LIGHT THEME - Override any dark theme
+          const lightThemeStyle = clonedDoc.createElement('style');
+          lightThemeStyle.textContent = `
+            /* FORCE LIGHT THEME - OVERRIDE DARK MODE */
+            html, body {
+              background-color: #ffffff !important;
+              color: #000000 !important;
             }
             
-            /* EXACT BACKGROUND COLORS */
+            /* FORCE EXACT NEWSLETTER COLORS */
             .bg-red-700 {
               background-color: #b91c1c !important;
               color: #ffffff !important;
-              opacity: 1 !important;
             }
             
             .bg-black {
               background-color: #000000 !important;
               color: #ffffff !important;
-              opacity: 1 !important;
             }
             
             .bg-white {
               background-color: #ffffff !important;
               color: #000000 !important;
-              opacity: 1 !important;
             }
             
-            /* EXACT TEXT COLORS */
             .text-white {
               color: #ffffff !important;
-              opacity: 1 !important;
             }
             
             .text-black {
               color: #000000 !important;
-              opacity: 1 !important;
             }
             
             .text-red-700 {
               color: #b91c1c !important;
-              opacity: 1 !important;
             }
             
-            /* FORCE GRAYSCALE ON ALL IMAGES */
+            .text-gray-700 {
+              color: #374151 !important;
+            }
+            
+            .text-gray-600 {
+              color: #4b5563 !important;
+            }
+            
+            .text-gray-500 {
+              color: #6b7280 !important;
+            }
+            
+            /* IMAGES */
             img {
               filter: grayscale(100%) !important;
               opacity: 1 !important;
-              object-fit: cover !important;
-              width: 100% !important;
-              height: 100% !important;
             }
             
-            .grayscale {
-              filter: grayscale(100%) !important;
-              opacity: 1 !important;
-            }
-            
-            /* REMOVE ANY DIM/OVERLAY EFFECTS */
-            .newsletter-container,
-            .newsletter,
-            .newsletter-page,
-            .newsletter-cover,
-            .newsletter-threats,
-            .newsletter-best-practices {
-              opacity: 1 !important;
-              background: none !important;
-              filter: none !important;
-            }
-            
-            /* ENSURE FULL OPACITY ON ALL ELEMENTS */
-            .opacity-60 {
-              opacity: 0.6 !important;
-            }
-            
-            /* FORCE EXACT POSITIONING AND SIZING */
+            /* LAYOUT */
             .min-h-screen {
               min-height: 100vh !important;
-              height: 100vh !important;
             }
             
             .h-screen {
               height: 100vh !important;
             }
             
-            .absolute {
-              position: absolute !important;
+            /* REMOVE ANY DARK THEME OVERRIDES */
+            * {
+              opacity: 1 !important;
             }
             
-            .relative {
-              position: relative !important;
+            /* ENSURE NEWSLETTER CONTAINER IS WHITE */
+            .newsletter-container,
+            .newsletter,
+            .newsletter-page {
+              background-color: #ffffff !important;
             }
             
-            .inset-0 {
-              top: 0 !important;
-              right: 0 !important;
-              bottom: 0 !important;
-              left: 0 !important;
-            }
-            
-            /* TYPOGRAPHY EXACT MATCH */
-            .text-8xl {
-              font-size: 6rem !important;
-              line-height: 1 !important;
-              font-weight: 700 !important;
-            }
-            
-            .text-5xl {
-              font-size: 3rem !important;
-              line-height: 1.2 !important;
-              font-weight: 700 !important;
-            }
-            
-            .text-3xl {
-              font-size: 1.875rem !important;
-              line-height: 2.25rem !important;
-              font-weight: 700 !important;
-            }
-            
-            .text-2xl {
-              font-size: 1.5rem !important;
-              line-height: 2rem !important;
-              font-weight: 600 !important;
-            }
-            
-            .text-xl {
-              font-size: 1.25rem !important;
-              line-height: 1.75rem !important;
-              font-weight: 600 !important;
-            }
-            
-            .text-lg {
-              font-size: 1.125rem !important;
-              line-height: 1.75rem !important;
-            }
-            
-            .text-sm {
-              font-size: 0.875rem !important;
-              line-height: 1.25rem !important;
-            }
-            
-            .font-bold {
-              font-weight: 700 !important;
-            }
-            
-            .font-medium {
-              font-weight: 500 !important;
-            }
-            
-            .uppercase {
-              text-transform: uppercase !important;
-            }
-            
-            /* LAYOUT EXACT MATCH */
-            .flex {
-              display: flex !important;
-            }
-            
-            .flex-col {
-              flex-direction: column !important;
-            }
-            
-            .items-center {
-              align-items: center !important;
-            }
-            
-            .items-end {
-              align-items: flex-end !important;
-            }
-            
-            .justify-between {
-              justify-content: space-between !important;
-            }
-            
-            .w-5\\/12 {
-              width: 41.666667% !important;
-            }
-            
-            .w-7\\/12 {
-              width: 58.333333% !important;
-            }
-            
-            .w-full {
-              width: 100% !important;
-            }
-            
-            .h-1\\/3 {
-              height: 33.333333% !important;
-            }
-            
-            .h-2\\/3 {
-              height: 66.666667% !important;
-            }
-            
-            /* SPACING EXACT MATCH */
-            .p-8 { padding: 2rem !important; }
-            .p-6 { padding: 1.5rem !important; }
-            .p-5 { padding: 1.25rem !important; }
-            .p-4 { padding: 1rem !important; }
-            .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-            .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-            
-            .mb-52 { margin-bottom: 13rem !important; }
-            .mb-8 { margin-bottom: 2rem !important; }
-            .mb-4 { margin-bottom: 1rem !important; }
-            .mb-2 { margin-bottom: 0.5rem !important; }
-            .mt-10 { margin-top: 2.5rem !important; }
-            .mt-8 { margin-top: 2rem !important; }
-            .mt-2 { margin-top: 0.5rem !important; }
-            .ml-8 { margin-left: 2rem !important; }
-            .mr-4 { margin-right: 1rem !important; }
-            .-ml-4 { margin-left: -1rem !important; }
-            
-            /* MISC */
-            .overflow-hidden { overflow: hidden !important; }
-            .rounded-full { border-radius: 9999px !important; }
-            .leading-none { line-height: 1 !important; }
-            .leading-tight { line-height: 1.25 !important; }
-            .leading-relaxed { line-height: 1.625 !important; }
-            .tracking-wider { letter-spacing: 0.05em !important; }
-            .inline-block { display: inline-block !important; }
-            .max-w-md { max-width: 28rem !important; }
-            .z-10 { z-index: 10 !important; }
-            
-            /* REMOVE ANY TRANSPARENCY OR DIM EFFECTS */
-            .newsletter-container::before,
-            .newsletter-container::after,
-            .newsletter::before,
-            .newsletter::after {
-              display: none !important;
+            /* OPACITY CLASSES */
+            .opacity-60 {
+              opacity: 0.6 !important;
             }
           `;
-
-          clonedDoc.head.appendChild(perfectStyle);
-
-          // Force apply styles to ALL elements
+          
+          clonedDoc.head.appendChild(lightThemeStyle);
+          
+          // Force styles on all elements
           const allElements = element.querySelectorAll('*');
           allElements.forEach((el) => {
             if (el instanceof HTMLElement) {
-              // Remove any opacity or filter effects that might cause dimming
-              el.style.setProperty('opacity', '1', 'important');
-              el.style.setProperty('filter', el.tagName === 'IMG' ? 'grayscale(100%)' : 'none', 'important');
+              // Remove any dark theme classes or styles
+              el.style.removeProperty('color-scheme');
               
-              // Force exact background colors
+              // Force specific colors based on classes
               if (el.classList.contains('bg-red-700')) {
                 el.style.setProperty('background-color', '#b91c1c', 'important');
                 el.style.setProperty('color', '#ffffff', 'important');
@@ -311,7 +149,6 @@ function App() {
                 el.style.setProperty('color', '#000000', 'important');
               }
               
-              // Force exact text colors
               if (el.classList.contains('text-white')) {
                 el.style.setProperty('color', '#ffffff', 'important');
               }
@@ -324,17 +161,13 @@ function App() {
                 el.style.setProperty('color', '#b91c1c', 'important');
               }
               
-              // Force grayscale on images
               if (el.tagName === 'IMG') {
                 el.style.setProperty('filter', 'grayscale(100%)', 'important');
-                el.style.setProperty('object-fit', 'cover', 'important');
-                el.style.setProperty('width', '100%', 'important');
-                el.style.setProperty('height', '100%', 'important');
               }
             }
           });
-
-          console.log('✅ EXACT styling applied - no dim effects, perfect colors');
+          
+          console.log('✅ Light theme forced, colors applied');
         }
       });
 
@@ -370,7 +203,7 @@ function App() {
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🎉 PERFECT PDF generated - exact preview copy!');
+      console.log('🎉 PDF generated successfully!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -386,19 +219,18 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PERFECT PNG with exact preview styling...');
+      console.log('🖼️ Generating PNG with forced light theme...');
 
-      // Force complete rendering and stabilization
+      // Prepare for capture
       window.scrollTo(0, 0);
-      content.scrollIntoView({ behavior: 'instant', block: 'start' });
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Use EXACT same canvas settings as PDF for consistency
+      // Use same approach as PDF
       const canvas = await html2canvas(content, {
-        scale: 3,
+        scale: 2,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: null,
+        backgroundColor: '#ffffff', // FORCE WHITE BACKGROUND
         logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
@@ -406,41 +238,38 @@ function App() {
         windowHeight: window.innerHeight,
         scrollX: 0,
         scrollY: 0,
-        foreignObjectRendering: true,
-        imageTimeout: 15000,
+        foreignObjectRendering: false,
+        imageTimeout: 10000,
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          // Use EXACT same styling logic as PDF
-          const existingStyles = clonedDoc.querySelectorAll('style');
-          existingStyles.forEach(style => {
-            if (!style.textContent?.includes('tailwind')) {
-              style.remove();
-            }
-          });
-          
-          const perfectStyle = clonedDoc.createElement('style');
-          perfectStyle.textContent = `
-            * { box-sizing: border-box !important; opacity: 1 !important; filter: none !important; }
-            .bg-red-700 { background-color: #b91c1c !important; color: #ffffff !important; opacity: 1 !important; }
-            .bg-black { background-color: #000000 !important; color: #ffffff !important; opacity: 1 !important; }
-            .bg-white { background-color: #ffffff !important; color: #000000 !important; opacity: 1 !important; }
-            .text-white { color: #ffffff !important; opacity: 1 !important; }
-            .text-black { color: #000000 !important; opacity: 1 !important; }
-            .text-red-700 { color: #b91c1c !important; opacity: 1 !important; }
-            img { filter: grayscale(100%) !important; opacity: 1 !important; object-fit: cover !important; width: 100% !important; height: 100% !important; }
-            .grayscale { filter: grayscale(100%) !important; opacity: 1 !important; }
-            .min-h-screen { min-height: 100vh !important; height: 100vh !important; }
+          // Same light theme forcing as PDF
+          const lightThemeStyle = clonedDoc.createElement('style');
+          lightThemeStyle.textContent = `
+            html, body { background-color: #ffffff !important; color: #000000 !important; }
+            .bg-red-700 { background-color: #b91c1c !important; color: #ffffff !important; }
+            .bg-black { background-color: #000000 !important; color: #ffffff !important; }
+            .bg-white { background-color: #ffffff !important; color: #000000 !important; }
+            .text-white { color: #ffffff !important; }
+            .text-black { color: #000000 !important; }
+            .text-red-700 { color: #b91c1c !important; }
+            .text-gray-700 { color: #374151 !important; }
+            .text-gray-600 { color: #4b5563 !important; }
+            .text-gray-500 { color: #6b7280 !important; }
+            img { filter: grayscale(100%) !important; opacity: 1 !important; }
+            .min-h-screen { min-height: 100vh !important; }
+            .h-screen { height: 100vh !important; }
+            * { opacity: 1 !important; }
+            .newsletter-container, .newsletter, .newsletter-page { background-color: #ffffff !important; }
             .opacity-60 { opacity: 0.6 !important; }
           `;
-          clonedDoc.head.appendChild(perfectStyle);
-
-          // Apply exact same element styling as PDF
+          clonedDoc.head.appendChild(lightThemeStyle);
+          
+          // Apply same element styling as PDF
           const allElements = element.querySelectorAll('*');
           allElements.forEach((el) => {
             if (el instanceof HTMLElement) {
-              el.style.setProperty('opacity', '1', 'important');
-              el.style.setProperty('filter', el.tagName === 'IMG' ? 'grayscale(100%)' : 'none', 'important');
+              el.style.removeProperty('color-scheme');
               
               if (el.classList.contains('bg-red-700')) {
                 el.style.setProperty('background-color', '#b91c1c', 'important');
@@ -471,9 +300,6 @@ function App() {
               
               if (el.tagName === 'IMG') {
                 el.style.setProperty('filter', 'grayscale(100%)', 'important');
-                el.style.setProperty('object-fit', 'cover', 'important');
-                el.style.setProperty('width', '100%', 'important');
-                el.style.setProperty('height', '100%', 'important');
               }
             }
           });
@@ -493,7 +319,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PERFECT PNG generated - exact preview copy!');
+      console.log('🎉 PNG generated successfully!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
