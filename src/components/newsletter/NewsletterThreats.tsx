@@ -169,37 +169,6 @@ const NewsletterThreats: React.FC = () => {
             ⚠️ CRITICAL ALERT: MULTIPLE HIGH-SEVERITY VULNERABILITIES DETECTED. IMMEDIATE ACTION REQUIRED.
           </div>
         )}
-        
-        <div className="mt-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
-          <h4 className="font-semibold text-gray-700 mb-2">📊 Threat Intelligence Summary</h4>
-          <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-            <div>
-              <span className="font-medium">Total Incidents:</span> {threats.length}
-            </div>
-            <div>
-              <span className="font-medium">CVEs Identified:</span> {threats.reduce((acc, t) => acc + (t.cves?.length || 0), 0)}
-            </div>
-            <div>
-              <span className="font-medium">Critical/High:</span> {threats.filter(t => t.severity === 'CRITICAL' || t.severity === 'HIGH').length}
-            </div>
-            <div>
-              <span className="font-medium">Sources:</span> {[...new Set(threats.map(t => t.source))].length}
-            </div>
-          </div>
-          <div className="mt-3 text-xs text-gray-500">
-            <div className="flex items-center justify-between">
-              <span>
-                <span className="font-medium">Direct Links:</span> {threats.filter(t => t.linkType === 'direct').length} of {threats.length}
-              </span>
-              <span>
-                <span className="font-medium">Search Links:</span> {threats.filter(t => t.linkType === 'fallback').length} of {threats.length}
-              </span>
-            </div>
-            <div className="mt-1 text-xs text-gray-400">
-              🔗 = Direct article link | 🔍 = Search results (original link unavailable)
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
