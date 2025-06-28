@@ -16,50 +16,27 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PDF with enhanced settings...');
+      console.log('📄 Generating PDF...');
       
-      // Scroll to top and wait
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Enhanced html2canvas options for better quality
       const canvas = await html2canvas(content, {
-        scale: 3, // Higher scale for better quality
+        scale: 2,
         useCORS: true,
-        allowTaint: true, // Allow cross-origin images
+        allowTaint: false,
         backgroundColor: '#ffffff',
-        logging: true, // Enable logging to debug
+        logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
-        x: 0,
-        y: 0,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: content.offsetWidth,
-        windowHeight: content.offsetHeight,
-        foreignObjectRendering: true, // Better text rendering
-        imageTimeout: 15000, // Longer timeout for images
-        removeContainer: true,
-        // Force high quality rendering
-        onclone: (clonedDoc) => {
-          // Ensure all elements are visible and properly styled
-          const style = clonedDoc.createElement('style');
-          style.textContent = `
-            * {
-              -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-            body {
-              background: white !important;
-            }
-            img {
-              opacity: 1 !important;
-              filter: none !important;
-            }
-          `;
-          clonedDoc.head.appendChild(style);
-        }
+        foreignObjectRendering: false,
+        imageTimeout: 10000,
+        removeContainer: false,
+        ignoreElements: () => false
       });
 
       console.log(`📸 Canvas created: ${canvas.width}x${canvas.height}`);
@@ -68,13 +45,11 @@ function App() {
         throw new Error('Canvas has zero dimensions');
       }
 
-      // Use maximum quality for image data
       const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4',
-        compress: false // Don't compress for better quality
+        format: 'a4'
       });
 
       const pdfWidth = 210;
@@ -85,13 +60,13 @@ function App() {
       let heightLeft = imgHeight;
       let position = 0;
 
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pdfHeight;
 
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pdfHeight;
       }
 
@@ -112,50 +87,27 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with enhanced settings...');
+      console.log('🖼️ Generating PNG...');
       
-      // Scroll to top and wait
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Enhanced html2canvas options for better quality
       const canvas = await html2canvas(content, {
-        scale: 3, // Higher scale for better quality
+        scale: 2,
         useCORS: true,
-        allowTaint: true, // Allow cross-origin images
+        allowTaint: false,
         backgroundColor: '#ffffff',
-        logging: true, // Enable logging to debug
+        logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
-        x: 0,
-        y: 0,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: content.offsetWidth,
-        windowHeight: content.offsetHeight,
-        foreignObjectRendering: true, // Better text rendering
-        imageTimeout: 15000, // Longer timeout for images
-        removeContainer: true,
-        // Force high quality rendering
-        onclone: (clonedDoc) => {
-          // Ensure all elements are visible and properly styled
-          const style = clonedDoc.createElement('style');
-          style.textContent = `
-            * {
-              -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-            body {
-              background: white !important;
-            }
-            img {
-              opacity: 1 !important;
-              filter: none !important;
-            }
-          `;
-          clonedDoc.head.appendChild(style);
-        }
+        foreignObjectRendering: false,
+        imageTimeout: 10000,
+        removeContainer: false,
+        ignoreElements: () => false
       });
 
       console.log(`📸 PNG canvas: ${canvas.width}x${canvas.height}`);
@@ -164,7 +116,6 @@ function App() {
         throw new Error('Canvas has zero dimensions');
       }
 
-      // Create download link with maximum quality
       const link = document.createElement('a');
       link.download = 'Cybersecurity-Newsletter.png';
       link.href = canvas.toDataURL('image/png', 1.0);
