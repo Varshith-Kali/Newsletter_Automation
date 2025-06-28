@@ -16,13 +16,15 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PDF...');
+      console.log('📄 Generating PDF with enhanced quality...');
       
+      // Ensure the element is visible and properly rendered
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
+      // Enhanced html2canvas options for better quality
       const canvas = await html2canvas(content, {
-        scale: 2,
+        scale: 3, // Higher scale for better quality
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
@@ -33,10 +35,88 @@ function App() {
         windowHeight: window.innerHeight,
         scrollX: 0,
         scrollY: 0,
-        foreignObjectRendering: false,
-        imageTimeout: 10000,
+        foreignObjectRendering: true, // Better rendering
+        imageTimeout: 15000,
         removeContainer: false,
-        ignoreElements: () => false
+        ignoreElements: () => false,
+        // Enhanced onclone to ensure proper styling
+        onclone: (clonedDoc, element) => {
+          console.log('🎨 Enhancing cloned document for better quality...');
+          
+          // Force all elements to have proper opacity and colors
+          const allElements = element.querySelectorAll('*');
+          allElements.forEach((el) => {
+            if (el instanceof HTMLElement) {
+              const computedStyle = window.getComputedStyle(el);
+              
+              // Ensure proper background colors
+              if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+                el.style.backgroundColor = computedStyle.backgroundColor;
+              }
+              
+              // Ensure proper text colors
+              if (computedStyle.color) {
+                el.style.color = computedStyle.color;
+              }
+              
+              // Remove any transparency issues
+              if (el.style.opacity && parseFloat(el.style.opacity) < 1) {
+                el.style.opacity = '1';
+              }
+            }
+          });
+          
+          // Ensure images are properly loaded and visible
+          const images = element.querySelectorAll('img');
+          images.forEach((img) => {
+            if (img instanceof HTMLImageElement) {
+              img.style.opacity = '1';
+              img.style.filter = 'none'; // Remove any filters that might cause dimming
+            }
+          });
+          
+          // Add a style to ensure everything is bright and clear
+          const enhanceStyle = clonedDoc.createElement('style');
+          enhanceStyle.textContent = `
+            * {
+              -webkit-print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            
+            .bg-red-700 {
+              background-color: #b91c1c !important;
+            }
+            
+            .bg-black {
+              background-color: #000000 !important;
+            }
+            
+            .bg-white {
+              background-color: #ffffff !important;
+            }
+            
+            .text-white {
+              color: #ffffff !important;
+            }
+            
+            .text-black {
+              color: #000000 !important;
+            }
+            
+            .text-red-700 {
+              color: #b91c1c !important;
+            }
+            
+            img {
+              opacity: 1 !important;
+              filter: none !important;
+            }
+          `;
+          
+          clonedDoc.head.appendChild(enhanceStyle);
+          console.log('✅ Document enhancement complete');
+        }
       });
 
       console.log(`📸 Canvas created: ${canvas.width}x${canvas.height}`);
@@ -87,13 +167,15 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG...');
+      console.log('🖼️ Generating PNG with enhanced quality...');
       
+      // Ensure the element is visible and properly rendered
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
+      // Same enhanced options as PDF
       const canvas = await html2canvas(content, {
-        scale: 2,
+        scale: 3, // Higher scale for better quality
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
@@ -104,10 +186,87 @@ function App() {
         windowHeight: window.innerHeight,
         scrollX: 0,
         scrollY: 0,
-        foreignObjectRendering: false,
-        imageTimeout: 10000,
+        foreignObjectRendering: true,
+        imageTimeout: 15000,
         removeContainer: false,
-        ignoreElements: () => false
+        ignoreElements: () => false,
+        onclone: (clonedDoc, element) => {
+          console.log('🎨 Enhancing cloned document for PNG...');
+          
+          // Force all elements to have proper opacity and colors
+          const allElements = element.querySelectorAll('*');
+          allElements.forEach((el) => {
+            if (el instanceof HTMLElement) {
+              const computedStyle = window.getComputedStyle(el);
+              
+              // Ensure proper background colors
+              if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+                el.style.backgroundColor = computedStyle.backgroundColor;
+              }
+              
+              // Ensure proper text colors
+              if (computedStyle.color) {
+                el.style.color = computedStyle.color;
+              }
+              
+              // Remove any transparency issues
+              if (el.style.opacity && parseFloat(el.style.opacity) < 1) {
+                el.style.opacity = '1';
+              }
+            }
+          });
+          
+          // Ensure images are properly loaded and visible
+          const images = element.querySelectorAll('img');
+          images.forEach((img) => {
+            if (img instanceof HTMLImageElement) {
+              img.style.opacity = '1';
+              img.style.filter = 'none';
+            }
+          });
+          
+          // Add enhancement styles
+          const enhanceStyle = clonedDoc.createElement('style');
+          enhanceStyle.textContent = `
+            * {
+              -webkit-print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            
+            .bg-red-700 {
+              background-color: #b91c1c !important;
+            }
+            
+            .bg-black {
+              background-color: #000000 !important;
+            }
+            
+            .bg-white {
+              background-color: #ffffff !important;
+            }
+            
+            .text-white {
+              color: #ffffff !important;
+            }
+            
+            .text-black {
+              color: #000000 !important;
+            }
+            
+            .text-red-700 {
+              color: #b91c1c !important;
+            }
+            
+            img {
+              opacity: 1 !important;
+              filter: none !important;
+            }
+          `;
+          
+          clonedDoc.head.appendChild(enhanceStyle);
+          console.log('✅ PNG enhancement complete');
+        }
       });
 
       console.log(`📸 PNG canvas: ${canvas.width}x${canvas.height}`);
