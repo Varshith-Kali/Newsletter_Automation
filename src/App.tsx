@@ -39,60 +39,35 @@ function App() {
         imageTimeout: 10000,
         removeContainer: false,
         ignoreElements: () => false,
-        // Enhanced onclone to ensure proper grayscale
+        // MINIMAL onclone - just ensure images are grayscale
         onclone: (clonedDoc, element) => {
-          console.log('🎨 Applying grayscale to images...');
+          console.log('🎨 Applying minimal style fixes...');
           
-          // Add comprehensive grayscale styles
-          const grayscaleStyle = clonedDoc.createElement('style');
-          grayscaleStyle.textContent = `
-            /* Force grayscale on ALL images with maximum specificity */
-            img, 
-            .newsletter-cover img,
-            .newsletter-threats img,
-            .newsletter-best-practices img {
-              filter: grayscale(100%) brightness(1) contrast(1) !important;
-              -webkit-filter: grayscale(100%) brightness(1) contrast(1) !important;
+          // Only add minimal style to ensure grayscale images
+          const minimalStyle = clonedDoc.createElement('style');
+          minimalStyle.textContent = `
+            /* Only force grayscale on images - keep everything else as-is */
+            img {
+              filter: grayscale(100%) !important;
             }
             
-            /* Ensure opacity is preserved */
+            /* Ensure no transparency issues */
             .opacity-60 {
               opacity: 0.6 !important;
             }
-            
-            /* Ensure all existing classes work */
-            .grayscale {
-              filter: grayscale(100%) !important;
-              -webkit-filter: grayscale(100%) !important;
-            }
           `;
           
-          clonedDoc.head.appendChild(grayscaleStyle);
+          clonedDoc.head.appendChild(minimalStyle);
           
-          // Force grayscale on every single image element
-          const allImages = element.querySelectorAll('img');
-          console.log(`🖼️ Found ${allImages.length} images to convert to grayscale`);
-          
-          allImages.forEach((img, index) => {
+          // Only modify images to ensure they're grayscale
+          const images = element.querySelectorAll('img');
+          images.forEach((img) => {
             if (img instanceof HTMLElement) {
-              console.log(`Converting image ${index + 1} to grayscale`);
-              
-              // Apply multiple methods to ensure grayscale
-              img.style.setProperty('filter', 'grayscale(100%) brightness(1) contrast(1)', 'important');
-              img.style.setProperty('-webkit-filter', 'grayscale(100%) brightness(1) contrast(1)', 'important');
-              
-              // Add grayscale class
-              img.classList.add('grayscale');
-              
-              // Set inline style as backup
-              img.setAttribute('style', 
-                (img.getAttribute('style') || '') + 
-                '; filter: grayscale(100%) brightness(1) contrast(1) !important; -webkit-filter: grayscale(100%) brightness(1) contrast(1) !important;'
-              );
+              img.style.setProperty('filter', 'grayscale(100%)', 'important');
             }
           });
           
-          console.log('✅ Grayscale applied to all images');
+          console.log('✅ Minimal styling applied - preserving original appearance');
         }
       });
 
@@ -128,7 +103,7 @@ function App() {
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🎉 PDF generated successfully with grayscale images!');
+      console.log('🎉 PDF generated successfully!');
       
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -150,7 +125,7 @@ function App() {
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Use same enhanced approach as PDF
+      // Use same minimal approach as PDF
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
@@ -168,49 +143,24 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          console.log('🎨 Applying grayscale to images...');
-          
-          // Same comprehensive grayscale approach as PDF
-          const grayscaleStyle = clonedDoc.createElement('style');
-          grayscaleStyle.textContent = `
-            img, 
-            .newsletter-cover img,
-            .newsletter-threats img,
-            .newsletter-best-practices img {
-              filter: grayscale(100%) brightness(1) contrast(1) !important;
-              -webkit-filter: grayscale(100%) brightness(1) contrast(1) !important;
+          // Same minimal approach as PDF
+          const minimalStyle = clonedDoc.createElement('style');
+          minimalStyle.textContent = `
+            img {
+              filter: grayscale(100%) !important;
             }
-            
             .opacity-60 {
               opacity: 0.6 !important;
             }
-            
-            .grayscale {
-              filter: grayscale(100%) !important;
-              -webkit-filter: grayscale(100%) !important;
-            }
           `;
-          clonedDoc.head.appendChild(grayscaleStyle);
+          clonedDoc.head.appendChild(minimalStyle);
           
-          const allImages = element.querySelectorAll('img');
-          console.log(`🖼️ Found ${allImages.length} images to convert to grayscale`);
-          
-          allImages.forEach((img, index) => {
+          const images = element.querySelectorAll('img');
+          images.forEach((img) => {
             if (img instanceof HTMLElement) {
-              console.log(`Converting image ${index + 1} to grayscale`);
-              
-              img.style.setProperty('filter', 'grayscale(100%) brightness(1) contrast(1)', 'important');
-              img.style.setProperty('-webkit-filter', 'grayscale(100%) brightness(1) contrast(1)', 'important');
-              img.classList.add('grayscale');
-              
-              img.setAttribute('style', 
-                (img.getAttribute('style') || '') + 
-                '; filter: grayscale(100%) brightness(1) contrast(1) !important; -webkit-filter: grayscale(100%) brightness(1) contrast(1) !important;'
-              );
+              img.style.setProperty('filter', 'grayscale(100%)', 'important');
             }
           });
-          
-          console.log('✅ Grayscale applied to all images');
         }
       });
 
@@ -227,7 +177,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
       
-      console.log('🎉 PNG generated successfully with grayscale images!');
+      console.log('🎉 PNG generated successfully!');
       
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
