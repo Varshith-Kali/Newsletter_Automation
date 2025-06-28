@@ -8,34 +8,86 @@ import { jsPDF } from 'jspdf';
 function App() {
   const printRef = useRef<HTMLDivElement>(null);
 
-  const convertCanvasToGrayscale = (canvas: HTMLCanvasElement): HTMLCanvasElement => {
-    console.log('🎨 ULTIMATE GRAYSCALE: Converting canvas pixels directly...');
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      console.warn('⚠️ Could not get canvas context');
-      return canvas;
-    }
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-      const red = data[i];
-      const green = data[i + 1];
-      const blue = data[i + 2];
+  // Function to convert image to grayscale canvas
+  const convertImageToGrayscale = (img: HTMLImageElement): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
       
-      const grayscale = Math.round(0.299 * red + 0.587 * green + 0.114 * blue);
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
       
-      data[i] = grayscale;
-      data[i + 1] = grayscale;
-      data[i + 2] = grayscale;
-    }
+      if (ctx) {
+        // Draw the original image
+        ctx.drawImage(img, 0, 0);
+        
+        // Get image data and convert to grayscale
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+          const red = data[i];
+          const green = data[i + 1];
+          const blue = data[i + 2];
+          
+          // Use luminance formula for proper grayscale conversion
+          const grayscale = Math.round(0.299 * red + 0.587 * green + 0.114 * blue);
+          
+          data[i] = grayscale;     // Red
+          data[i + 1] = grayscale; // Green
+          data[i + 2] = grayscale; // Blue
+          // Alpha channel (data[i + 3]) remains unchanged
+        }
+        
+        // Put the grayscale data back
+        ctx.putImageData(imageData, 0, 0);
+      }
+      
+      // Convert canvas to data URL
+      resolve(canvas.toDataURL('image/png', 1.0));
+    });
+  };
 
-    ctx.putImageData(imageData, 0, 0);
+  // Function to replace all images with grayscale versions
+  const replaceImagesWithGrayscale = async (element: HTMLElement): Promise<void> => {
+    const images = element.querySelectorAll('img');
+    const promises: Promise<void>[] = [];
     
-    console.log('✅ ULTIMATE GRAYSCALE: Canvas pixels converted to grayscale!');
-    return canvas;
+    images.forEach((img) => {
+      if (img instanceof HTMLImageElement) {
+        const promise = new Promise<void>((resolve) => {
+          if (img.complete && img.naturalWidth > 0) {
+            // Image is already loaded
+            convertImageToGrayscale(img).then((grayscaleDataUrl) => {
+              img.src = grayscaleDataUrl;
+              img.style.filter = 'none'; // Remove any existing filters
+              resolve();
+            });
+          } else {
+            // Wait for image to load
+            const handleLoad = () => {
+              convertImageToGrayscale(img).then((grayscaleDataUrl) => {
+                img.src = grayscaleDataUrl;
+                img.style.filter = 'none';
+                resolve();
+              });
+            };
+            
+            const handleError = () => {
+              console.warn('Failed to load image:', img.src);
+              resolve();
+            };
+            
+            img.addEventListener('load', handleLoad, { once: true });
+            img.addEventListener('error', handleError, { once: true });
+          }
+        });
+        
+        promises.push(promise);
+      }
+    });
+    
+    await Promise.all(promises);
   };
 
   const downloadAsPDF = async () => {
@@ -46,12 +98,12 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating SINGLE-PAGE PDF with ULTIMATE GRAYSCALE...');
+      console.log('📄 Generating SINGLE-PAGE PDF with PRE-PROCESSED GRAYSCALE IMAGES...');
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      let canvas = await html2canvas(content, {
+      const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
@@ -67,9 +119,15 @@ function App() {
         imageTimeout: 15000,
         removeContainer: false,
         ignoreElements: () => false,
-        onclone: (clonedDoc, element) => {
-          console.log('🎨 APPLYING COMPREHENSIVE STYLING...');
+        onclone: async (clonedDoc, element) => {
+          console.log('🎨 PRE-PROCESSING: Converting all images to grayscale...');
           
+          // First, replace all images with grayscale versions
+          await replaceImagesWithGrayscale(element);
+          
+          console.log('✅ All images converted to grayscale BEFORE canvas capture!');
+          
+          // Apply comprehensive styling
           const comprehensiveStyle = clonedDoc.createElement('style');
           comprehensiveStyle.textContent = `
             html, body, .newsletter-container, .newsletter, .newsletter-page {
@@ -86,6 +144,12 @@ function App() {
             .text-gray-700 { color: #374151 !important; }
             .text-gray-600 { color: #4b5563 !important; }
             .text-gray-500 { color: #6b7280 !important; }
+            
+            /* Remove any filters from images since they're already grayscale */
+            img {
+              filter: none !important;
+              -webkit-filter: none !important;
+            }
             
             .min-h-screen { min-height: 100vh !important; }
             .h-screen { height: 100vh !important; }
@@ -121,6 +185,7 @@ function App() {
           
           clonedDoc.head.appendChild(comprehensiveStyle);
           
+          // Apply additional styling to elements
           const allElements = element.querySelectorAll('*');
           allElements.forEach((el) => {
             if (el instanceof HTMLElement) {
@@ -155,6 +220,7 @@ function App() {
             }
           });
           
+          // Special handling for red boxes
           const redBoxes = element.querySelectorAll('.bg-red-700');
           redBoxes.forEach((box) => {
             if (box instanceof HTMLElement) {
@@ -180,7 +246,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling applied');
+          console.log('✅ Comprehensive styling applied with pre-processed grayscale images');
         }
       });
 
@@ -189,8 +255,6 @@ function App() {
       if (canvas.width === 0 || canvas.height === 0) {
         throw new Error('Canvas has zero dimensions');
       }
-
-      canvas = convertCanvasToGrayscale(canvas);
 
       const imgData = canvas.toDataURL('image/png', 1.0);
       
@@ -228,7 +292,7 @@ function App() {
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
 
       pdf.save('Cybersecurity-Newsletter-SinglePage.pdf');
-      console.log('🎉 SINGLE-PAGE PDF generated with ULTIMATE GRAYSCALE!');
+      console.log('🎉 SINGLE-PAGE PDF generated with PRE-PROCESSED GRAYSCALE IMAGES!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -244,12 +308,12 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with ULTIMATE GRAYSCALE...');
+      console.log('🖼️ Generating PNG with PRE-PROCESSED GRAYSCALE IMAGES...');
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      let canvas = await html2canvas(content, {
+      const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
@@ -265,8 +329,13 @@ function App() {
         imageTimeout: 15000,
         removeContainer: false,
         ignoreElements: () => false,
-        onclone: (clonedDoc, element) => {
-          console.log('🎨 APPLYING COMPREHENSIVE STYLING FOR PNG...');
+        onclone: async (clonedDoc, element) => {
+          console.log('🎨 PRE-PROCESSING PNG: Converting all images to grayscale...');
+          
+          // Pre-process images to grayscale
+          await replaceImagesWithGrayscale(element);
+          
+          console.log('✅ All images converted to grayscale for PNG!');
           
           const comprehensiveStyle = clonedDoc.createElement('style');
           comprehensiveStyle.textContent = `
@@ -283,6 +352,12 @@ function App() {
             .text-gray-700 { color: #374151 !important; }
             .text-gray-600 { color: #4b5563 !important; }
             .text-gray-500 { color: #6b7280 !important; }
+            
+            img {
+              filter: none !important;
+              -webkit-filter: none !important;
+            }
+            
             .min-h-screen { min-height: 100vh !important; }
             .h-screen { height: 100vh !important; }
             .absolute { position: absolute !important; }
@@ -373,7 +448,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling for PNG applied');
+          console.log('✅ Comprehensive styling for PNG applied with pre-processed images');
         }
       });
 
@@ -383,8 +458,6 @@ function App() {
         throw new Error('Canvas has zero dimensions');
       }
 
-      canvas = convertCanvasToGrayscale(canvas);
-
       const link = document.createElement('a');
       link.download = 'Cybersecurity-Newsletter.png';
       link.href = canvas.toDataURL('image/png', 1.0);
@@ -392,7 +465,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated with ULTIMATE GRAYSCALE!');
+      console.log('🎉 PNG generated with PRE-PROCESSED GRAYSCALE IMAGES!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
