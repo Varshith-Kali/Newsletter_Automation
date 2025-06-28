@@ -36,12 +36,37 @@ const NewsletterThreats: React.FC = () => {
     return 'Recent';
   };
 
-  const handleThreatClick = (link?: string) => {
-    if (link) {
-      console.log('Opening link:', link);
-      window.open(link, '_blank', 'noopener,noreferrer');
+  const handleThreatClick = (threat: any, event: React.MouseEvent) => {
+    event.preventDefault();
+    
+    console.log('🔗 Threat clicked:', {
+      title: threat.title,
+      link: threat.link,
+      source: threat.source
+    });
+    
+    if (threat.link && threat.link.trim() !== '') {
+      // Validate URL format
+      let url = threat.link.trim();
+      
+      // Add protocol if missing
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      
+      try {
+        // Validate URL
+        new URL(url);
+        
+        console.log('✅ Opening valid URL:', url);
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } catch (error) {
+        console.error('❌ Invalid URL format:', url, error);
+        alert(`Invalid URL format: ${url}`);
+      }
     } else {
-      console.log('No link available for this threat');
+      console.warn('⚠️ No valid link available for this threat');
+      alert('No source link available for this incident');
     }
   };
 
@@ -87,13 +112,20 @@ const NewsletterThreats: React.FC = () => {
               <div className="flex items-start justify-between mb-2">
                 <h3 className="font-bold mb-2 flex items-center flex-1">
                   <span 
-                    onClick={() => handleThreatClick(threat.link)}
-                    className={`text-black transition-colors ${
-                      threat.link 
-                        ? 'cursor-pointer hover:text-gray-600 hover:underline' 
+                    onClick={(e) => handleThreatClick(threat, e)}
+                    className={`text-black transition-all duration-200 ${
+                      threat.link && threat.link.trim() !== ''
+                        ? 'cursor-pointer hover:text-red-600 hover:underline hover:scale-105 transform' 
                         : 'cursor-default'
                     }`}
-                    title={threat.link ? 'Click to read more' : 'No source link available'}
+                    title={
+                      threat.link && threat.link.trim() !== ''
+                        ? `Click to read full article: ${threat.link}` 
+                        : 'No source link available'
+                    }
+                    style={{
+                      textDecoration: threat.link && threat.link.trim() !== '' ? 'none' : 'initial'
+                    }}
                   >
                     {index + 1}. {threat.title}
                   </span>
@@ -115,6 +147,17 @@ const NewsletterThreats: React.FC = () => {
                     {formatDate(threat.formattedDate, threat.pubDate)}
                   </span>
                 </div>
+                {threat.link && threat.link.trim() !== '' && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-green-600 font-medium">🔗 Source Available</span>
+                    <button
+                      onClick={(e) => handleThreatClick(threat, e)}
+                      className="text-blue-600 hover:text-blue-800 underline text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition-colors"
+                    >
+                      Read Full Article
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -141,6 +184,9 @@ const NewsletterThreats: React.FC = () => {
             <div>
               <span className="font-medium">Sources:</span> {[...new Set(threats.map(t => t.source))].length}
             </div>
+          </div>
+          <div className="mt-3 text-xs text-gray-500">
+            <span className="font-medium">Links Available:</span> {threats.filter(t => t.link && t.link.trim() !== '').length} of {threats.length} incidents
           </div>
         </div>
       </div>
