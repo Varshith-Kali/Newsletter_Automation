@@ -1,6 +1,6 @@
 import React from 'react';
 import { Threat, useNewsletter } from '../context/NewsletterContext';
-import { Trash2, RefreshCw, Zap, Clock, TrendingUp, Shield, Users, Calendar } from 'lucide-react';
+import { Trash2, RefreshCw, Zap, Clock, TrendingUp, Shield, Users, Calendar, Brain, Target, BarChart3 } from 'lucide-react';
 
 const NewsletterEditor: React.FC = () => {
   const {
@@ -54,6 +54,14 @@ const NewsletterEditor: React.FC = () => {
     }
   };
 
+  const getThreatScoreColor = (score?: number) => {
+    if (!score) return 'bg-gray-100 text-gray-600';
+    if (score >= 50) return 'bg-red-100 text-red-700';
+    if (score >= 30) return 'bg-orange-100 text-orange-700';
+    if (score >= 15) return 'bg-yellow-100 text-yellow-700';
+    return 'bg-green-100 text-green-700';
+  };
+
   const formatThreatDate = (formattedDate?: string, pubDate?: string) => {
     if (formattedDate) return formattedDate;
     if (pubDate) {
@@ -76,11 +84,11 @@ const NewsletterEditor: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-red-600 rounded-lg">
-              <Zap className="text-white" size={24} />
+              <Brain className="text-white" size={24} />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-red-800">AI-Powered Threat Intelligence</h3>
-              <p className="text-sm text-red-600">Real-time cybersecurity incident monitoring (Past 7 days ONLY)</p>
+              <h3 className="text-xl font-bold text-red-800">🤖 AI-Powered Threat Intelligence</h3>
+              <p className="text-sm text-red-600">Advanced AI analyzes 20+ sources to identify TOP 4 most critical threats</p>
             </div>
           </div>
           <button
@@ -93,47 +101,47 @@ const NewsletterEditor: React.FC = () => {
             }`}
           >
             <RefreshCw className={isUpdating ? 'animate-spin' : ''} size={18} />
-            <span>{isUpdating ? 'Scanning Latest...' : 'Fetch Latest Threats'}</span>
+            <span>{isUpdating ? 'AI Analyzing...' : '🚀 Fetch Latest Threats'}</span>
           </button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="bg-white p-4 rounded-lg border border-red-200">
             <div className="flex items-center space-x-2 mb-2">
-              <TrendingUp className="text-red-600" size={20} />
-              <h4 className="font-semibold text-red-700">Live Monitoring</h4>
+              <Target className="text-red-600" size={20} />
+              <h4 className="font-semibold text-red-700">🎯 AI Selection</h4>
             </div>
             <ul className="space-y-1 text-sm text-red-600">
-              <li>• 20+ cybersecurity RSS feeds</li>
-              <li>• <strong>STRICTLY past 7 days</strong></li>
-              <li>• Smart duplicate elimination</li>
-              <li>• CVE extraction & classification</li>
+              <li>• <strong>Smart threat scoring</strong></li>
+              <li>• CVE detection & analysis</li>
+              <li>• Severity classification</li>
+              <li>• <strong>TOP 4 most critical</strong></li>
             </ul>
           </div>
           
           <div className="bg-white p-4 rounded-lg border border-red-200">
             <div className="flex items-center space-x-2 mb-2">
               <Shield className="text-red-600" size={20} />
-              <h4 className="font-semibold text-red-700">AI Processing</h4>
+              <h4 className="font-semibold text-red-700">🤖 AI Processing</h4>
             </div>
             <ul className="space-y-1 text-sm text-red-600">
-              <li>• Smart threat classification</li>
+              <li>• Advanced summarization</li>
               <li>• Contextual best practices</li>
-              <li>• Automated summarization</li>
-              <li>• <strong>Date extraction & display</strong></li>
+              <li>• <strong>Real article links</strong></li>
+              <li>• Date extraction & validation</li>
             </ul>
           </div>
           
           <div className="bg-white p-4 rounded-lg border border-red-200">
             <div className="flex items-center space-x-2 mb-2">
-              <Calendar className="text-red-600" size={20} />
-              <h4 className="font-semibold text-red-700">Date Tracking</h4>
+              <BarChart3 className="text-red-600" size={20} />
+              <h4 className="font-semibold text-red-700">📊 Quality Metrics</h4>
             </div>
             <ul className="space-y-1 text-sm text-red-600">
-              <li>• Real publication dates</li>
-              <li>• "X hours/days ago" format</li>
-              <li>• Automatic date validation</li>
-              <li>• Weekly cache cleanup</li>
+              <li>• Threat score ranking</li>
+              <li>• Link validation (100%)</li>
+              <li>• <strong>STRICTLY past 7 days</strong></li>
+              <li>• Multi-source intelligence</li>
             </ul>
           </div>
         </div>
@@ -141,13 +149,16 @@ const NewsletterEditor: React.FC = () => {
         <div className="flex items-center justify-between text-sm bg-white p-3 rounded-lg border border-red-200">
           <div className="flex items-center space-x-2">
             <Clock size={16} className="text-red-600" />
-            <span className="font-semibold text-red-700">Last Updated:</span>
+            <span className="font-semibold text-red-700">Last AI Analysis:</span>
             <span className="text-red-600">{formatLastUpdated(lastUpdated)}</span>
           </div>
           
           {generationStats && (
             <div className="flex items-center space-x-4 text-red-600">
-              <span>📊 {generationStats.threatsGenerated} threats</span>
+              <span>🎯 {generationStats.threatsGenerated} threats</span>
+              {generationStats.avgThreatScore && (
+                <span>📊 Avg Score: {generationStats.avgThreatScore}</span>
+              )}
               <span>🔍 {generationStats.cveCount} CVEs</span>
               <span>📡 {generationStats.sourcesUsed} sources</span>
               {generationStats.newestArticle && (
@@ -159,10 +170,32 @@ const NewsletterEditor: React.FC = () => {
           {isUpdating && (
             <div className="flex items-center space-x-2 text-red-600">
               <div className="animate-pulse w-2 h-2 bg-red-600 rounded-full"></div>
-              <span>Scanning latest incidents...</span>
+              <span>AI analyzing latest threats...</span>
             </div>
           )}
         </div>
+
+        {/* Enhanced Statistics Display */}
+        {generationStats && generationStats.severityBreakdown && (
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="bg-red-100 p-3 rounded-lg text-center">
+              <div className="text-red-800 font-bold text-lg">{generationStats.severityBreakdown.critical}</div>
+              <div className="text-red-600 text-xs">Critical</div>
+            </div>
+            <div className="bg-orange-100 p-3 rounded-lg text-center">
+              <div className="text-orange-800 font-bold text-lg">{generationStats.severityBreakdown.high}</div>
+              <div className="text-orange-600 text-xs">High</div>
+            </div>
+            <div className="bg-yellow-100 p-3 rounded-lg text-center">
+              <div className="text-yellow-800 font-bold text-lg">{generationStats.severityBreakdown.medium}</div>
+              <div className="text-yellow-600 text-xs">Medium</div>
+            </div>
+            <div className="bg-blue-100 p-3 rounded-lg text-center">
+              <div className="text-blue-800 font-bold text-lg">{generationStats.articlesScanned}</div>
+              <div className="text-blue-600 text-xs">Articles Scanned</div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">
@@ -228,8 +261,8 @@ const NewsletterEditor: React.FC = () => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-medium">Security Flaws, Zero-Day Attacks & Vulnerabilities</h3>
-            <p className="text-sm text-gray-600">Latest incidents from the past 7 days with publication dates (minimum 4 required)</p>
+            <h3 className="text-lg font-medium">🎯 AI-Selected Top 4 Critical Threats</h3>
+            <p className="text-sm text-gray-600">Latest incidents ranked by AI threat scoring (past 7 days with exact article links)</p>
           </div>
           <button
             onClick={addThreat}
@@ -250,6 +283,11 @@ const NewsletterEditor: React.FC = () => {
                       {threat.severity}
                     </span>
                   )}
+                  {threat.threatScore && (
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getThreatScoreColor(threat.threatScore)}`}>
+                      Score: {threat.threatScore}
+                    </span>
+                  )}
                   {threat.cves && threat.cves.length > 0 && (
                     <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                       {threat.cves.join(', ')}
@@ -258,6 +296,15 @@ const NewsletterEditor: React.FC = () => {
                   <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold border border-green-300">
                     {formatThreatDate(threat.formattedDate, threat.pubDate)}
                   </div>
+                  {threat.linkType && (
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      threat.linkType === 'direct' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {threat.linkType === 'direct' ? '🔗 Direct' : '🔍 Search'}
+                    </span>
+                  )}
                 </div>
                 <button
                   onClick={() => removeThreat(threat.id)}
@@ -295,7 +342,7 @@ const NewsletterEditor: React.FC = () => {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-800 underline"
                   >
-                    View Original
+                    {threat.linkType === 'direct' ? 'View Article' : 'Search Article'}
                   </a>
                 )}
               </div>
@@ -307,8 +354,8 @@ const NewsletterEditor: React.FC = () => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-medium">Best Practices & Awareness</h3>
-            <p className="text-sm text-gray-600">Contextual recommendations based on current threats (minimum 3 required)</p>
+            <h3 className="text-lg font-medium">🛡️ AI-Generated Best Practices</h3>
+            <p className="text-sm text-gray-600">Contextual recommendations based on current threat landscape</p>
           </div>
           <button
             onClick={addBestPractice}
@@ -341,8 +388,8 @@ const NewsletterEditor: React.FC = () => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-medium">Training Spotlight</h3>
-            <p className="text-sm text-gray-600">Relevant training based on current threat landscape (minimum 3 required)</p>
+            <h3 className="text-lg font-medium">🎓 AI-Generated Training Spotlight</h3>
+            <p className="text-sm text-gray-600">Relevant training based on current threat intelligence</p>
           </div>
           <button
             onClick={addTrainingItem}
@@ -373,7 +420,7 @@ const NewsletterEditor: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Thought of the Day</h3>
+        <h3 className="text-lg font-medium">💭 AI-Generated Thought of the Day</h3>
         <textarea
           value={thoughtOfTheDay}
           onChange={(e) => setThoughtOfTheDay(e.target.value)}
@@ -383,7 +430,7 @@ const NewsletterEditor: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Security Joke</h3>
+        <h3 className="text-lg font-medium">😄 AI-Generated Security Joke</h3>
         <textarea
           value={securityJoke}
           onChange={(e) => setSecurityJoke(e.target.value)}

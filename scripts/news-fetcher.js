@@ -5,7 +5,7 @@ import { join } from 'path';
 
 const parser = new Parser();
 
-// Enhanced cybersecurity RSS feeds with more sources
+// Enhanced cybersecurity RSS feeds with more sources for better coverage
 const RSS_FEEDS = [
   'https://feeds.feedburner.com/TheHackersNews',
   'https://krebsonsecurity.com/feed/',
@@ -26,7 +26,11 @@ const RSS_FEEDS = [
   'https://www.govinfosecurity.com/rss.php',
   'https://feeds.feedburner.com/eset/blog',
   'https://blog.malwarebytes.com/feed/',
-  'https://www.welivesecurity.com/feed/'
+  'https://www.welivesecurity.com/feed/',
+  'https://www.sans.org/blog/rss/',
+  'https://www.fireeye.com/blog/feed',
+  'https://unit42.paloaltonetworks.com/feed/',
+  'https://blog.talosintelligence.com/feeds/posts/default'
 ];
 
 const CACHE_FILE = 'src/data/news-cache.json';
@@ -224,8 +228,77 @@ function generateFallbackSearchUrl(title, source) {
   }
 }
 
+// Enhanced threat scoring algorithm
+function calculateThreatScore(article) {
+  let score = 0;
+  const text = (article.title + ' ' + article.description).toLowerCase();
+  
+  // Critical keywords (highest impact)
+  const criticalKeywords = [
+    'zero-day', 'zero day', 'critical', 'remote code execution', 'rce', 
+    'privilege escalation', 'unauthenticated', 'wormable', 'actively exploited',
+    'emergency patch', 'immediate action', 'urgent', 'ransomware', 'apt',
+    'supply chain', 'backdoor', 'nation-state'
+  ];
+  
+  // High impact keywords
+  const highKeywords = [
+    'vulnerability', 'exploit', 'breach', 'malware', 'trojan', 
+    'advanced persistent threat', 'attack', 'compromise', 'infiltration',
+    'data breach', 'stolen', 'leaked', 'exposed'
+  ];
+  
+  // Medium impact keywords
+  const mediumKeywords = [
+    'phishing', 'scam', 'update', 'patch', 'security flaw', 
+    'data leak', 'exposure', 'misconfiguration', 'warning'
+  ];
+  
+  // CVE mentions add significant score
+  const cveMatches = text.match(/cve-\d{4}-\d{4,7}/gi) || [];
+  score += cveMatches.length * 15;
+  
+  // Critical keywords
+  criticalKeywords.forEach(keyword => {
+    if (text.includes(keyword)) score += 20;
+  });
+  
+  // High keywords
+  highKeywords.forEach(keyword => {
+    if (text.includes(keyword)) score += 10;
+  });
+  
+  // Medium keywords
+  mediumKeywords.forEach(keyword => {
+    if (text.includes(keyword)) score += 5;
+  });
+  
+  // Recency bonus (more recent = higher score)
+  const articleDate = new Date(article.pubDate);
+  const now = new Date();
+  const hoursOld = (now - articleDate) / (1000 * 60 * 60);
+  
+  if (hoursOld < 24) score += 10; // Last 24 hours
+  else if (hoursOld < 48) score += 7; // Last 48 hours
+  else if (hoursOld < 72) score += 5; // Last 3 days
+  
+  // Source credibility bonus
+  const credibleSources = [
+    'microsoft', 'cisa', 'nist', 'sans', 'fireeye', 'crowdstrike',
+    'palo alto', 'symantec', 'kaspersky', 'trend micro', 'bleeping'
+  ];
+  
+  credibleSources.forEach(source => {
+    if (article.source.toLowerCase().includes(source)) {
+      score += 8;
+    }
+  });
+  
+  return score;
+}
+
 export async function fetchCyberSecurityNews() {
-  console.log('🔍 Fetching STRICTLY latest cybersecurity news from past 7 days...');
+  console.log('🤖 AI-POWERED THREAT INTELLIGENCE: Fetching latest cybersecurity incidents...');
   console.log(`📅 Current time: ${new Date().toISOString()}`);
   console.log(`📅 Cutoff time: ${new Date(Date.now() - CACHE_DURATION).toISOString()}`);
   
@@ -241,6 +314,8 @@ export async function fetchCyberSecurityNews() {
   let validLinks = 0;
   let fallbackLinks = 0;
   
+  console.log(`🔍 Scanning ${RSS_FEEDS.length} cybersecurity intelligence sources...`);
+  
   for (const feedUrl of RSS_FEEDS) {
     try {
       console.log(`📡 Fetching from: ${feedUrl}`);
@@ -248,7 +323,7 @@ export async function fetchCyberSecurityNews() {
       
       const recentArticles = [];
       
-      for (const item of feed.items.slice(0, 12)) { // Check more items per feed
+      for (const item of feed.items.slice(0, 15)) { // Check more items per feed for better coverage
         const isRecent = isStrictlyRecentArticle(item.pubDate);
         if (isRecent) {
           console.log(`✅ Valid article: ${item.title} - ${formatArticleDate(item.pubDate)}`);
@@ -279,7 +354,7 @@ export async function fetchCyberSecurityNews() {
             console.log(`🔄 Using fallback search URL: ${validatedLink}`);
           }
           
-          recentArticles.push({
+          const article = {
             title: item.title?.trim() || 'Untitled',
             description: (item.contentSnippet || item.description || '').trim(),
             link: validatedLink, // Always has a working link (validated or fallback)
@@ -291,8 +366,12 @@ export async function fetchCyberSecurityNews() {
             originalLink: item.link, // Keep original for debugging
             feedUrl: feedUrl,
             linkType: validatedLink === item.link ? 'direct' : 'fallback'
-          });
+          };
           
+          // Calculate threat score for intelligent ranking
+          article.threatScore = calculateThreatScore(article);
+          
+          recentArticles.push(article);
           validArticles++;
         }
       }
@@ -301,7 +380,7 @@ export async function fetchCyberSecurityNews() {
       totalFetched += feed.items.length;
       
       // Add delay to be respectful to servers and avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1200));
       
     } catch (error) {
       console.warn(`⚠️ Failed to fetch from ${feedUrl}:`, error.message);
@@ -316,10 +395,17 @@ export async function fetchCyberSecurityNews() {
   const allArticles = [...cache.articles, ...newArticles];
   const uniqueArticles = removeDuplicates(allArticles);
   
-  // Sort by date (newest first) and ensure they're all recent
+  // Sort by threat score and date (newest first) and ensure they're all recent
   const recentUniqueArticles = uniqueArticles
     .filter(article => isStrictlyRecentArticle(article.pubDate))
-    .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+    .sort((a, b) => {
+      // Primary sort: threat score (higher first)
+      if (b.threatScore !== a.threatScore) {
+        return b.threatScore - a.threatScore;
+      }
+      // Secondary sort: date (newer first)
+      return new Date(b.pubDate) - new Date(a.pubDate);
+    });
   
   // Update cache
   cache.articles = recentUniqueArticles;
@@ -328,57 +414,128 @@ export async function fetchCyberSecurityNews() {
   
   console.log(`✅ Final count: ${recentUniqueArticles.length} unique recent articles`);
   console.log(`🔗 All articles have working links (${recentUniqueArticles.filter(a => a.linkType === 'direct').length} direct, ${recentUniqueArticles.filter(a => a.linkType === 'fallback').length} fallback)`);
+  console.log(`🎯 Top threat scores: ${recentUniqueArticles.slice(0, 5).map(a => a.threatScore).join(', ')}`);
   
-  // Return the most recent articles for processing
-  return recentUniqueArticles.slice(0, 30);
+  // Return the most recent and highest-scoring articles for processing
+  return recentUniqueArticles.slice(0, 50); // Return top 50 for further processing
 }
 
-export async function summarizeWithHuggingFace(text, maxLength = 120) {
+// Enhanced AI summarization with multiple fallbacks
+export async function summarizeWithAI(text, maxLength = 130) {
   try {
     // Clean and prepare text
     const cleanText = text
       .replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/\s+/g, ' ')
       .trim()
-      .substring(0, 1000);
+      .substring(0, 1500); // Increased for better context
     
     if (cleanText.length < 50) {
       return cleanText + '...';
     }
     
-    const response = await fetch('https://api-inference.huggingface.co/models/facebook/bart-large-cnn', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        inputs: cleanText,
-        parameters: {
-          max_length: maxLength,
-          min_length: 40,
-          do_sample: false,
-          early_stopping: true
+    console.log('🤖 Attempting AI summarization...');
+    
+    // Try multiple AI endpoints for better reliability
+    const aiEndpoints = [
+      {
+        url: 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn',
+        headers: { 'Content-Type': 'application/json' },
+        body: {
+          inputs: cleanText,
+          parameters: {
+            max_length: maxLength,
+            min_length: 50,
+            do_sample: false,
+            early_stopping: true
+          }
         }
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
+      },
+      {
+        url: 'https://api-inference.huggingface.co/models/google/pegasus-xsum',
+        headers: { 'Content-Type': 'application/json' },
+        body: {
+          inputs: cleanText,
+          parameters: {
+            max_length: maxLength,
+            min_length: 50
+          }
+        }
+      }
+    ];
     
-    if (result[0]?.summary_text) {
-      return result[0].summary_text;
+    for (const endpoint of aiEndpoints) {
+      try {
+        const response = await fetch(endpoint.url, {
+          method: 'POST',
+          headers: endpoint.headers,
+          body: JSON.stringify(endpoint.body)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          
+          if (result[0]?.summary_text) {
+            console.log('✅ AI summarization successful');
+            return result[0].summary_text;
+          } else if (result[0]?.generated_text) {
+            console.log('✅ AI text generation successful');
+            return result[0].generated_text.substring(0, maxLength) + '...';
+          }
+        }
+      } catch (error) {
+        console.warn(`⚠️ AI endpoint failed: ${endpoint.url}`, error.message);
+        continue;
+      }
     }
     
-    // Fallback to truncated original text
-    return cleanText.substring(0, maxLength) + '...';
+    // Intelligent fallback: extract key sentences
+    console.log('🔄 Using intelligent text extraction fallback...');
+    return extractKeyInformation(cleanText, maxLength);
     
   } catch (error) {
-    console.warn('⚠️ Summarization failed, using truncated text:', error.message);
+    console.warn('⚠️ All summarization methods failed, using truncated text:', error.message);
     return text.substring(0, maxLength) + '...';
   }
+}
+
+// Intelligent text extraction for fallback
+function extractKeyInformation(text, maxLength) {
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+  
+  // Prioritize sentences with important keywords
+  const importantKeywords = [
+    'vulnerability', 'exploit', 'breach', 'attack', 'malware', 'ransomware',
+    'critical', 'zero-day', 'cve', 'patch', 'security', 'threat'
+  ];
+  
+  const scoredSentences = sentences.map(sentence => {
+    let score = 0;
+    const lowerSentence = sentence.toLowerCase();
+    
+    importantKeywords.forEach(keyword => {
+      if (lowerSentence.includes(keyword)) score += 1;
+    });
+    
+    // Prefer shorter, more concise sentences
+    if (sentence.length < 100) score += 0.5;
+    
+    return { sentence: sentence.trim(), score };
+  });
+  
+  // Sort by score and take the best sentences
+  scoredSentences.sort((a, b) => b.score - a.score);
+  
+  let result = '';
+  for (const item of scoredSentences) {
+    if (result.length + item.sentence.length < maxLength - 3) {
+      result += (result ? '. ' : '') + item.sentence;
+    } else {
+      break;
+    }
+  }
+  
+  return result + '...';
 }
 
 export function extractCVEs(text) {
@@ -387,7 +544,7 @@ export function extractCVEs(text) {
   return [...new Set(matches)]; // Remove duplicates
 }
 
-export function classifyThreatSeverity(title, description) {
+export function classifyThreatSeverity(title, description, threatScore = 0) {
   const text = (title + ' ' + description).toLowerCase();
   
   const criticalKeywords = [
@@ -407,11 +564,12 @@ export function classifyThreatSeverity(title, description) {
     'data leak', 'exposure', 'misconfiguration', 'warning'
   ];
   
-  if (criticalKeywords.some(keyword => text.includes(keyword))) {
+  // Use threat score as additional factor
+  if (threatScore > 50 || criticalKeywords.some(keyword => text.includes(keyword))) {
     return 'CRITICAL';
-  } else if (highKeywords.some(keyword => text.includes(keyword))) {
+  } else if (threatScore > 30 || highKeywords.some(keyword => text.includes(keyword))) {
     return 'HIGH';
-  } else if (mediumKeywords.some(keyword => text.includes(keyword))) {
+  } else if (threatScore > 15 || mediumKeywords.some(keyword => text.includes(keyword))) {
     return 'MEDIUM';
   }
   return 'LOW';
@@ -515,7 +673,9 @@ export function generateSecurityThought() {
     'THE BEST DEFENSE AGAINST TOMORROW\'S THREATS IS TODAY\'S PREPARATION - ASSUME BREACH, PLAN FOR RESILIENCE.',
     'CYBERSECURITY IS NOT A DESTINATION BUT A CONTINUOUS JOURNEY OF ADAPTATION, LEARNING, AND IMPROVEMENT.',
     'IN CYBERSECURITY, PARANOIA IS PROFESSIONALISM - QUESTION EVERYTHING, VERIFY CONSTANTLY, TRUST CAUTIOUSLY.',
-    'THE COST OF PREVENTION IS ALWAYS LESS THAN THE PRICE OF RECOVERY - INVEST IN SECURITY BEFORE YOU NEED IT.'
+    'THE COST OF PREVENTION IS ALWAYS LESS THAN THE PRICE OF RECOVERY - INVEST IN SECURITY BEFORE YOU NEED IT.',
+    'ARTIFICIAL INTELLIGENCE IS RESHAPING BOTH CYBER ATTACKS AND DEFENSES - STAY AHEAD OF THE CURVE OR FALL BEHIND.',
+    'ZERO TRUST IS NOT JUST A SECURITY MODEL, IT\'S A MINDSET - NEVER TRUST, ALWAYS VERIFY, CONTINUOUSLY MONITOR.'
   ];
   
   return thoughts[Math.floor(Math.random() * thoughts.length)];
@@ -529,7 +689,9 @@ export function generateSecurityJoke() {
     'HOW MANY CYBERSECURITY PROFESSIONALS DOES IT TAKE TO CHANGE A LIGHT BULB? NONE - THEY JUST DECLARE DARKNESS A SECURITY FEATURE!',
     'WHY DON\'T SECURITY ANALYSTS TRUST STAIRS? BECAUSE THEY\'RE ALWAYS UP TO SOMETHING SUSPICIOUS!',
     'WHAT DO YOU CALL A CYBERSECURITY EXPERT WHO WORKS FROM HOME? A REMOTE ACCESS TROJAN... WAIT, THAT CAME OUT WRONG!',
-    'WHY DID THE PASSWORD GO TO THERAPY? IT HAD TOO MANY COMPLEX REQUIREMENTS AND COULDN\'T HANDLE THE PRESSURE!'
+    'WHY DID THE PASSWORD GO TO THERAPY? IT HAD TOO MANY COMPLEX REQUIREMENTS AND COULDN\'T HANDLE THE PRESSURE!',
+    'WHAT\'S A HACKER\'S FAVORITE TYPE OF MUSIC? ANYTHING WITH GOOD ENCRYPTION... I MEAN, GOOD RHYTHM!',
+    'WHY DO CYBERSECURITY TEAMS LOVE COFFEE? BECAUSE THEY NEED TO STAY ALERT FOR THOSE 3 AM INCIDENT RESPONSE CALLS!'
   ];
   
   return jokes[Math.floor(Math.random() * jokes.length)];

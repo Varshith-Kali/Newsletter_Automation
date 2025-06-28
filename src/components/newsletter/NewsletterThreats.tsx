@@ -36,81 +36,7 @@ const NewsletterThreats: React.FC = () => {
     return 'Recent';
   };
 
-  // Test if a URL is accessible in real-time
-  const testUrlAccessibility = async (url: string): Promise<boolean> => {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
-      
-      const response = await fetch(url, {
-        method: 'HEAD',
-        signal: controller.signal,
-        mode: 'no-cors', // This helps avoid CORS issues
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; NewsBot/1.0)'
-        }
-      });
-      
-      clearTimeout(timeoutId);
-      return response.ok || response.status === 0; // status 0 is common with no-cors
-      
-    } catch (error) {
-      console.warn(`URL test failed for ${url}:`, error.message);
-      return false;
-    }
-  };
-
-  // Generate smart fallback URLs based on the threat content
-  const generateSmartFallbackUrl = (threat: any) => {
-    const title = threat.title.toLowerCase();
-    const source = (threat.source || '').toLowerCase();
-    
-    // Create search query from title (first 50 chars for better results)
-    const searchQuery = encodeURIComponent(
-      threat.title.substring(0, 50).replace(/[^\w\s]/g, ' ').trim()
-    );
-    
-    // CVE-specific search if CVEs are present
-    if (threat.cves && threat.cves.length > 0) {
-      const cveQuery = encodeURIComponent(threat.cves[0]);
-      return `https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=${cveQuery}`;
-    }
-    
-    // Source-specific intelligent fallbacks
-    if (source.includes('microsoft') || title.includes('microsoft')) {
-      return `https://msrc.microsoft.com/update-guide/en-US/security-updates`;
-    } else if (source.includes('cisa') || title.includes('cisa')) {
-      return `https://www.cisa.gov/news-events/cybersecurity-advisories`;
-    } else if (source.includes('github') || title.includes('npm') || title.includes('supply chain')) {
-      return `https://github.com/advisories?query=${searchQuery}`;
-    } else if (source.includes('bleeping') || source.includes('bleepingcomputer')) {
-      return `https://www.bleepingcomputer.com/search/?q=${searchQuery}`;
-    } else if (source.includes('krebs')) {
-      return `https://krebsonsecurity.com/?s=${searchQuery}`;
-    } else if (source.includes('dark reading')) {
-      return `https://www.darkreading.com/search?query=${searchQuery}`;
-    } else if (source.includes('security week')) {
-      return `https://www.securityweek.com/search/?q=${searchQuery}`;
-    } else if (title.includes('ransomware')) {
-      return `https://www.cisa.gov/stopransomware`;
-    } else if (title.includes('phishing')) {
-      return `https://www.cisa.gov/news-events/alerts`;
-    } else {
-      // Generic cybersecurity search with specific terms
-      const specificTerms = [];
-      if (title.includes('vulnerability')) specificTerms.push('vulnerability');
-      if (title.includes('exploit')) specificTerms.push('exploit');
-      if (title.includes('zero-day')) specificTerms.push('zero-day');
-      if (title.includes('malware')) specificTerms.push('malware');
-      
-      const enhancedQuery = encodeURIComponent(
-        `${threat.title.substring(0, 40)} ${specificTerms.join(' ')} cybersecurity`
-      );
-      return `https://www.google.com/search?q=${enhancedQuery}`;
-    }
-  };
-
-  const handleThreatClick = async (threat: any, event: React.MouseEvent) => {
+  const handleThreatClick = (threat: any, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     
@@ -121,126 +47,41 @@ const NewsletterThreats: React.FC = () => {
       source: threat.source
     });
     
-    // Show loading state
-    const originalText = event.currentTarget.textContent;
-    (event.currentTarget as HTMLElement).style.opacity = '0.6';
-    (event.currentTarget as HTMLElement).textContent = '🔄 Testing link...';
-    
-    try {
-      let finalUrl = threat.link;
-      let linkType = threat.linkType || 'unknown';
-      
-      // If we have a link, test it first
-      if (threat.link && threat.link.trim() !== '') {
-        console.log('🧪 Testing original link accessibility...');
-        
-        const isAccessible = await testUrlAccessibility(threat.link);
-        
-        if (!isAccessible) {
-          console.warn('⚠️ Original link not accessible, generating smart fallback...');
-          finalUrl = generateSmartFallbackUrl(threat);
-          linkType = 'smart-fallback';
-        }
-      } else {
-        // No link provided, generate smart fallback
-        console.log('📝 No link provided, generating smart fallback...');
-        finalUrl = generateSmartFallbackUrl(threat);
-        linkType = 'smart-fallback';
-      }
-      
-      // Validate final URL format
+    if (threat.link && threat.link.trim() !== '') {
       try {
-        new URL(finalUrl);
+        // Validate URL format
+        new URL(threat.link);
         
-        console.log(`✅ Opening ${linkType === 'direct' ? 'article' : 'search/resource'}: ${finalUrl}`);
+        console.log(`✅ Opening ${threat.linkType === 'fallback' ? 'search results for' : 'article'}: ${threat.link}`);
         
-        // Inform user about link type
-        if (linkType === 'smart-fallback' || linkType === 'fallback') {
-          console.log('🔄 Note: Opening relevant cybersecurity resource as original article may not be accessible');
+        // Show user what type of link they're opening
+        if (threat.linkType === 'fallback') {
+          console.log('🔄 Note: Opening search results as original article link was not accessible');
         }
         
-        window.open(finalUrl, '_blank', 'noopener,noreferrer');
-        
-      } catch (urlError) {
-        console.error('❌ Invalid final URL format:', finalUrl, urlError);
-        
-        // Last resort: Google search
-        const lastResortQuery = encodeURIComponent(`${threat.title} cybersecurity`);
-        const lastResortUrl = `https://www.google.com/search?q=${lastResortQuery}`;
-        
-        console.log('🆘 Using last resort Google search:', lastResortUrl);
-        window.open(lastResortUrl, '_blank', 'noopener,noreferrer');
+        window.open(threat.link, '_blank', 'noopener,noreferrer');
+      } catch (error) {
+        console.error('❌ Invalid URL format:', threat.link, error);
+        alert(`Invalid URL format: ${threat.link}`);
       }
-      
-    } catch (error) {
-      console.error('❌ Error handling threat click:', error);
-      
-      // Emergency fallback: Google search
-      const emergencyQuery = encodeURIComponent(`${threat.title} cybersecurity news`);
-      const emergencyUrl = `https://www.google.com/search?q=${emergencyQuery}`;
-      
-      console.log('🚨 Emergency fallback to Google search:', emergencyUrl);
-      window.open(emergencyUrl, '_blank', 'noopener,noreferrer');
-      
-    } finally {
-      // Restore original text and style
-      (event.currentTarget as HTMLElement).style.opacity = '1';
-      (event.currentTarget as HTMLElement).textContent = originalText;
+    } else {
+      console.warn('⚠️ No valid link available for this threat');
+      alert('No source link available for this incident');
     }
   };
 
   const getLinkTypeIcon = (linkType?: string) => {
-    switch (linkType) {
-      case 'direct': return '🔗';
-      case 'fallback': return '🔍';
-      case 'smart-fallback': return '🎯';
-      default: return '🌐';
+    if (linkType === 'fallback') {
+      return '🔍'; // Search icon for fallback links
     }
+    return '🔗'; // Direct link icon
   };
 
-  const getLinkTypeTooltip = (threat: any) => {
-    const linkType = threat.linkType;
-    const source = threat.source;
-    
-    switch (linkType) {
-      case 'direct':
-        return `Click to read the original article from ${source}`;
-      case 'fallback':
-        return `Click to search for this article on ${source || 'the web'}`;
-      case 'smart-fallback':
-        return `Click to find relevant cybersecurity resources about this topic`;
-      default:
-        return 'Click to find more information about this cybersecurity incident';
+  const getLinkTypeTooltip = (linkType?: string, source?: string) => {
+    if (linkType === 'fallback') {
+      return `Click to search for this article on ${source || 'the web'}`;
     }
-  };
-
-  const getLinkStatusBadge = (linkType?: string) => {
-    switch (linkType) {
-      case 'direct':
-        return (
-          <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-            Direct Link
-          </span>
-        );
-      case 'fallback':
-        return (
-          <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">
-            Search Link
-          </span>
-        );
-      case 'smart-fallback':
-        return (
-          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-            Smart Resource
-          </span>
-        );
-      default:
-        return (
-          <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-medium">
-            Research Link
-          </span>
-        );
-    }
+    return 'Click to read the full article';
   };
 
   return (
@@ -286,11 +127,14 @@ const NewsletterThreats: React.FC = () => {
                 <h3 className="font-bold mb-2 flex items-center flex-1">
                   <span 
                     onClick={(e) => handleThreatClick(threat, e)}
-                    className="text-black cursor-pointer hover:text-red-600 hover:underline hover:scale-[1.02] transform transition-all duration-200 flex items-center"
-                    title={getLinkTypeTooltip(threat)}
+                    className={`text-black transition-all duration-200 ${
+                      threat.link && threat.link.trim() !== ''
+                        ? 'cursor-pointer hover:text-red-600 hover:underline hover:scale-[1.02] transform' 
+                        : 'cursor-default'
+                    }`}
+                    title={getLinkTypeTooltip(threat.linkType, threat.source)}
                   >
-                    <span className="mr-2">{getLinkTypeIcon(threat.linkType)}</span>
-                    {index + 1}. {threat.title}
+                    {getLinkTypeIcon(threat.linkType)} {index + 1}. {threat.title}
                   </span>
                   {getSeverityBadge(threat.severity)}
                 </h3>
@@ -309,7 +153,11 @@ const NewsletterThreats: React.FC = () => {
                   <span className="text-gray-600 font-medium">
                     {formatDate(threat.formattedDate, threat.pubDate)}
                   </span>
-                  {getLinkStatusBadge(threat.linkType)}
+                  {threat.linkType === 'fallback' && (
+                    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                      Search Link
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -344,12 +192,11 @@ const NewsletterThreats: React.FC = () => {
                 <span className="font-medium">Direct Links:</span> {threats.filter(t => t.linkType === 'direct').length} of {threats.length}
               </span>
               <span>
-                <span className="font-medium">Smart Resources:</span> {threats.filter(t => t.linkType === 'fallback' || t.linkType === 'smart-fallback').length} of {threats.length}
+                <span className="font-medium">Search Links:</span> {threats.filter(t => t.linkType === 'fallback').length} of {threats.length}
               </span>
             </div>
-            <div className="mt-2 text-xs text-gray-400 space-y-1">
-              <div>🔗 = Direct article link | 🔍 = Search results | 🎯 = Smart cybersecurity resource | 🌐 = Research link</div>
-              <div className="font-medium text-green-600">✅ All links are tested in real-time before opening - No more 404 errors!</div>
+            <div className="mt-1 text-xs text-gray-400">
+              🔗 = Direct article link | 🔍 = Search results (original link unavailable)
             </div>
           </div>
         </div>
