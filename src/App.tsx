@@ -16,59 +16,18 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PDF with exact preview styling...');
+      console.log('📄 Generating PDF with EXACT preview styling...');
       
-      // Simple preparation - just ensure visibility
-      window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Use minimal canvas options to preserve existing styling
+      // Capture exactly what's shown in preview - NO MODIFICATIONS
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: '#ffffff', // White background instead of null
+        backgroundColor: '#ffffff',
         logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
-        scrollX: 0,
-        scrollY: 0,
-        foreignObjectRendering: false, // Use standard rendering
-        imageTimeout: 10000,
-        removeContainer: false,
-        ignoreElements: () => false,
-        // MINIMAL onclone - just ensure images are grayscale
-        onclone: (clonedDoc, element) => {
-          console.log('🎨 Applying minimal style fixes...');
-          
-          // Only add minimal style to ensure grayscale images
-          const minimalStyle = clonedDoc.createElement('style');
-          minimalStyle.textContent = `
-            /* Only force grayscale on images - keep everything else as-is */
-            img {
-              filter: grayscale(100%) !important;
-            }
-            
-            /* Ensure no transparency issues */
-            .opacity-60 {
-              opacity: 0.6 !important;
-            }
-          `;
-          
-          clonedDoc.head.appendChild(minimalStyle);
-          
-          // Only modify images to ensure they're grayscale
-          const images = element.querySelectorAll('img');
-          images.forEach((img) => {
-            if (img instanceof HTMLElement) {
-              img.style.setProperty('filter', 'grayscale(100%)', 'important');
-            }
-          });
-          
-          console.log('✅ Minimal styling applied - preserving original appearance');
-        }
+        // NO onclone modifications - capture exactly as displayed
       });
 
       console.log(`📸 Canvas created: ${canvas.width}x${canvas.height}`);
@@ -119,13 +78,9 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with exact preview styling...');
+      console.log('🖼️ Generating PNG with EXACT preview styling...');
       
-      // Simple preparation
-      window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Use same minimal approach as PDF
+      // Capture exactly what's shown in preview - NO MODIFICATIONS
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
@@ -134,34 +89,7 @@ function App() {
         logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
-        scrollX: 0,
-        scrollY: 0,
-        foreignObjectRendering: false,
-        imageTimeout: 10000,
-        removeContainer: false,
-        ignoreElements: () => false,
-        onclone: (clonedDoc, element) => {
-          // Same minimal approach as PDF
-          const minimalStyle = clonedDoc.createElement('style');
-          minimalStyle.textContent = `
-            img {
-              filter: grayscale(100%) !important;
-            }
-            .opacity-60 {
-              opacity: 0.6 !important;
-            }
-          `;
-          clonedDoc.head.appendChild(minimalStyle);
-          
-          const images = element.querySelectorAll('img');
-          images.forEach((img) => {
-            if (img instanceof HTMLElement) {
-              img.style.setProperty('filter', 'grayscale(100%)', 'important');
-            }
-          });
-        }
+        // NO onclone modifications - capture exactly as displayed
       });
 
       console.log(`📸 PNG canvas: ${canvas.width}x${canvas.height}`);
