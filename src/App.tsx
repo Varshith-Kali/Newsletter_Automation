@@ -16,7 +16,7 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PDF with FORCED grayscale images...');
+      console.log('📄 Generating SINGLE-PAGE PDF with FORCED grayscale images...');
 
       // Prepare for capture
       window.scrollTo(0, 0);
@@ -451,32 +451,48 @@ function App() {
       }
 
       const imgData = canvas.toDataURL('image/png', 1.0);
+      
+      // 🎯 SINGLE PAGE PDF GENERATION
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
 
-      const pdfWidth = 210;
-      const pdfHeight = 297;
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
+      const pdfWidth = 210; // A4 width in mm
+      const pdfHeight = 297; // A4 height in mm
+      
+      // Calculate scaling to fit entire content on one page
+      const canvasAspectRatio = canvas.width / canvas.height;
+      const pdfAspectRatio = pdfWidth / pdfHeight;
+      
+      let finalWidth, finalHeight;
+      
+      if (canvasAspectRatio > pdfAspectRatio) {
+        // Canvas is wider relative to its height than PDF
+        finalWidth = pdfWidth;
+        finalHeight = pdfWidth / canvasAspectRatio;
+      } else {
+        // Canvas is taller relative to its width than PDF
+        finalHeight = pdfHeight;
+        finalWidth = pdfHeight * canvasAspectRatio;
       }
+      
+      // Center the image on the page
+      const xOffset = (pdfWidth - finalWidth) / 2;
+      const yOffset = (pdfHeight - finalHeight) / 2;
+      
+      console.log(`📄 Fitting entire newsletter on single page:`);
+      console.log(`   Canvas: ${canvas.width}x${canvas.height} (ratio: ${canvasAspectRatio.toFixed(2)})`);
+      console.log(`   PDF: ${pdfWidth}x${pdfHeight}mm (ratio: ${pdfAspectRatio.toFixed(2)})`);
+      console.log(`   Final size: ${finalWidth.toFixed(1)}x${finalHeight.toFixed(1)}mm`);
+      console.log(`   Position: x=${xOffset.toFixed(1)}mm, y=${yOffset.toFixed(1)}mm`);
 
-      pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🎉 PDF generated with FORCED grayscale images!');
+      // Add the entire newsletter as a single image on one page
+      pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
+
+      pdf.save('Cybersecurity-Newsletter-SinglePage.pdf');
+      console.log('🎉 SINGLE-PAGE PDF generated with FORCED grayscale images!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -817,7 +833,7 @@ function App() {
                   onClick={downloadAsPDF}
                   className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded shadow-lg transition-colors"
                 >
-                  📄 Download as PDF
+                  📄 Download as Single-Page PDF
                 </button>
                 <button
                   onClick={downloadAsPNG}
