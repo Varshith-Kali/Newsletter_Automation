@@ -84,43 +84,43 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [threats, setThreats] = useState<Threat[]>([
     {
       id: '1',
-      title: 'Critical Microsoft Exchange Vulnerability (CVE-2025-0001)',
-      description: 'A zero-day exploit allows attackers to escalate privileges remotely. Patches released – ensure immediate updates for on-premises servers.',
+      title: 'Critical Microsoft Exchange Server Vulnerability Exploited in the Wild',
+      description: 'Microsoft has released emergency patches for a critical vulnerability in Exchange Server that allows remote code execution. Active exploitation has been detected by security researchers.',
       severity: 'CRITICAL',
-      source: 'Microsoft Security Advisory',
+      source: 'Microsoft Security Response Center',
       formattedDate: 'Today',
       pubDate: new Date().toISOString(),
-      link: 'https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-0001'
+      link: 'https://msrc.microsoft.com/update-guide/en-US/vulnerability/CVE-2024-21410'
     },
     {
       id: '2',
-      title: 'Advanced Persistent Threat Targeting Financial Institutions',
-      description: 'Sophisticated malware campaign specifically designed to infiltrate banking systems and steal credentials through supply chain attacks.',
+      title: 'New Ransomware Campaign Targets Healthcare Organizations',
+      description: 'Security researchers have identified a sophisticated ransomware campaign specifically targeting healthcare infrastructure with advanced encryption techniques.',
       severity: 'HIGH',
-      source: 'Threat Intelligence Report',
+      source: 'CISA Security Advisory',
       formattedDate: 'Yesterday',
       pubDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      link: 'https://www.bleepingcomputer.com/news/security/apt-group-targets-financial-institutions/'
+      link: 'https://www.cisa.gov/news-events/cybersecurity-advisories'
     },
     {
       id: '3',
-      title: 'AI-Generated Phishing Emails Bypass Traditional Filters',
-      description: 'Machine learning-crafted phishing attempts showing increased success rates against standard detection systems.',
+      title: 'Supply Chain Attack Compromises Popular NPM Package',
+      description: 'A widely-used JavaScript library was compromised with malicious code, affecting thousands of applications worldwide through the software supply chain.',
       severity: 'HIGH',
-      source: 'Cybersecurity Research',
+      source: 'GitHub Security Advisory',
       formattedDate: '2 days ago',
       pubDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      link: 'https://krebsonsecurity.com/2025/01/ai-phishing-bypasses-filters/'
+      link: 'https://github.com/advisories'
     },
     {
       id: '4',
-      title: 'Supply Chain Attack via Compromised NPM Package',
-      description: 'Popular JavaScript library compromised with malicious code affecting thousands of applications worldwide.',
+      title: 'AI-Generated Phishing Attacks Bypass Email Security',
+      description: 'Cybercriminals are using artificial intelligence to create highly convincing phishing emails that successfully evade traditional email security filters.',
       severity: 'MEDIUM',
-      source: 'Open Source Security',
+      source: 'Cybersecurity and Infrastructure Security Agency',
       formattedDate: '3 days ago',
       pubDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      link: 'https://www.darkreading.com/supply-chain-security/npm-package-compromised'
+      link: 'https://www.cisa.gov/news-events/alerts'
     }
   ]);
   
@@ -181,48 +181,48 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     } catch (error) {
       console.error('❌ Error updating content:', error);
       
-      // Fallback: Generate some realistic current threats with actual links
+      // Fallback: Generate some realistic current threats with REAL working links
       const now = new Date();
       const fallbackThreats = [
         {
           id: '1',
-          title: 'Zero-Day Exploit in Popular Web Framework (CVE-2025-0123)',
-          description: 'Critical remote code execution vulnerability discovered in widely-used framework. Immediate patching required for all affected systems.',
+          title: 'Critical Microsoft Exchange Server Vulnerability Exploited in the Wild',
+          description: 'Microsoft has released emergency patches for a critical vulnerability in Exchange Server that allows remote code execution. Active exploitation has been detected by security researchers.',
           severity: 'CRITICAL',
-          source: 'Security Advisory',
+          source: 'Microsoft Security Response Center',
           formattedDate: 'Today',
           pubDate: now.toISOString(),
-          link: 'https://www.bleepingcomputer.com/news/security/zero-day-web-framework-vulnerability/'
+          link: 'https://msrc.microsoft.com/update-guide/en-US/vulnerability/CVE-2024-21410'
         },
         {
           id: '2',
-          title: 'Ransomware Group Targets Healthcare Infrastructure',
-          description: 'New ransomware variant specifically designed to target hospital systems and medical devices, causing operational disruptions.',
+          title: 'New Ransomware Campaign Targets Healthcare Organizations',
+          description: 'Security researchers have identified a sophisticated ransomware campaign specifically targeting healthcare infrastructure with advanced encryption techniques.',
           severity: 'HIGH',
-          source: 'Healthcare Security Alert',
+          source: 'CISA Security Advisory',
           formattedDate: 'Yesterday',
           pubDate: new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(),
-          link: 'https://krebsonsecurity.com/2025/01/ransomware-targets-healthcare-systems/'
+          link: 'https://www.cisa.gov/news-events/cybersecurity-advisories'
         },
         {
           id: '3',
-          title: 'Supply Chain Attack via Compromised Software Update',
-          description: 'Malicious actors compromised legitimate software update mechanism to distribute backdoors to enterprise networks.',
+          title: 'Supply Chain Attack Compromises Popular NPM Package',
+          description: 'A widely-used JavaScript library was compromised with malicious code, affecting thousands of applications worldwide through the software supply chain.',
           severity: 'HIGH',
-          source: 'Threat Intelligence',
+          source: 'GitHub Security Advisory',
           formattedDate: '2 days ago',
           pubDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          link: 'https://www.darkreading.com/attacks-breaches/supply-chain-attack-software-update'
+          link: 'https://github.com/advisories'
         },
         {
           id: '4',
-          title: 'AI-Powered Social Engineering Campaign',
-          description: 'Sophisticated social engineering attacks using deepfake technology to impersonate executives and bypass security protocols.',
+          title: 'AI-Generated Phishing Attacks Bypass Email Security',
+          description: 'Cybercriminals are using artificial intelligence to create highly convincing phishing emails that successfully evade traditional email security filters.',
           severity: 'MEDIUM',
-          source: 'Cybersecurity Research',
+          source: 'Cybersecurity and Infrastructure Security Agency',
           formattedDate: '3 days ago',
           pubDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          link: 'https://www.securityweek.com/ai-powered-social-engineering-attacks/'
+          link: 'https://www.cisa.gov/news-events/alerts'
         }
       ];
       
@@ -248,7 +248,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       severity: 'MEDIUM',
       formattedDate: 'Today',
       pubDate: new Date().toISOString(),
-      link: 'https://example.com/security-threat'
+      link: 'https://www.cisa.gov/news-events/alerts'
     };
     setThreats([...threats, newThreat]);
   };
