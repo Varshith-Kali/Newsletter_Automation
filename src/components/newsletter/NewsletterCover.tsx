@@ -44,8 +44,8 @@ const NewsletterCover: React.FC = () => {
               </h2>
             </div>
           </div>
-          <div className="mt-10 bg-red-700 inline-block py-2 px-4 text-center">
-            <h3 className="text-lg font-medium text-center">
+          <div className="mt-10 bg-red-700 inline-block py-2 px-4">
+            <h3 className="text-lg font-medium">
               CYBERSECURITY INSIGHTS FOR COMPREHENSIVE PROTECTION
             </h3>
           </div>
