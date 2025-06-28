@@ -10,16 +10,21 @@ function App() {
 
   // Function to convert image to grayscale canvas
   const convertImageToGrayscale = (img: HTMLImageElement): Promise<string> => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      canvas.width = img.naturalWidth || img.width;
-      canvas.height = img.naturalHeight || img.height;
-      
-      if (ctx) {
+    return new Promise((resolve, reject) => {
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+        
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        
         // Draw the original image
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         
         // Get image data and convert to grayscale
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -41,10 +46,12 @@ function App() {
         
         // Put the grayscale data back
         ctx.putImageData(imageData, 0, 0);
+        
+        // Convert canvas to data URL
+        resolve(canvas.toDataURL('image/png', 1.0));
+      } catch (error) {
+        reject(error);
       }
-      
-      // Convert canvas to data URL
-      resolve(canvas.toDataURL('image/png', 1.0));
     });
   };
 
@@ -53,34 +60,58 @@ function App() {
     const images = element.querySelectorAll('img');
     const promises: Promise<void>[] = [];
     
-    images.forEach((img) => {
+    console.log(`🎨 Found ${images.length} images to convert to grayscale`);
+    
+    images.forEach((img, index) => {
       if (img instanceof HTMLImageElement) {
         const promise = new Promise<void>((resolve) => {
-          if (img.complete && img.naturalWidth > 0) {
-            // Image is already loaded
-            convertImageToGrayscale(img).then((grayscaleDataUrl) => {
-              img.src = grayscaleDataUrl;
-              img.style.filter = 'none'; // Remove any existing filters
-              resolve();
-            });
-          } else {
-            // Wait for image to load
-            const handleLoad = () => {
-              convertImageToGrayscale(img).then((grayscaleDataUrl) => {
+          const processImage = async () => {
+            try {
+              console.log(`🖼️ Processing image ${index + 1}: ${img.src.substring(0, 50)}...`);
+              
+              if (img.complete && img.naturalWidth > 0) {
+                // Image is already loaded
+                const grayscaleDataUrl = await convertImageToGrayscale(img);
                 img.src = grayscaleDataUrl;
-                img.style.filter = 'none';
+                img.style.filter = 'none'; // Remove any existing filters
+                console.log(`✅ Image ${index + 1} converted to grayscale`);
                 resolve();
-              });
-            };
-            
-            const handleError = () => {
-              console.warn('Failed to load image:', img.src);
+              } else {
+                // Wait for image to load
+                const handleLoad = async () => {
+                  try {
+                    const grayscaleDataUrl = await convertImageToGrayscale(img);
+                    img.src = grayscaleDataUrl;
+                    img.style.filter = 'none';
+                    console.log(`✅ Image ${index + 1} loaded and converted to grayscale`);
+                    resolve();
+                  } catch (error) {
+                    console.warn(`⚠️ Failed to convert image ${index + 1}:`, error);
+                    resolve();
+                  }
+                };
+                
+                const handleError = () => {
+                  console.warn(`⚠️ Failed to load image ${index + 1}:`, img.src);
+                  resolve();
+                };
+                
+                img.addEventListener('load', handleLoad, { once: true });
+                img.addEventListener('error', handleError, { once: true });
+                
+                // Force reload if needed
+                if (!img.src) {
+                  console.warn(`⚠️ Image ${index + 1} has no src, skipping`);
+                  resolve();
+                }
+              }
+            } catch (error) {
+              console.warn(`⚠️ Error processing image ${index + 1}:`, error);
               resolve();
-            };
-            
-            img.addEventListener('load', handleLoad, { once: true });
-            img.addEventListener('error', handleError, { once: true });
-          }
+            }
+          };
+          
+          processImage();
         });
         
         promises.push(promise);
@@ -88,6 +119,7 @@ function App() {
     });
     
     await Promise.all(promises);
+    console.log('🎉 All images converted to grayscale!');
   };
 
   const downloadAsPDF = async () => {
@@ -122,7 +154,7 @@ function App() {
         onclone: async (clonedDoc, element) => {
           console.log('🎨 PRE-PROCESSING: Converting all images to grayscale...');
           
-          // First, replace all images with grayscale versions
+          // CRITICAL: First, replace all images with grayscale versions
           await replaceImagesWithGrayscale(element);
           
           console.log('✅ All images converted to grayscale BEFORE canvas capture!');
@@ -145,7 +177,7 @@ function App() {
             .text-gray-600 { color: #4b5563 !important; }
             .text-gray-500 { color: #6b7280 !important; }
             
-            /* Remove any filters from images since they're already grayscale */
+            /* Ensure images stay grayscale */
             img {
               filter: none !important;
               -webkit-filter: none !important;
