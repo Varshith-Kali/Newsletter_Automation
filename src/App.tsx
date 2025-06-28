@@ -48,7 +48,7 @@ function App() {
     });
   };
 
-  // Function to replace all images with grayscale versions
+  // Function to replace ONLY images with grayscale versions
   const replaceImagesWithGrayscale = async (element: HTMLElement): Promise<void> => {
     const images = element.querySelectorAll('img');
     const promises: Promise<void>[] = [];
@@ -98,7 +98,7 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating SINGLE-PAGE PDF with PRE-PROCESSED GRAYSCALE IMAGES...');
+      console.log('📄 Generating SINGLE-PAGE PDF with SELECTIVE GRAYSCALE (images only)...');
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -120,133 +120,107 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING: Converting all images to grayscale...');
+          console.log('🎨 SELECTIVE PROCESSING: Converting ONLY images to grayscale...');
           
-          // First, replace all images with grayscale versions
+          // ONLY convert images to grayscale - preserve all other colors
           await replaceImagesWithGrayscale(element);
           
-          console.log('✅ All images converted to grayscale BEFORE canvas capture!');
+          console.log('✅ Images converted to grayscale - ALL OTHER COLORS PRESERVED!');
           
-          // Apply comprehensive styling
-          const comprehensiveStyle = clonedDoc.createElement('style');
-          comprehensiveStyle.textContent = `
-            html, body, .newsletter-container, .newsletter, .newsletter-page {
-              background-color: #ffffff !important;
-              color: #000000 !important;
-            }
-            
-            .bg-red-700 { background-color: #b91c1c !important; color: #ffffff !important; }
-            .bg-black { background-color: #000000 !important; color: #ffffff !important; }
-            .bg-white { background-color: #ffffff !important; color: #000000 !important; }
-            .text-white { color: #ffffff !important; }
-            .text-black { color: #000000 !important; }
-            .text-red-700 { color: #b91c1c !important; }
-            .text-gray-700 { color: #374151 !important; }
-            .text-gray-600 { color: #4b5563 !important; }
-            .text-gray-500 { color: #6b7280 !important; }
-            
-            /* Remove any filters from images since they're already grayscale */
+          // Apply MINIMAL styling - ONLY to preserve existing appearance
+          const minimalStyle = clonedDoc.createElement('style');
+          minimalStyle.textContent = `
+            /* PRESERVE ALL EXISTING COLORS - only ensure no additional filters on images */
             img {
               filter: none !important;
               -webkit-filter: none !important;
             }
             
+            /* Ensure all existing styles are preserved exactly as in preview */
+            * {
+              box-sizing: border-box !important;
+            }
+            
+            /* Preserve all background colors exactly as they are */
+            .bg-red-700 { 
+              background-color: #b91c1c !important; 
+              color: #ffffff !important; 
+            }
+            .bg-black { 
+              background-color: #000000 !important; 
+              color: #ffffff !important; 
+            }
+            .bg-white { 
+              background-color: #ffffff !important; 
+              color: #000000 !important; 
+            }
+            .bg-gray-50 { 
+              background-color: #f9fafb !important; 
+            }
+            .bg-gray-100 { 
+              background-color: #f3f4f6 !important; 
+            }
+            
+            /* Preserve all text colors exactly as they are */
+            .text-white { color: #ffffff !important; }
+            .text-black { color: #000000 !important; }
+            .text-red-700 { color: #b91c1c !important; }
+            .text-red-800 { color: #991b1b !important; }
+            .text-red-600 { color: #dc2626 !important; }
+            .text-gray-700 { color: #374151 !important; }
+            .text-gray-600 { color: #4b5563 !important; }
+            .text-gray-500 { color: #6b7280 !important; }
+            .text-gray-800 { color: #1f2937 !important; }
+            .text-blue-800 { color: #1e40af !important; }
+            .text-blue-600 { color: #2563eb !important; }
+            .text-orange-800 { color: #9a3412 !important; }
+            .text-yellow-800 { color: #92400e !important; }
+            .text-green-800 { color: #166534 !important; }
+            
+            /* Preserve all border colors */
+            .border-red-300 { border-color: #fca5a5 !important; }
+            .border-orange-300 { border-color: #fdba74 !important; }
+            .border-yellow-300 { border-color: #fcd34d !important; }
+            .border-green-300 { border-color: #86efac !important; }
+            .border-gray-300 { border-color: #d1d5db !important; }
+            .border-gray-200 { border-color: #e5e7eb !important; }
+            .border-blue-300 { border-color: #93c5fd !important; }
+            
+            /* Preserve all background colors for badges and elements */
+            .bg-red-100 { background-color: #fee2e2 !important; }
+            .bg-orange-100 { background-color: #ffedd5 !important; }
+            .bg-yellow-100 { background-color: #fef3c7 !important; }
+            .bg-green-100 { background-color: #dcfce7 !important; }
+            .bg-blue-100 { background-color: #dbeafe !important; }
+            .bg-red-600 { background-color: #dc2626 !important; }
+            
+            /* Ensure proper positioning and layout */
             .min-h-screen { min-height: 100vh !important; }
             .h-screen { height: 100vh !important; }
             .absolute { position: absolute !important; }
             .relative { position: relative !important; }
             .z-10 { z-index: 10 !important; }
             .z-20 { z-index: 20 !important; }
-            .top-8 { top: 2rem !important; }
-            .left-8 { left: 2rem !important; }
-            .right-0 { right: 0 !important; }
-            .top-0 { top: 0 !important; }
-            .bottom-0 { bottom: 0 !important; }
-            .inset-0 { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; }
-            .max-w-md { max-width: 28rem !important; }
-            .inline-block { display: inline-block !important; }
-            .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-            .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-            .mt-10 { margin-top: 2.5rem !important; }
-            .text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
-            .font-medium { font-weight: 500 !important; }
-            .opacity-60 { opacity: 0.6 !important; }
-            .whitespace-nowrap { white-space: nowrap !important; }
             
-            .bg-red-700 h3, .bg-red-700 .text-white, .bg-red-700 * {
-              color: #ffffff !important;
-              opacity: 1 !important;
+            /* Preserve opacity settings */
+            .opacity-60 { opacity: 0.6 !important; }
+            
+            /* Ensure all elements are visible */
+            * { 
               visibility: visible !important;
               display: block !important;
             }
             
-            * { opacity: 1 !important; }
+            /* Inline elements should remain inline */
+            span, a, strong, em, code { display: inline !important; }
+            .inline-block { display: inline-block !important; }
+            .flex { display: flex !important; }
+            .grid { display: grid !important; }
           `;
           
-          clonedDoc.head.appendChild(comprehensiveStyle);
+          clonedDoc.head.appendChild(minimalStyle);
           
-          // Apply additional styling to elements
-          const allElements = element.querySelectorAll('*');
-          allElements.forEach((el) => {
-            if (el instanceof HTMLElement) {
-              el.style.removeProperty('color-scheme');
-              
-              if (el.classList.contains('bg-red-700')) {
-                el.style.setProperty('background-color', '#b91c1c', 'important');
-                el.style.setProperty('color', '#ffffff', 'important');
-              }
-              
-              if (el.classList.contains('bg-black')) {
-                el.style.setProperty('background-color', '#000000', 'important');
-                el.style.setProperty('color', '#ffffff', 'important');
-              }
-              
-              if (el.classList.contains('bg-white')) {
-                el.style.setProperty('background-color', '#ffffff', 'important');
-                el.style.setProperty('color', '#000000', 'important');
-              }
-              
-              if (el.classList.contains('text-white')) {
-                el.style.setProperty('color', '#ffffff', 'important');
-              }
-              
-              if (el.classList.contains('text-black')) {
-                el.style.setProperty('color', '#000000', 'important');
-              }
-              
-              if (el.classList.contains('text-red-700')) {
-                el.style.setProperty('color', '#b91c1c', 'important');
-              }
-            }
-          });
-          
-          // Special handling for red boxes
-          const redBoxes = element.querySelectorAll('.bg-red-700');
-          redBoxes.forEach((box) => {
-            if (box instanceof HTMLElement) {
-              box.style.setProperty('background-color', '#b91c1c', 'important');
-              box.style.setProperty('color', '#ffffff', 'important');
-              
-              const textElements = box.querySelectorAll('*');
-              textElements.forEach((textEl) => {
-                if (textEl instanceof HTMLElement) {
-                  textEl.style.setProperty('color', '#ffffff', 'important');
-                  textEl.style.setProperty('opacity', '1', 'important');
-                  textEl.style.setProperty('visibility', 'visible', 'important');
-                  textEl.style.setProperty('display', 'block', 'important');
-                  
-                  if (textEl.tagName === 'H3') {
-                    textEl.style.setProperty('font-size', '1.125rem', 'important');
-                    textEl.style.setProperty('font-weight', '500', 'important');
-                    textEl.style.setProperty('line-height', '1.75rem', 'important');
-                    textEl.style.setProperty('white-space', 'nowrap', 'important');
-                  }
-                }
-              });
-            }
-          });
-          
-          console.log('✅ Comprehensive styling applied with pre-processed grayscale images');
+          console.log('✅ SELECTIVE styling applied - images grayscale, everything else preserved!');
         }
       });
 
@@ -292,7 +266,7 @@ function App() {
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
 
       pdf.save('Cybersecurity-Newsletter-SinglePage.pdf');
-      console.log('🎉 SINGLE-PAGE PDF generated with PRE-PROCESSED GRAYSCALE IMAGES!');
+      console.log('🎉 SINGLE-PAGE PDF with SELECTIVE GRAYSCALE generated successfully!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -308,7 +282,7 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with PRE-PROCESSED GRAYSCALE IMAGES...');
+      console.log('🖼️ Generating PNG with SELECTIVE GRAYSCALE (images only)...');
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -330,33 +304,60 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING PNG: Converting all images to grayscale...');
+          console.log('🎨 SELECTIVE PNG PROCESSING: Converting ONLY images to grayscale...');
           
-          // Pre-process images to grayscale
+          // ONLY convert images to grayscale - preserve all other colors
           await replaceImagesWithGrayscale(element);
           
-          console.log('✅ All images converted to grayscale for PNG!');
+          console.log('✅ Images converted to grayscale for PNG - ALL OTHER COLORS PRESERVED!');
           
-          const comprehensiveStyle = clonedDoc.createElement('style');
-          comprehensiveStyle.textContent = `
-            html, body, .newsletter-container, .newsletter, .newsletter-page {
-              background-color: #ffffff !important;
-              color: #000000 !important;
-            }
-            .bg-red-700 { background-color: #b91c1c !important; color: #ffffff !important; }
-            .bg-black { background-color: #000000 !important; color: #ffffff !important; }
-            .bg-white { background-color: #ffffff !important; color: #000000 !important; }
-            .text-white { color: #ffffff !important; }
-            .text-black { color: #000000 !important; }
-            .text-red-700 { color: #b91c1c !important; }
-            .text-gray-700 { color: #374151 !important; }
-            .text-gray-600 { color: #4b5563 !important; }
-            .text-gray-500 { color: #6b7280 !important; }
-            
+          // Apply same minimal styling as PDF
+          const minimalStyle = clonedDoc.createElement('style');
+          minimalStyle.textContent = `
             img {
               filter: none !important;
               -webkit-filter: none !important;
             }
+            
+            * {
+              box-sizing: border-box !important;
+            }
+            
+            .bg-red-700 { background-color: #b91c1c !important; color: #ffffff !important; }
+            .bg-black { background-color: #000000 !important; color: #ffffff !important; }
+            .bg-white { background-color: #ffffff !important; color: #000000 !important; }
+            .bg-gray-50 { background-color: #f9fafb !important; }
+            .bg-gray-100 { background-color: #f3f4f6 !important; }
+            
+            .text-white { color: #ffffff !important; }
+            .text-black { color: #000000 !important; }
+            .text-red-700 { color: #b91c1c !important; }
+            .text-red-800 { color: #991b1b !important; }
+            .text-red-600 { color: #dc2626 !important; }
+            .text-gray-700 { color: #374151 !important; }
+            .text-gray-600 { color: #4b5563 !important; }
+            .text-gray-500 { color: #6b7280 !important; }
+            .text-gray-800 { color: #1f2937 !important; }
+            .text-blue-800 { color: #1e40af !important; }
+            .text-blue-600 { color: #2563eb !important; }
+            .text-orange-800 { color: #9a3412 !important; }
+            .text-yellow-800 { color: #92400e !important; }
+            .text-green-800 { color: #166534 !important; }
+            
+            .border-red-300 { border-color: #fca5a5 !important; }
+            .border-orange-300 { border-color: #fdba74 !important; }
+            .border-yellow-300 { border-color: #fcd34d !important; }
+            .border-green-300 { border-color: #86efac !important; }
+            .border-gray-300 { border-color: #d1d5db !important; }
+            .border-gray-200 { border-color: #e5e7eb !important; }
+            .border-blue-300 { border-color: #93c5fd !important; }
+            
+            .bg-red-100 { background-color: #fee2e2 !important; }
+            .bg-orange-100 { background-color: #ffedd5 !important; }
+            .bg-yellow-100 { background-color: #fef3c7 !important; }
+            .bg-green-100 { background-color: #dcfce7 !important; }
+            .bg-blue-100 { background-color: #dbeafe !important; }
+            .bg-red-600 { background-color: #dc2626 !important; }
             
             .min-h-screen { min-height: 100vh !important; }
             .h-screen { height: 100vh !important; }
@@ -364,91 +365,21 @@ function App() {
             .relative { position: relative !important; }
             .z-10 { z-index: 10 !important; }
             .z-20 { z-index: 20 !important; }
-            .top-8 { top: 2rem !important; }
-            .left-8 { left: 2rem !important; }
-            .right-0 { right: 0 !important; }
-            .top-0 { top: 0 !important; }
-            .bottom-0 { bottom: 0 !important; }
-            .inset-0 { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; }
-            .max-w-md { max-width: 28rem !important; }
-            .inline-block { display: inline-block !important; }
-            .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-            .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-            .mt-10 { margin-top: 2.5rem !important; }
-            .text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
-            .font-medium { font-weight: 500 !important; }
             .opacity-60 { opacity: 0.6 !important; }
-            .whitespace-nowrap { white-space: nowrap !important; }
-            .bg-red-700 h3, .bg-red-700 .text-white, .bg-red-700 * { 
-              color: #ffffff !important; 
-              opacity: 1 !important; 
-              visibility: visible !important; 
-              display: block !important; 
+            
+            * { 
+              visibility: visible !important;
+              display: block !important;
             }
-            * { opacity: 1 !important; }
+            
+            span, a, strong, em, code { display: inline !important; }
+            .inline-block { display: inline-block !important; }
+            .flex { display: flex !important; }
+            .grid { display: grid !important; }
           `;
-          clonedDoc.head.appendChild(comprehensiveStyle);
+          clonedDoc.head.appendChild(minimalStyle);
           
-          const allElements = element.querySelectorAll('*');
-          allElements.forEach((el) => {
-            if (el instanceof HTMLElement) {
-              el.style.removeProperty('color-scheme');
-              
-              if (el.classList.contains('bg-red-700')) {
-                el.style.setProperty('background-color', '#b91c1c', 'important');
-                el.style.setProperty('color', '#ffffff', 'important');
-              }
-              
-              if (el.classList.contains('bg-black')) {
-                el.style.setProperty('background-color', '#000000', 'important');
-                el.style.setProperty('color', '#ffffff', 'important');
-              }
-              
-              if (el.classList.contains('bg-white')) {
-                el.style.setProperty('background-color', '#ffffff', 'important');
-                el.style.setProperty('color', '#000000', 'important');
-              }
-              
-              if (el.classList.contains('text-white')) {
-                el.style.setProperty('color', '#ffffff', 'important');
-              }
-              
-              if (el.classList.contains('text-black')) {
-                el.style.setProperty('color', '#000000', 'important');
-              }
-              
-              if (el.classList.contains('text-red-700')) {
-                el.style.setProperty('color', '#b91c1c', 'important');
-              }
-            }
-          });
-          
-          const redBoxes = element.querySelectorAll('.bg-red-700');
-          redBoxes.forEach((box) => {
-            if (box instanceof HTMLElement) {
-              box.style.setProperty('background-color', '#b91c1c', 'important');
-              box.style.setProperty('color', '#ffffff', 'important');
-              
-              const textElements = box.querySelectorAll('*');
-              textElements.forEach((textEl) => {
-                if (textEl instanceof HTMLElement) {
-                  textEl.style.setProperty('color', '#ffffff', 'important');
-                  textEl.style.setProperty('opacity', '1', 'important');
-                  textEl.style.setProperty('visibility', 'visible', 'important');
-                  textEl.style.setProperty('display', 'block', 'important');
-                  
-                  if (textEl.tagName === 'H3') {
-                    textEl.style.setProperty('font-size', '1.125rem', 'important');
-                    textEl.style.setProperty('font-weight', '500', 'important');
-                    textEl.style.setProperty('line-height', '1.75rem', 'important');
-                    textEl.style.setProperty('white-space', 'nowrap', 'important');
-                  }
-                }
-              });
-            }
-          });
-          
-          console.log('✅ Comprehensive styling for PNG applied with pre-processed images');
+          console.log('✅ SELECTIVE PNG styling applied - images grayscale, everything else preserved!');
         }
       });
 
@@ -465,7 +396,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated with PRE-PROCESSED GRAYSCALE IMAGES!');
+      console.log('🎉 PNG with SELECTIVE GRAYSCALE generated successfully!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
