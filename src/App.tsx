@@ -16,19 +16,18 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PDF with grayscale images...');
+      console.log('📄 Generating PDF with proper text rendering...');
 
       // Prepare for capture
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Force light theme and capture
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
-        logging: false,
+        logging: true,
         width: content.offsetWidth,
         height: content.offsetHeight,
         windowWidth: window.innerWidth,
@@ -36,126 +35,151 @@ function App() {
         scrollX: 0,
         scrollY: 0,
         foreignObjectRendering: false,
-        imageTimeout: 10000,
+        imageTimeout: 15000,
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          console.log('🎨 Applying grayscale to all images...');
+          console.log('🎨 Applying comprehensive styling fixes...');
           
-          // FORCE LIGHT THEME AND GRAYSCALE IMAGES
-          const lightThemeStyle = clonedDoc.createElement('style');
-          lightThemeStyle.textContent = `
-            /* FORCE LIGHT THEME */
+          // COMPREHENSIVE STYLE FIXES
+          const comprehensiveStyle = clonedDoc.createElement('style');
+          comprehensiveStyle.textContent = `
+            /* FORCE LIGHT THEME AND REMOVE DARK MODE */
             html, body {
               background-color: #ffffff !important;
               color: #000000 !important;
+              color-scheme: light !important;
             }
             
-            /* FORCE EXACT NEWSLETTER COLORS */
-            .bg-red-700 {
+            /* FORCE EXACT NEWSLETTER COLORS WITH HIGH SPECIFICITY */
+            .bg-red-700,
+            div.bg-red-700,
+            .newsletter .bg-red-700,
+            .newsletter-container .bg-red-700 {
               background-color: #b91c1c !important;
               color: #ffffff !important;
+              opacity: 1 !important;
             }
             
-            .bg-black {
+            .bg-black,
+            div.bg-black,
+            .newsletter .bg-black,
+            .newsletter-container .bg-black {
               background-color: #000000 !important;
               color: #ffffff !important;
+              opacity: 1 !important;
             }
             
-            .bg-white {
+            .bg-white,
+            div.bg-white,
+            .newsletter .bg-white,
+            .newsletter-container .bg-white {
               background-color: #ffffff !important;
               color: #000000 !important;
+              opacity: 1 !important;
             }
             
-            .text-white {
+            /* FORCE TEXT COLORS WITH HIGH SPECIFICITY */
+            .text-white,
+            h1.text-white,
+            h2.text-white,
+            h3.text-white,
+            p.text-white,
+            span.text-white,
+            div.text-white,
+            .newsletter .text-white,
+            .newsletter-container .text-white {
               color: #ffffff !important;
+              opacity: 1 !important;
             }
             
-            .text-black {
+            .text-black,
+            .newsletter .text-black,
+            .newsletter-container .text-black {
               color: #000000 !important;
+              opacity: 1 !important;
             }
             
-            .text-red-700 {
+            .text-red-700,
+            .newsletter .text-red-700,
+            .newsletter-container .text-red-700 {
               color: #b91c1c !important;
+              opacity: 1 !important;
             }
             
-            .text-gray-700 {
-              color: #374151 !important;
-            }
-            
-            .text-gray-600 {
-              color: #4b5563 !important;
-            }
-            
-            .text-gray-500 {
-              color: #6b7280 !important;
-            }
+            .text-gray-700 { color: #374151 !important; }
+            .text-gray-600 { color: #4b5563 !important; }
+            .text-gray-500 { color: #6b7280 !important; }
             
             /* FORCE GRAYSCALE ON ALL IMAGES */
-            img {
+            img,
+            .newsletter img,
+            .newsletter-container img {
               filter: grayscale(100%) !important;
               -webkit-filter: grayscale(100%) !important;
+              -moz-filter: grayscale(100%) !important;
+              -ms-filter: grayscale(100%) !important;
+              -o-filter: grayscale(100%) !important;
               opacity: 1 !important;
             }
             
-            /* LAYOUT */
-            .min-h-screen {
-              min-height: 100vh !important;
-            }
+            /* LAYOUT FIXES */
+            .min-h-screen { min-height: 100vh !important; }
+            .h-screen { height: 100vh !important; }
             
-            .h-screen {
-              height: 100vh !important;
-            }
-            
-            /* REMOVE ANY DARK THEME OVERRIDES */
-            * {
-              opacity: 1 !important;
-            }
-            
-            /* ENSURE NEWSLETTER CONTAINER IS WHITE */
+            /* ENSURE NEWSLETTER CONTAINER IS PROPERLY STYLED */
             .newsletter-container,
             .newsletter,
             .newsletter-page {
               background-color: #ffffff !important;
+              opacity: 1 !important;
             }
             
             /* OPACITY CLASSES */
-            .opacity-60 {
-              opacity: 0.6 !important;
+            .opacity-60 { opacity: 0.6 !important; }
+            
+            /* FORCE INLINE-BLOCK ELEMENTS TO RENDER PROPERLY */
+            .inline-block {
+              display: inline-block !important;
+              opacity: 1 !important;
+            }
+            
+            /* ENSURE ALL ELEMENTS ARE VISIBLE */
+            * {
+              opacity: 1 !important;
+              visibility: visible !important;
+            }
+            
+            /* SPECIFIC FIX FOR RED BOX WITH WHITE TEXT */
+            .bg-red-700.inline-block,
+            .bg-red-700 h3,
+            .bg-red-700 .text-lg {
+              background-color: #b91c1c !important;
+              color: #ffffff !important;
+              opacity: 1 !important;
+              visibility: visible !important;
+              display: inline-block !important;
             }
           `;
           
-          clonedDoc.head.appendChild(lightThemeStyle);
+          clonedDoc.head.appendChild(comprehensiveStyle);
           
-          // FORCE GRAYSCALE ON ALL IMAGES DIRECTLY
-          const allImages = element.querySelectorAll('img');
-          allImages.forEach((img) => {
-            if (img instanceof HTMLElement) {
-              // Apply multiple grayscale methods to ensure it works
-              img.style.setProperty('filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-webkit-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-moz-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-ms-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-o-filter', 'grayscale(100%)', 'important');
-              
-              // Also try setting the attribute
-              img.setAttribute('style', (img.getAttribute('style') || '') + '; filter: grayscale(100%) !important;');
-              
-              console.log('Applied grayscale to image:', img.src);
-            }
-          });
-          
-          // Force styles on all other elements
+          // FORCE STYLES ON ALL ELEMENTS DIRECTLY
           const allElements = element.querySelectorAll('*');
           allElements.forEach((el) => {
-            if (el instanceof HTMLElement && el.tagName !== 'IMG') {
-              // Remove any dark theme classes or styles
+            if (el instanceof HTMLElement) {
+              // Remove any dark theme properties
               el.style.removeProperty('color-scheme');
               
-              // Force specific colors based on classes
+              // Force visibility
+              el.style.setProperty('visibility', 'visible', 'important');
+              el.style.setProperty('opacity', '1', 'important');
+              
+              // Apply specific color fixes based on classes
               if (el.classList.contains('bg-red-700')) {
                 el.style.setProperty('background-color', '#b91c1c', 'important');
                 el.style.setProperty('color', '#ffffff', 'important');
+                console.log('Fixed red background element:', el.textContent?.substring(0, 50));
               }
               
               if (el.classList.contains('bg-black')) {
@@ -179,10 +203,30 @@ function App() {
               if (el.classList.contains('text-red-700')) {
                 el.style.setProperty('color', '#b91c1c', 'important');
               }
+              
+              // Special handling for inline-block elements
+              if (el.classList.contains('inline-block')) {
+                el.style.setProperty('display', 'inline-block', 'important');
+                el.style.setProperty('visibility', 'visible', 'important');
+                el.style.setProperty('opacity', '1', 'important');
+              }
             }
           });
           
-          console.log(`✅ Applied grayscale to ${allImages.length} images`);
+          // FORCE GRAYSCALE ON ALL IMAGES
+          const allImages = element.querySelectorAll('img');
+          allImages.forEach((img) => {
+            if (img instanceof HTMLElement) {
+              img.style.setProperty('filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-webkit-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-moz-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-ms-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-o-filter', 'grayscale(100%)', 'important');
+              img.setAttribute('style', (img.getAttribute('style') || '') + '; filter: grayscale(100%) !important;');
+            }
+          });
+          
+          console.log(`✅ Applied comprehensive fixes to ${allElements.length} elements and ${allImages.length} images`);
         }
       });
 
@@ -218,7 +262,7 @@ function App() {
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🎉 PDF generated with grayscale images!');
+      console.log('🎉 PDF generated with proper text rendering!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -234,19 +278,19 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with grayscale images...');
+      console.log('🖼️ Generating PNG with proper text rendering...');
 
       // Prepare for capture
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Use same approach as PDF
+      // Use same comprehensive approach as PDF
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
-        logging: false,
+        logging: true,
         width: content.offsetWidth,
         height: content.offsetHeight,
         windowWidth: window.innerWidth,
@@ -254,54 +298,41 @@ function App() {
         scrollX: 0,
         scrollY: 0,
         foreignObjectRendering: false,
-        imageTimeout: 10000,
+        imageTimeout: 15000,
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          // Same light theme forcing as PDF
-          const lightThemeStyle = clonedDoc.createElement('style');
-          lightThemeStyle.textContent = `
-            html, body { background-color: #ffffff !important; color: #000000 !important; }
-            .bg-red-700 { background-color: #b91c1c !important; color: #ffffff !important; }
-            .bg-black { background-color: #000000 !important; color: #ffffff !important; }
-            .bg-white { background-color: #ffffff !important; color: #000000 !important; }
-            .text-white { color: #ffffff !important; }
-            .text-black { color: #000000 !important; }
-            .text-red-700 { color: #b91c1c !important; }
+          // Same comprehensive styling as PDF
+          const comprehensiveStyle = clonedDoc.createElement('style');
+          comprehensiveStyle.textContent = `
+            html, body { background-color: #ffffff !important; color: #000000 !important; color-scheme: light !important; }
+            .bg-red-700, div.bg-red-700, .newsletter .bg-red-700, .newsletter-container .bg-red-700 { background-color: #b91c1c !important; color: #ffffff !important; opacity: 1 !important; }
+            .bg-black, div.bg-black, .newsletter .bg-black, .newsletter-container .bg-black { background-color: #000000 !important; color: #ffffff !important; opacity: 1 !important; }
+            .bg-white, div.bg-white, .newsletter .bg-white, .newsletter-container .bg-white { background-color: #ffffff !important; color: #000000 !important; opacity: 1 !important; }
+            .text-white, h1.text-white, h2.text-white, h3.text-white, p.text-white, span.text-white, div.text-white, .newsletter .text-white, .newsletter-container .text-white { color: #ffffff !important; opacity: 1 !important; }
+            .text-black, .newsletter .text-black, .newsletter-container .text-black { color: #000000 !important; opacity: 1 !important; }
+            .text-red-700, .newsletter .text-red-700, .newsletter-container .text-red-700 { color: #b91c1c !important; opacity: 1 !important; }
             .text-gray-700 { color: #374151 !important; }
             .text-gray-600 { color: #4b5563 !important; }
             .text-gray-500 { color: #6b7280 !important; }
-            img { 
-              filter: grayscale(100%) !important; 
-              -webkit-filter: grayscale(100%) !important;
-              opacity: 1 !important; 
-            }
+            img, .newsletter img, .newsletter-container img { filter: grayscale(100%) !important; -webkit-filter: grayscale(100%) !important; -moz-filter: grayscale(100%) !important; -ms-filter: grayscale(100%) !important; -o-filter: grayscale(100%) !important; opacity: 1 !important; }
             .min-h-screen { min-height: 100vh !important; }
             .h-screen { height: 100vh !important; }
-            * { opacity: 1 !important; }
-            .newsletter-container, .newsletter, .newsletter-page { background-color: #ffffff !important; }
+            .newsletter-container, .newsletter, .newsletter-page { background-color: #ffffff !important; opacity: 1 !important; }
             .opacity-60 { opacity: 0.6 !important; }
+            .inline-block { display: inline-block !important; opacity: 1 !important; }
+            * { opacity: 1 !important; visibility: visible !important; }
+            .bg-red-700.inline-block, .bg-red-700 h3, .bg-red-700 .text-lg { background-color: #b91c1c !important; color: #ffffff !important; opacity: 1 !important; visibility: visible !important; display: inline-block !important; }
           `;
-          clonedDoc.head.appendChild(lightThemeStyle);
+          clonedDoc.head.appendChild(comprehensiveStyle);
           
-          // FORCE GRAYSCALE ON ALL IMAGES DIRECTLY (same as PDF)
-          const allImages = element.querySelectorAll('img');
-          allImages.forEach((img) => {
-            if (img instanceof HTMLElement) {
-              img.style.setProperty('filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-webkit-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-moz-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-ms-filter', 'grayscale(100%)', 'important');
-              img.style.setProperty('-o-filter', 'grayscale(100%)', 'important');
-              img.setAttribute('style', (img.getAttribute('style') || '') + '; filter: grayscale(100%) !important;');
-            }
-          });
-          
-          // Apply same element styling as PDF
+          // Apply same element fixes as PDF
           const allElements = element.querySelectorAll('*');
           allElements.forEach((el) => {
-            if (el instanceof HTMLElement && el.tagName !== 'IMG') {
+            if (el instanceof HTMLElement) {
               el.style.removeProperty('color-scheme');
+              el.style.setProperty('visibility', 'visible', 'important');
+              el.style.setProperty('opacity', '1', 'important');
               
               if (el.classList.contains('bg-red-700')) {
                 el.style.setProperty('background-color', '#b91c1c', 'important');
@@ -329,10 +360,29 @@ function App() {
               if (el.classList.contains('text-red-700')) {
                 el.style.setProperty('color', '#b91c1c', 'important');
               }
+              
+              if (el.classList.contains('inline-block')) {
+                el.style.setProperty('display', 'inline-block', 'important');
+                el.style.setProperty('visibility', 'visible', 'important');
+                el.style.setProperty('opacity', '1', 'important');
+              }
             }
           });
           
-          console.log(`✅ Applied grayscale to ${allImages.length} images`);
+          // Apply same image fixes as PDF
+          const allImages = element.querySelectorAll('img');
+          allImages.forEach((img) => {
+            if (img instanceof HTMLElement) {
+              img.style.setProperty('filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-webkit-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-moz-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-ms-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-o-filter', 'grayscale(100%)', 'important');
+              img.setAttribute('style', (img.getAttribute('style') || '') + '; filter: grayscale(100%) !important;');
+            }
+          });
+          
+          console.log(`✅ Applied comprehensive fixes to ${allElements.length} elements and ${allImages.length} images`);
         }
       });
 
@@ -349,7 +399,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated with grayscale images!');
+      console.log('🎉 PNG generated with proper text rendering!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
