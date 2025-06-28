@@ -29,30 +29,6 @@ const RSS_FEEDS = [
   'https://www.welivesecurity.com/feed/'
 ];
 
-// Mapping of RSS feed URLs to their main website URLs for reliable linking
-const FEED_TO_WEBSITE_MAP = {
-  'https://feeds.feedburner.com/TheHackersNews': 'https://thehackernews.com',
-  'https://krebsonsecurity.com/feed/': 'https://krebsonsecurity.com',
-  'https://www.bleepingcomputer.com/feed/': 'https://www.bleepingcomputer.com',
-  'https://threatpost.com/feed/': 'https://threatpost.com',
-  'https://www.darkreading.com/rss.xml': 'https://www.darkreading.com',
-  'https://www.securityweek.com/feed': 'https://www.securityweek.com',
-  'https://www.infosecurity-magazine.com/rss/news/': 'https://www.infosecurity-magazine.com',
-  'https://www.csoonline.com/index.rss': 'https://www.csoonline.com',
-  'https://www.scmagazine.com/feed': 'https://www.scmagazine.com',
-  'https://cybersecuritynews.com/feed/': 'https://cybersecuritynews.com',
-  'https://www.cyberscoop.com/feed/': 'https://www.cyberscoop.com',
-  'https://www.zdnet.com/topic/security/rss.xml': 'https://www.zdnet.com/topic/security/',
-  'https://www.securitymagazine.com/rss/topic/2236-cyber-security': 'https://www.securitymagazine.com',
-  'https://www.helpnetsecurity.com/feed/': 'https://www.helpnetsecurity.com',
-  'https://www.recordedfuture.com/feed': 'https://www.recordedfuture.com',
-  'https://www.bankinfosecurity.com/rss.php': 'https://www.bankinfosecurity.com',
-  'https://www.govinfosecurity.com/rss.php': 'https://www.govinfosecurity.com',
-  'https://feeds.feedburner.com/eset/blog': 'https://www.welivesecurity.com',
-  'https://blog.malwarebytes.com/feed/': 'https://blog.malwarebytes.com',
-  'https://www.welivesecurity.com/feed/': 'https://www.welivesecurity.com'
-};
-
 const CACHE_FILE = 'src/data/news-cache.json';
 const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
@@ -147,31 +123,53 @@ function formatArticleDate(pubDate) {
   }
 }
 
-// Get reliable website URL for a feed
-function getReliableWebsiteUrl(feedUrl, originalLink) {
-  // First try to use the mapped website URL
-  const mappedUrl = FEED_TO_WEBSITE_MAP[feedUrl];
-  if (mappedUrl) {
-    return mappedUrl;
+// Validate and clean article URL
+async function validateAndCleanUrl(url, feedUrl) {
+  if (!url || typeof url !== 'string') {
+    console.warn('⚠️ Invalid URL provided:', url);
+    return null;
   }
   
-  // If original link exists and looks valid, try to extract domain
-  if (originalLink && originalLink.startsWith('http')) {
+  let cleanUrl = url.trim();
+  
+  // Handle relative URLs
+  if (cleanUrl.startsWith('/')) {
     try {
-      const url = new URL(originalLink);
-      return `${url.protocol}//${url.hostname}`;
+      const feedDomain = new URL(feedUrl);
+      cleanUrl = `${feedDomain.protocol}//${feedDomain.hostname}${cleanUrl}`;
     } catch (error) {
-      console.warn('⚠️ Could not parse original link:', originalLink);
+      console.warn('⚠️ Could not construct absolute URL from relative:', cleanUrl);
+      return null;
     }
   }
   
-  // Fallback to extracting domain from feed URL
+  // Ensure URL has protocol
+  if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+    cleanUrl = 'https://' + cleanUrl;
+  }
+  
+  // Validate URL format
   try {
-    const url = new URL(feedUrl);
-    return `${url.protocol}//${url.hostname}`;
+    const urlObj = new URL(cleanUrl);
+    
+    // Remove tracking parameters and clean up
+    const cleanParams = new URLSearchParams();
+    for (const [key, value] of urlObj.searchParams) {
+      // Keep essential parameters, remove tracking ones
+      if (!key.match(/^(utm_|fbclid|gclid|_ga|ref|source|medium|campaign)/i)) {
+        cleanParams.set(key, value);
+      }
+    }
+    
+    urlObj.search = cleanParams.toString();
+    const finalUrl = urlObj.toString();
+    
+    console.log(`✅ Validated URL: ${finalUrl}`);
+    return finalUrl;
+    
   } catch (error) {
-    console.warn('⚠️ Could not parse feed URL:', feedUrl);
-    return 'https://www.cisa.gov/news-events/alerts'; // Ultimate fallback
+    console.warn('⚠️ Invalid URL format:', cleanUrl, error.message);
+    return null;
   }
 }
 
@@ -189,33 +187,44 @@ export async function fetchCyberSecurityNews() {
   const newArticles = [];
   let totalFetched = 0;
   let validArticles = 0;
+  let validLinks = 0;
   
   for (const feedUrl of RSS_FEEDS) {
     try {
       console.log(`📡 Fetching from: ${feedUrl}`);
       const feed = await parser.parseURL(feedUrl);
       
-      const recentArticles = feed.items
-        .filter(item => {
-          const isRecent = isStrictlyRecentArticle(item.pubDate);
-          if (isRecent) {
-            console.log(`✅ Valid article: ${item.title} - ${formatArticleDate(item.pubDate)}`);
+      const recentArticles = [];
+      
+      for (const item of feed.items.slice(0, 10)) { // Check more items per feed
+        const isRecent = isStrictlyRecentArticle(item.pubDate);
+        if (isRecent) {
+          console.log(`✅ Valid article: ${item.title} - ${formatArticleDate(item.pubDate)}`);
+          
+          // Validate and clean the article URL
+          const validatedLink = await validateAndCleanUrl(item.link, feedUrl);
+          
+          if (validatedLink) {
+            validLinks++;
+            console.log(`🔗 Valid link: ${validatedLink}`);
+          } else {
+            console.warn(`⚠️ Invalid link for article: ${item.title}`);
           }
-          return isRecent;
-        })
-        .slice(0, 8) // Limit per feed to avoid overwhelming
-        .map(item => ({
-          title: item.title?.trim() || 'Untitled',
-          description: (item.contentSnippet || item.description || '').trim(),
-          link: getReliableWebsiteUrl(feedUrl, item.link), // Use reliable website URL
-          pubDate: item.pubDate,
-          formattedDate: formatArticleDate(item.pubDate),
-          source: feed.title || feedUrl.replace(/https?:\/\//, '').split('/')[0],
-          content: item.content || item.description || '',
-          fetchedAt: Date.now(),
-          originalLink: item.link, // Keep original for reference
-          feedUrl: feedUrl
-        }));
+          
+          recentArticles.push({
+            title: item.title?.trim() || 'Untitled',
+            description: (item.contentSnippet || item.description || '').trim(),
+            link: validatedLink, // Use validated exact article link
+            pubDate: item.pubDate,
+            formattedDate: formatArticleDate(item.pubDate),
+            source: feed.title || feedUrl.replace(/https?:\/\//, '').split('/')[0],
+            content: item.content || item.description || '',
+            fetchedAt: Date.now(),
+            originalLink: item.link, // Keep original for debugging
+            feedUrl: feedUrl
+          });
+        }
+      }
       
       newArticles.push(...recentArticles);
       totalFetched += feed.items.length;
@@ -230,6 +239,7 @@ export async function fetchCyberSecurityNews() {
   }
   
   console.log(`📊 Scanned ${totalFetched} total articles, found ${validArticles} valid recent articles`);
+  console.log(`🔗 Validated ${validLinks} article links`);
   
   // Combine with cached articles and remove duplicates
   const allArticles = [...cache.articles, ...newArticles];
@@ -246,7 +256,7 @@ export async function fetchCyberSecurityNews() {
   saveCache(cache);
   
   console.log(`✅ Final count: ${recentUniqueArticles.length} unique recent articles`);
-  console.log(`🔗 All articles now link to reliable source websites`);
+  console.log(`🔗 Articles with valid links: ${recentUniqueArticles.filter(a => a.link).length}`);
   
   // Return the most recent articles for processing
   return recentUniqueArticles.slice(0, 30);

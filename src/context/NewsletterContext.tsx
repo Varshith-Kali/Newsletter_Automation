@@ -167,7 +167,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setIsUpdating(true);
     try {
       console.log('🚀 Starting real-time cybersecurity news update...');
-      console.log('📅 Fetching STRICTLY latest incidents from past 7 days with dates...');
+      console.log('📅 Fetching STRICTLY latest incidents from past 7 days with EXACT article links...');
       
       // Import and run the update function
       const { updateNewsletterContent } = await import('../../scripts/update-newsletter.js');
@@ -176,12 +176,12 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Reload the updated content
       await loadSavedContent();
       
-      console.log('✅ Newsletter content updated with latest threats and dates!');
+      console.log('✅ Newsletter content updated with latest threats and EXACT article links!');
       
     } catch (error) {
       console.error('❌ Error updating content:', error);
       
-      // Fallback: Generate some realistic current threats with RELIABLE working links
+      // Fallback: Generate some realistic current threats with REAL working article links
       const now = new Date();
       const fallbackThreats = [
         {
