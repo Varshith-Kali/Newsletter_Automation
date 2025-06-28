@@ -40,7 +40,7 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          console.log('🎨 Applying grayscale to all images...');
+          console.log('🎨 Applying grayscale to all images and fixing overlays...');
           
           // FORCE LIGHT THEME AND GRAYSCALE IMAGES
           const lightThemeStyle = clonedDoc.createElement('style');
@@ -105,6 +105,53 @@ function App() {
             
             .h-screen {
               height: 100vh !important;
+            }
+            
+            /* ENSURE ABSOLUTE POSITIONING WORKS */
+            .absolute {
+              position: absolute !important;
+            }
+            
+            .relative {
+              position: relative !important;
+            }
+            
+            /* ENSURE Z-INDEX WORKS */
+            .z-10 {
+              z-index: 10 !important;
+            }
+            
+            /* ENSURE POSITIONING VALUES */
+            .top-8 {
+              top: 2rem !important;
+            }
+            
+            .left-8 {
+              left: 2rem !important;
+            }
+            
+            .right-0 {
+              right: 0 !important;
+            }
+            
+            .top-0 {
+              top: 0 !important;
+            }
+            
+            .bottom-0 {
+              bottom: 0 !important;
+            }
+            
+            .inset-0 {
+              top: 0 !important;
+              right: 0 !important;
+              bottom: 0 !important;
+              left: 0 !important;
+            }
+            
+            /* ENSURE MAX-WIDTH WORKS */
+            .max-w-md {
+              max-width: 28rem !important;
             }
             
             /* REMOVE ANY DARK THEME OVERRIDES */
@@ -179,10 +226,57 @@ function App() {
               if (el.classList.contains('text-red-700')) {
                 el.style.setProperty('color', '#b91c1c', 'important');
               }
+              
+              // Fix absolute positioning
+              if (el.classList.contains('absolute')) {
+                el.style.setProperty('position', 'absolute', 'important');
+              }
+              
+              if (el.classList.contains('relative')) {
+                el.style.setProperty('position', 'relative', 'important');
+              }
+              
+              // Fix z-index
+              if (el.classList.contains('z-10')) {
+                el.style.setProperty('z-index', '10', 'important');
+              }
+              
+              // Fix positioning values
+              if (el.classList.contains('top-8')) {
+                el.style.setProperty('top', '2rem', 'important');
+              }
+              
+              if (el.classList.contains('left-8')) {
+                el.style.setProperty('left', '2rem', 'important');
+              }
+              
+              if (el.classList.contains('right-0')) {
+                el.style.setProperty('right', '0', 'important');
+              }
+              
+              if (el.classList.contains('top-0')) {
+                el.style.setProperty('top', '0', 'important');
+              }
+              
+              if (el.classList.contains('bottom-0')) {
+                el.style.setProperty('bottom', '0', 'important');
+              }
+              
+              if (el.classList.contains('inset-0')) {
+                el.style.setProperty('top', '0', 'important');
+                el.style.setProperty('right', '0', 'important');
+                el.style.setProperty('bottom', '0', 'important');
+                el.style.setProperty('left', '0', 'important');
+              }
+              
+              // Fix max-width
+              if (el.classList.contains('max-w-md')) {
+                el.style.setProperty('max-width', '28rem', 'important');
+              }
             }
           });
           
-          console.log(`✅ Applied grayscale to ${allImages.length} images`);
+          console.log(`✅ Applied grayscale to ${allImages.length} images and fixed positioning`);
         }
       });
 
@@ -218,7 +312,7 @@ function App() {
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🎉 PDF generated with grayscale images!');
+      console.log('🎉 PDF generated with grayscale images and fixed overlays!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -278,6 +372,16 @@ function App() {
             }
             .min-h-screen { min-height: 100vh !important; }
             .h-screen { height: 100vh !important; }
+            .absolute { position: absolute !important; }
+            .relative { position: relative !important; }
+            .z-10 { z-index: 10 !important; }
+            .top-8 { top: 2rem !important; }
+            .left-8 { left: 2rem !important; }
+            .right-0 { right: 0 !important; }
+            .top-0 { top: 0 !important; }
+            .bottom-0 { bottom: 0 !important; }
+            .inset-0 { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; }
+            .max-w-md { max-width: 28rem !important; }
             * { opacity: 1 !important; }
             .newsletter-container, .newsletter, .newsletter-page { background-color: #ffffff !important; }
             .opacity-60 { opacity: 0.6 !important; }
@@ -297,7 +401,7 @@ function App() {
             }
           });
           
-          // Apply same element styling as PDF
+          // Apply same element styling as PDF including positioning fixes
           const allElements = element.querySelectorAll('*');
           allElements.forEach((el) => {
             if (el instanceof HTMLElement && el.tagName !== 'IMG') {
@@ -329,10 +433,54 @@ function App() {
               if (el.classList.contains('text-red-700')) {
                 el.style.setProperty('color', '#b91c1c', 'important');
               }
+              
+              // Fix positioning (same as PDF)
+              if (el.classList.contains('absolute')) {
+                el.style.setProperty('position', 'absolute', 'important');
+              }
+              
+              if (el.classList.contains('relative')) {
+                el.style.setProperty('position', 'relative', 'important');
+              }
+              
+              if (el.classList.contains('z-10')) {
+                el.style.setProperty('z-index', '10', 'important');
+              }
+              
+              if (el.classList.contains('top-8')) {
+                el.style.setProperty('top', '2rem', 'important');
+              }
+              
+              if (el.classList.contains('left-8')) {
+                el.style.setProperty('left', '2rem', 'important');
+              }
+              
+              if (el.classList.contains('right-0')) {
+                el.style.setProperty('right', '0', 'important');
+              }
+              
+              if (el.classList.contains('top-0')) {
+                el.style.setProperty('top', '0', 'important');
+              }
+              
+              if (el.classList.contains('bottom-0')) {
+                el.style.setProperty('bottom', '0', 'important');
+              }
+              
+              if (el.classList.contains('inset-0')) {
+                el.style.setProperty('top', '0', 'important');
+                el.style.setProperty('right', '0', 'important');
+                el.style.setProperty('bottom', '0', 'important');
+                el.style.setProperty('left', '0', 'important');
+              }
+              
+              if (el.classList.contains('max-w-md')) {
+                el.style.setProperty('max-width', '28rem', 'important');
+              }
             }
           });
           
-          console.log(`✅ Applied grayscale to ${allImages.length} images`);
+          console.log(`✅ Applied grayscale to ${allImages.length} images and fixed positioning`);
         }
       });
 
@@ -349,7 +497,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated with grayscale images!');
+      console.log('🎉 PNG generated with grayscale images and fixed overlays!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
