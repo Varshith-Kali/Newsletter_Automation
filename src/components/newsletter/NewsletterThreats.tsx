@@ -144,9 +144,6 @@ const NewsletterThreats: React.FC = () => {
                   <span className="text-gray-600 font-medium">
                     {formatDate(threat.formattedDate, threat.pubDate)}
                   </span>
-                  {threat.link && threat.link.trim() !== '' && (
-                    <span className="text-green-600 font-medium">🔗 Click title to read more</span>
-                  )}
                 </div>
               </div>
             </div>
