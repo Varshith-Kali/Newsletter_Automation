@@ -16,7 +16,7 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating PDF with forced light theme...');
+      console.log('📄 Generating PDF with grayscale images...');
 
       // Prepare for capture
       window.scrollTo(0, 0);
@@ -27,7 +27,7 @@ function App() {
         scale: 2,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: '#ffffff', // FORCE WHITE BACKGROUND
+        backgroundColor: '#ffffff',
         logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
@@ -40,12 +40,12 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: (clonedDoc, element) => {
-          console.log('🎨 Forcing light theme and exact colors...');
+          console.log('🎨 Applying grayscale to all images...');
           
-          // FORCE LIGHT THEME - Override any dark theme
+          // FORCE LIGHT THEME AND GRAYSCALE IMAGES
           const lightThemeStyle = clonedDoc.createElement('style');
           lightThemeStyle.textContent = `
-            /* FORCE LIGHT THEME - OVERRIDE DARK MODE */
+            /* FORCE LIGHT THEME */
             html, body {
               background-color: #ffffff !important;
               color: #000000 !important;
@@ -91,9 +91,10 @@ function App() {
               color: #6b7280 !important;
             }
             
-            /* IMAGES */
+            /* FORCE GRAYSCALE ON ALL IMAGES */
             img {
               filter: grayscale(100%) !important;
+              -webkit-filter: grayscale(100%) !important;
               opacity: 1 !important;
             }
             
@@ -126,10 +127,28 @@ function App() {
           
           clonedDoc.head.appendChild(lightThemeStyle);
           
-          // Force styles on all elements
+          // FORCE GRAYSCALE ON ALL IMAGES DIRECTLY
+          const allImages = element.querySelectorAll('img');
+          allImages.forEach((img) => {
+            if (img instanceof HTMLElement) {
+              // Apply multiple grayscale methods to ensure it works
+              img.style.setProperty('filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-webkit-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-moz-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-ms-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-o-filter', 'grayscale(100%)', 'important');
+              
+              // Also try setting the attribute
+              img.setAttribute('style', (img.getAttribute('style') || '') + '; filter: grayscale(100%) !important;');
+              
+              console.log('Applied grayscale to image:', img.src);
+            }
+          });
+          
+          // Force styles on all other elements
           const allElements = element.querySelectorAll('*');
           allElements.forEach((el) => {
-            if (el instanceof HTMLElement) {
+            if (el instanceof HTMLElement && el.tagName !== 'IMG') {
               // Remove any dark theme classes or styles
               el.style.removeProperty('color-scheme');
               
@@ -160,14 +179,10 @@ function App() {
               if (el.classList.contains('text-red-700')) {
                 el.style.setProperty('color', '#b91c1c', 'important');
               }
-              
-              if (el.tagName === 'IMG') {
-                el.style.setProperty('filter', 'grayscale(100%)', 'important');
-              }
             }
           });
           
-          console.log('✅ Light theme forced, colors applied');
+          console.log(`✅ Applied grayscale to ${allImages.length} images`);
         }
       });
 
@@ -203,7 +218,7 @@ function App() {
       }
 
       pdf.save('Cybersecurity-Newsletter.pdf');
-      console.log('🎉 PDF generated successfully!');
+      console.log('🎉 PDF generated with grayscale images!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -219,7 +234,7 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with forced light theme...');
+      console.log('🖼️ Generating PNG with grayscale images...');
 
       // Prepare for capture
       window.scrollTo(0, 0);
@@ -230,7 +245,7 @@ function App() {
         scale: 2,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: '#ffffff', // FORCE WHITE BACKGROUND
+        backgroundColor: '#ffffff',
         logging: false,
         width: content.offsetWidth,
         height: content.offsetHeight,
@@ -256,7 +271,11 @@ function App() {
             .text-gray-700 { color: #374151 !important; }
             .text-gray-600 { color: #4b5563 !important; }
             .text-gray-500 { color: #6b7280 !important; }
-            img { filter: grayscale(100%) !important; opacity: 1 !important; }
+            img { 
+              filter: grayscale(100%) !important; 
+              -webkit-filter: grayscale(100%) !important;
+              opacity: 1 !important; 
+            }
             .min-h-screen { min-height: 100vh !important; }
             .h-screen { height: 100vh !important; }
             * { opacity: 1 !important; }
@@ -265,10 +284,23 @@ function App() {
           `;
           clonedDoc.head.appendChild(lightThemeStyle);
           
+          // FORCE GRAYSCALE ON ALL IMAGES DIRECTLY (same as PDF)
+          const allImages = element.querySelectorAll('img');
+          allImages.forEach((img) => {
+            if (img instanceof HTMLElement) {
+              img.style.setProperty('filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-webkit-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-moz-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-ms-filter', 'grayscale(100%)', 'important');
+              img.style.setProperty('-o-filter', 'grayscale(100%)', 'important');
+              img.setAttribute('style', (img.getAttribute('style') || '') + '; filter: grayscale(100%) !important;');
+            }
+          });
+          
           // Apply same element styling as PDF
           const allElements = element.querySelectorAll('*');
           allElements.forEach((el) => {
-            if (el instanceof HTMLElement) {
+            if (el instanceof HTMLElement && el.tagName !== 'IMG') {
               el.style.removeProperty('color-scheme');
               
               if (el.classList.contains('bg-red-700')) {
@@ -297,12 +329,10 @@ function App() {
               if (el.classList.contains('text-red-700')) {
                 el.style.setProperty('color', '#b91c1c', 'important');
               }
-              
-              if (el.tagName === 'IMG') {
-                el.style.setProperty('filter', 'grayscale(100%)', 'important');
-              }
             }
           });
+          
+          console.log(`✅ Applied grayscale to ${allImages.length} images`);
         }
       });
 
@@ -319,7 +349,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated successfully!');
+      console.log('🎉 PNG generated with grayscale images!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
