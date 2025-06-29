@@ -55,45 +55,50 @@ const NewsletterBestPractices: React.FC = () => {
       <div className="w-7/12 bg-white relative">
         {/* Background city image - FORCED SPECIFIC URL */}
         <div 
-          className="h-2/3 overflow-hidden thought-of-day-background"
+          className="h-2/3 overflow-hidden thought-of-day-background relative"
           style={{
             backgroundImage: 'url("https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1")',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            filter: 'grayscale(100%)'
+            backgroundRepeat: 'no-repeat'
           }}
         >
-          {/* AGGRESSIVE RED OVERLAY BOX - MAXIMUM SPECIFICITY */}
+          {/* GRAYSCALE OVERLAY - SEPARATE FROM RED BOX */}
           <div 
-            className="absolute top-8 left-8 p-6 max-w-md z-50 force-red-box"
+            className="absolute inset-0 w-full h-full"
+            style={{
+              backgroundImage: 'url("https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1")',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              filter: 'grayscale(100%)',
+              zIndex: 1
+            }}
+          />
+          
+          {/* RED BOX - COMPLETELY ISOLATED FROM GRAYSCALE */}
+          <div 
+            className="absolute top-8 left-8 p-6 max-w-md bg-red-700 text-white"
             style={{
               backgroundColor: '#b91c1c',
               color: '#ffffff',
-              filter: 'none',
-              WebkitFilter: 'none',
-              isolation: 'isolate',
-              zIndex: 999
+              zIndex: 10,
+              position: 'absolute',
+              isolation: 'isolate'
             }}
           >
             <h3 
-              className="text-xl font-bold mb-4"
+              className="text-xl font-bold mb-4 text-white"
               style={{
-                color: '#ffffff',
-                backgroundColor: 'transparent',
-                filter: 'none',
-                WebkitFilter: 'none'
+                color: '#ffffff'
               }}
             >
               THOUGHT OF THE DAY !!
             </h3>
             <p 
-              className="text-sm italic"
+              className="text-sm italic text-white"
               style={{
-                color: '#ffffff',
-                backgroundColor: 'transparent',
-                filter: 'none',
-                WebkitFilter: 'none'
+                color: '#ffffff'
               }}
             >
               {thoughtOfTheDay}
