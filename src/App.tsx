@@ -223,17 +223,6 @@ function App() {
     try {
       console.log('📄 Generating SINGLE-PAGE PDF with FORCED NIGHT CITY BACKGROUND...');
 
-      // CRITICAL: Store current width and temporarily set to 100% for consistent download
-      const currentWidth = previewWidth;
-      const contentContainer = content.parentElement as HTMLElement;
-      const originalContainerWidth = contentContainer?.style.width || '';
-      
-      // Temporarily set preview to 100% width for download
-      if (contentContainer) {
-        contentContainer.style.width = '100%';
-      }
-      content.style.width = '100%';
-      
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -255,9 +244,6 @@ function App() {
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
           console.log('🎨 PRE-PROCESSING: Pre-loading and caching ALL images with FORCED night city background...');
-          
-          // CRITICAL: Ensure cloned element is at 100% width for consistent layout
-          element.style.width = '100%';
           
           // CRITICAL: Pre-load and cache ALL images with forced night city background
           const imageCache = await preloadAndCacheAllImages(element);
@@ -414,12 +400,6 @@ function App() {
         }
       });
 
-      // CRITICAL: Restore original width after capture
-      if (contentContainer) {
-        contentContainer.style.width = originalContainerWidth;
-      }
-      content.style.width = `${currentWidth}%`;
-
       console.log(`📸 Canvas created: ${canvas.width}x${canvas.height}`);
 
       if (canvas.width === 0 || canvas.height === 0) {
@@ -480,17 +460,6 @@ function App() {
     try {
       console.log('🖼️ Generating PNG with FORCED NIGHT CITY BACKGROUND...');
 
-      // CRITICAL: Store current width and temporarily set to 100% for consistent download
-      const currentWidth = previewWidth;
-      const contentContainer = content.parentElement as HTMLElement;
-      const originalContainerWidth = contentContainer?.style.width || '';
-      
-      // Temporarily set preview to 100% width for download
-      if (contentContainer) {
-        contentContainer.style.width = '100%';
-      }
-      content.style.width = '100%';
-
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -512,9 +481,6 @@ function App() {
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
           console.log('🎨 PRE-PROCESSING PNG: Pre-loading and caching ALL images with FORCED night city background...');
-          
-          // CRITICAL: Ensure cloned element is at 100% width for consistent layout
-          element.style.width = '100%';
           
           // Pre-load and cache ALL images with forced night city background
           const imageCache = await preloadAndCacheAllImages(element);
@@ -660,12 +626,6 @@ function App() {
           console.log('✅ Comprehensive styling for PNG applied with FORCED night city background');
         }
       });
-
-      // CRITICAL: Restore original width after capture
-      if (contentContainer) {
-        contentContainer.style.width = originalContainerWidth;
-      }
-      content.style.width = `${currentWidth}%`;
 
       console.log(`📸 PNG canvas: ${canvas.width}x${canvas.height}`);
 
