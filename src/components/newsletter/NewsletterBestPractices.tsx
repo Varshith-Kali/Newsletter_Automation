@@ -32,6 +32,7 @@ const NewsletterBestPractices: React.FC = () => {
           <ul className="space-y-6">
             {trainingItems.map((item) => (
               <li key={item.id} className="flex items-start">
+                <span className="w-2 h-2 bg-white rounded-full mt-2 mr-2"></span>
                 <span className="text-sm">{item.content}</span>
               </li>
             ))}
