@@ -626,7 +626,7 @@ function App() {
                 if (textEl instanceof HTMLElement) {
                   textEl.style.setProperty('color', '#ffffff', 'important');
                   textEl.style.setProperty('opacity', '1', 'important');
-                  textEl.setProperty('visibility', 'visible', 'important');
+                  textEl.style.setProperty('visibility', 'visible', 'important');
                   textEl.style.setProperty('display', 'block', 'important');
                   
                   if (textEl.tagName === 'H3') {
