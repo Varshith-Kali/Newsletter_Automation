@@ -221,7 +221,8 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating SINGLE-PAGE PDF with FORCED NIGHT CITY BACKGROUND...');
+      console.log('📄 Generating SINGLE-PAGE PDF with CURRENT PREVIEW WIDTH...');
+      console.log(`📏 Current preview width: ${previewWidth}%`);
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -244,6 +245,7 @@ function App() {
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
           console.log('🎨 PRE-PROCESSING: Pre-loading and caching ALL images with FORCED night city background...');
+          console.log(`📏 Maintaining current width: ${previewWidth}%`);
           
           // CRITICAL: Pre-load and cache ALL images with forced night city background
           const imageCache = await preloadAndCacheAllImages(element);
@@ -396,7 +398,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling applied with FORCED night city background consistency');
+          console.log('✅ Comprehensive styling applied with CURRENT WIDTH MAINTAINED');
         }
       });
 
@@ -441,8 +443,8 @@ function App() {
 
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
 
-      pdf.save('Cybersecurity-Newsletter-SinglePage.pdf');
-      console.log('🎉 SINGLE-PAGE PDF generated with FORCED NIGHT CITY BACKGROUND!');
+      pdf.save(`Cybersecurity-Newsletter-${previewWidth}percent.pdf`);
+      console.log(`🎉 SINGLE-PAGE PDF generated at ${previewWidth}% width!`);
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -458,7 +460,8 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with FORCED NIGHT CITY BACKGROUND...');
+      console.log('🖼️ Generating PNG with CURRENT PREVIEW WIDTH...');
+      console.log(`📏 Current preview width: ${previewWidth}%`);
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -481,6 +484,7 @@ function App() {
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
           console.log('🎨 PRE-PROCESSING PNG: Pre-loading and caching ALL images with FORCED night city background...');
+          console.log(`📏 Maintaining current width: ${previewWidth}%`);
           
           // Pre-load and cache ALL images with forced night city background
           const imageCache = await preloadAndCacheAllImages(element);
@@ -623,7 +627,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling for PNG applied with FORCED night city background');
+          console.log('✅ Comprehensive styling for PNG applied with CURRENT WIDTH MAINTAINED');
         }
       });
 
@@ -634,13 +638,13 @@ function App() {
       }
 
       const link = document.createElement('a');
-      link.download = 'Cybersecurity-Newsletter.png';
+      link.download = `Cybersecurity-Newsletter-${previewWidth}percent.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated with FORCED NIGHT CITY BACKGROUND!');
+      console.log(`🎉 PNG generated at ${previewWidth}% width!`);
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
@@ -710,13 +714,13 @@ function App() {
                   onClick={downloadAsPDF}
                   className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded shadow-lg transition-colors"
                 >
-                  📄 Download as Single-Page PDF
+                  📄 Download as PDF ({previewWidth}%)
                 </button>
                 <button
                   onClick={downloadAsPNG}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded shadow-lg transition-colors"
                 >
-                  🖼️ Download as PNG
+                  🖼️ Download as PNG ({previewWidth}%)
                 </button>
               </div>
             </div>
