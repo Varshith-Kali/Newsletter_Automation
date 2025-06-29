@@ -55,66 +55,128 @@ function App() {
     });
   };
 
-  // Function to preload and cache images before processing
-  const preloadAndCacheImages = async (element: HTMLElement): Promise<Map<string, string>> => {
-    const imageCache = new Map<string, string>();
-    const images = element.querySelectorAll('img');
+  // Function to extract image URLs from CSS background-image properties
+  const extractBackgroundImageUrls = (element: HTMLElement): string[] => {
+    const urls: string[] = [];
+    const allElements = element.querySelectorAll('*');
     
-    console.log(`🖼️ Pre-loading and caching ${images.length} images...`);
-    
-    const promises = Array.from(images).map(async (img, index) => {
-      if (img instanceof HTMLImageElement && img.src) {
-        try {
-          console.log(`📥 Pre-loading image ${index + 1}: ${img.src.substring(0, 50)}...`);
-          
-          // Create a new image to ensure it's fully loaded
-          const tempImg = new Image();
-          tempImg.crossOrigin = 'anonymous';
-          
-          await new Promise<void>((resolve, reject) => {
-            tempImg.onload = () => resolve();
-            tempImg.onerror = () => reject(new Error(`Failed to load image: ${img.src}`));
-            tempImg.src = img.src;
-          });
-          
-          // Convert to grayscale and cache
-          const grayscaleDataUrl = await convertImageToGrayscale(tempImg);
-          imageCache.set(img.src, grayscaleDataUrl);
-          
-          console.log(`✅ Image ${index + 1} cached successfully`);
-        } catch (error) {
-          console.warn(`⚠️ Failed to cache image ${index + 1}:`, error);
-          // Keep original src as fallback
-          imageCache.set(img.src, img.src);
+    allElements.forEach((el) => {
+      if (el instanceof HTMLElement) {
+        const computedStyle = window.getComputedStyle(el);
+        const backgroundImage = computedStyle.backgroundImage;
+        
+        if (backgroundImage && backgroundImage !== 'none') {
+          // Extract URL from background-image CSS property
+          const urlMatch = backgroundImage.match(/url\(['"]?([^'"]+)['"]?\)/);
+          if (urlMatch && urlMatch[1]) {
+            urls.push(urlMatch[1]);
+          }
         }
       }
     });
     
+    return [...new Set(urls)]; // Remove duplicates
+  };
+
+  // Function to preload and cache ALL images (both <img> tags and CSS backgrounds)
+  const preloadAndCacheAllImages = async (element: HTMLElement): Promise<Map<string, string>> => {
+    const imageCache = new Map<string, string>();
+    
+    // Get all <img> tag sources
+    const imgElements = element.querySelectorAll('img');
+    const imgSources = Array.from(imgElements)
+      .filter(img => img instanceof HTMLImageElement && img.src)
+      .map(img => (img as HTMLImageElement).src);
+    
+    // Get all CSS background image URLs
+    const backgroundUrls = extractBackgroundImageUrls(element);
+    
+    // Combine all image URLs
+    const allImageUrls = [...new Set([...imgSources, ...backgroundUrls])];
+    
+    console.log(`🖼️ Pre-loading and caching ${allImageUrls.length} images (${imgSources.length} <img> tags + ${backgroundUrls.length} CSS backgrounds)...`);
+    
+    const promises = allImageUrls.map(async (url, index) => {
+      try {
+        console.log(`📥 Pre-loading image ${index + 1}: ${url.substring(0, 50)}...`);
+        
+        // Create a new image to ensure it's fully loaded
+        const tempImg = new Image();
+        tempImg.crossOrigin = 'anonymous';
+        
+        await new Promise<void>((resolve, reject) => {
+          tempImg.onload = () => resolve();
+          tempImg.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+          tempImg.src = url;
+        });
+        
+        // Convert to grayscale and cache
+        const grayscaleDataUrl = await convertImageToGrayscale(tempImg);
+        imageCache.set(url, grayscaleDataUrl);
+        
+        console.log(`✅ Image ${index + 1} cached successfully`);
+      } catch (error) {
+        console.warn(`⚠️ Failed to cache image ${index + 1}:`, error);
+        // Keep original src as fallback
+        imageCache.set(url, url);
+      }
+    });
+    
     await Promise.all(promises);
-    console.log(`🎉 All ${imageCache.size} images cached!`);
+    console.log(`🎉 All ${imageCache.size} images cached (including CSS backgrounds)!`);
     return imageCache;
   };
 
-  // Function to replace all images with cached grayscale versions
-  const replaceImagesWithCachedVersions = (element: HTMLElement, imageCache: Map<string, string>): void => {
-    const images = element.querySelectorAll('img');
+  // Function to replace ALL images with cached grayscale versions
+  const replaceAllImagesWithCachedVersions = (element: HTMLElement, imageCache: Map<string, string>): void => {
+    console.log(`🔄 Replacing all images with cached grayscale versions...`);
     
-    console.log(`🔄 Replacing ${images.length} images with cached grayscale versions...`);
-    
-    images.forEach((img, index) => {
+    // Replace <img> tag sources
+    const imgElements = element.querySelectorAll('img');
+    imgElements.forEach((img, index) => {
       if (img instanceof HTMLImageElement && img.src) {
         const cachedVersion = imageCache.get(img.src);
         if (cachedVersion) {
           img.src = cachedVersion;
           img.style.filter = 'none'; // Remove any existing filters
-          console.log(`✅ Image ${index + 1} replaced with cached version`);
+          console.log(`✅ <img> ${index + 1} replaced with cached version`);
         } else {
-          console.warn(`⚠️ No cached version found for image ${index + 1}: ${img.src}`);
+          console.warn(`⚠️ No cached version found for <img> ${index + 1}: ${img.src}`);
         }
       }
     });
     
-    console.log('🎉 All images replaced with cached grayscale versions!');
+    // Replace CSS background images
+    const allElements = element.querySelectorAll('*');
+    let backgroundCount = 0;
+    
+    allElements.forEach((el) => {
+      if (el instanceof HTMLElement) {
+        const computedStyle = window.getComputedStyle(el);
+        const backgroundImage = computedStyle.backgroundImage;
+        
+        if (backgroundImage && backgroundImage !== 'none') {
+          // Extract URL from background-image CSS property
+          const urlMatch = backgroundImage.match(/url\(['"]?([^'"]+)['"]?\)/);
+          if (urlMatch && urlMatch[1]) {
+            const originalUrl = urlMatch[1];
+            const cachedVersion = imageCache.get(originalUrl);
+            
+            if (cachedVersion) {
+              // Replace the background image with cached grayscale version
+              el.style.setProperty('background-image', `url("${cachedVersion}")`, 'important');
+              el.style.setProperty('filter', 'none', 'important');
+              backgroundCount++;
+              console.log(`✅ CSS background ${backgroundCount} replaced: ${originalUrl.substring(0, 50)}...`);
+            } else {
+              console.warn(`⚠️ No cached version found for CSS background: ${originalUrl}`);
+            }
+          }
+        }
+      }
+    });
+    
+    console.log(`🎉 All images replaced: ${imgElements.length} <img> tags + ${backgroundCount} CSS backgrounds!`);
   };
 
   const downloadAsPDF = async () => {
@@ -125,7 +187,7 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating SINGLE-PAGE PDF with CACHED GRAYSCALE IMAGES...');
+      console.log('📄 Generating SINGLE-PAGE PDF with COMPLETE IMAGE CACHING (including CSS backgrounds)...');
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -147,15 +209,15 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING: Pre-loading and caching all images as grayscale...');
+          console.log('🎨 PRE-PROCESSING: Pre-loading and caching ALL images (including CSS backgrounds)...');
           
-          // CRITICAL: Pre-load and cache all images first
-          const imageCache = await preloadAndCacheImages(element);
+          // CRITICAL: Pre-load and cache ALL images (both <img> and CSS backgrounds)
+          const imageCache = await preloadAndCacheAllImages(element);
           
-          // Then replace all images with cached grayscale versions
-          replaceImagesWithCachedVersions(element, imageCache);
+          // Then replace ALL images with cached grayscale versions
+          replaceAllImagesWithCachedVersions(element, imageCache);
           
-          console.log('✅ All images replaced with consistent cached grayscale versions!');
+          console.log('✅ ALL images (including CSS backgrounds) replaced with consistent cached grayscale versions!');
           
           // Apply comprehensive styling
           const comprehensiveStyle = clonedDoc.createElement('style');
@@ -175,7 +237,7 @@ function App() {
             .text-gray-600 { color: #4b5563 !important; }
             .text-gray-500 { color: #6b7280 !important; }
             
-            /* Ensure images stay grayscale and maintain consistency */
+            /* Ensure ALL images stay grayscale and maintain consistency */
             img {
               filter: none !important;
               -webkit-filter: none !important;
@@ -183,7 +245,15 @@ function App() {
               image-rendering: crisp-edges !important;
             }
             
-            /* Ensure background images are properly handled */
+            /* Ensure ALL background images are properly handled and stay grayscale */
+            * {
+              background-size: cover !important;
+              background-position: center !important;
+              background-repeat: no-repeat !important;
+              filter: none !important;
+              -webkit-filter: none !important;
+            }
+            
             .h-2\/3, .h-1\/3 {
               background-size: cover !important;
               background-position: center !important;
@@ -285,7 +355,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling applied with cached grayscale images');
+          console.log('✅ Comprehensive styling applied with complete image caching (including CSS backgrounds)');
         }
       });
 
@@ -331,7 +401,7 @@ function App() {
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
 
       pdf.save('Cybersecurity-Newsletter-SinglePage.pdf');
-      console.log('🎉 SINGLE-PAGE PDF generated with CACHED GRAYSCALE IMAGES!');
+      console.log('🎉 SINGLE-PAGE PDF generated with COMPLETE IMAGE CACHING (including CSS backgrounds)!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -347,7 +417,7 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with CACHED GRAYSCALE IMAGES...');
+      console.log('🖼️ Generating PNG with COMPLETE IMAGE CACHING (including CSS backgrounds)...');
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -369,15 +439,15 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING PNG: Pre-loading and caching all images as grayscale...');
+          console.log('🎨 PRE-PROCESSING PNG: Pre-loading and caching ALL images (including CSS backgrounds)...');
           
-          // Pre-load and cache all images first
-          const imageCache = await preloadAndCacheImages(element);
+          // Pre-load and cache ALL images (both <img> and CSS backgrounds)
+          const imageCache = await preloadAndCacheAllImages(element);
           
-          // Then replace all images with cached grayscale versions
-          replaceImagesWithCachedVersions(element, imageCache);
+          // Then replace ALL images with cached grayscale versions
+          replaceAllImagesWithCachedVersions(element, imageCache);
           
-          console.log('✅ All images replaced with consistent cached grayscale versions for PNG!');
+          console.log('✅ ALL images (including CSS backgrounds) replaced with consistent cached grayscale versions for PNG!');
           
           const comprehensiveStyle = clonedDoc.createElement('style');
           comprehensiveStyle.textContent = `
@@ -400,6 +470,14 @@ function App() {
               -webkit-filter: none !important;
               image-rendering: -webkit-optimize-contrast !important;
               image-rendering: crisp-edges !important;
+            }
+            
+            * {
+              background-size: cover !important;
+              background-position: center !important;
+              background-repeat: no-repeat !important;
+              filter: none !important;
+              -webkit-filter: none !important;
             }
             
             .h-2\/3, .h-1\/3 {
@@ -498,7 +576,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling for PNG applied with cached images');
+          console.log('✅ Comprehensive styling for PNG applied with complete image caching');
         }
       });
 
@@ -515,7 +593,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated with CACHED GRAYSCALE IMAGES!');
+      console.log('🎉 PNG generated with COMPLETE IMAGE CACHING (including CSS backgrounds)!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
