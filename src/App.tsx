@@ -72,6 +72,15 @@ function App() {
             urls.push(urlMatch[1]);
           }
         }
+        
+        // Also check inline styles
+        const inlineStyle = el.style.backgroundImage;
+        if (inlineStyle && inlineStyle !== 'none') {
+          const urlMatch = inlineStyle.match(/url\(['"]?([^'"]+)['"]?\)/);
+          if (urlMatch && urlMatch[1]) {
+            urls.push(urlMatch[1]);
+          }
+        }
       }
     });
     
@@ -91,10 +100,15 @@ function App() {
     // Get all CSS background image URLs
     const backgroundUrls = extractBackgroundImageUrls(element);
     
+    // FORCE the specific night city image URL for the thought of the day section
+    const forcedCityImageUrl = 'https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1';
+    backgroundUrls.push(forcedCityImageUrl);
+    
     // Combine all image URLs
     const allImageUrls = [...new Set([...imgSources, ...backgroundUrls])];
     
     console.log(`🖼️ Pre-loading and caching ${allImageUrls.length} images (${imgSources.length} <img> tags + ${backgroundUrls.length} CSS backgrounds)...`);
+    console.log(`🏙️ FORCING night city image: ${forcedCityImageUrl}`);
     
     const promises = allImageUrls.map(async (url, index) => {
       try {
@@ -123,7 +137,7 @@ function App() {
     });
     
     await Promise.all(promises);
-    console.log(`🎉 All ${imageCache.size} images cached (including CSS backgrounds)!`);
+    console.log(`🎉 All ${imageCache.size} images cached (including forced night city background)!`);
     return imageCache;
   };
 
@@ -146,12 +160,31 @@ function App() {
       }
     });
     
-    // Replace CSS background images
+    // CRITICAL: Force replace the thought-of-day background specifically
+    const forcedCityImageUrl = 'https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1';
+    const cachedCityImage = imageCache.get(forcedCityImageUrl);
+    
+    if (cachedCityImage) {
+      // Find the thought-of-day background element specifically
+      const thoughtOfDayElements = element.querySelectorAll('.thought-of-day-background');
+      thoughtOfDayElements.forEach((el) => {
+        if (el instanceof HTMLElement) {
+          el.style.setProperty('background-image', `url("${cachedCityImage}")`, 'important');
+          el.style.setProperty('background-size', 'cover', 'important');
+          el.style.setProperty('background-position', 'center', 'important');
+          el.style.setProperty('background-repeat', 'no-repeat', 'important');
+          el.style.setProperty('filter', 'grayscale(100%)', 'important');
+          console.log(`🏙️ FORCED night city background replaced with cached grayscale version`);
+        }
+      });
+    }
+    
+    // Replace other CSS background images
     const allElements = element.querySelectorAll('*');
     let backgroundCount = 0;
     
     allElements.forEach((el) => {
-      if (el instanceof HTMLElement) {
+      if (el instanceof HTMLElement && !el.classList.contains('thought-of-day-background')) {
         const computedStyle = window.getComputedStyle(el);
         const backgroundImage = computedStyle.backgroundImage;
         
@@ -176,7 +209,7 @@ function App() {
       }
     });
     
-    console.log(`🎉 All images replaced: ${imgElements.length} <img> tags + ${backgroundCount} CSS backgrounds!`);
+    console.log(`🎉 All images replaced: ${imgElements.length} <img> tags + ${backgroundCount} CSS backgrounds + 1 FORCED night city background!`);
   };
 
   const downloadAsPDF = async () => {
@@ -187,7 +220,7 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating SINGLE-PAGE PDF with COMPLETE IMAGE CACHING (including CSS backgrounds)...');
+      console.log('📄 Generating SINGLE-PAGE PDF with FORCED NIGHT CITY BACKGROUND...');
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -209,15 +242,15 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING: Pre-loading and caching ALL images (including CSS backgrounds)...');
+          console.log('🎨 PRE-PROCESSING: Pre-loading and caching ALL images with FORCED night city background...');
           
-          // CRITICAL: Pre-load and cache ALL images (both <img> and CSS backgrounds)
+          // CRITICAL: Pre-load and cache ALL images with forced night city background
           const imageCache = await preloadAndCacheAllImages(element);
           
-          // Then replace ALL images with cached grayscale versions
+          // Then replace ALL images with cached grayscale versions including forced background
           replaceAllImagesWithCachedVersions(element, imageCache);
           
-          console.log('✅ ALL images (including CSS backgrounds) replaced with consistent cached grayscale versions!');
+          console.log('✅ ALL images replaced with consistent cached grayscale versions including FORCED night city background!');
           
           // Apply comprehensive styling
           const comprehensiveStyle = clonedDoc.createElement('style');
@@ -245,13 +278,20 @@ function App() {
               image-rendering: crisp-edges !important;
             }
             
+            /* CRITICAL: Force the thought-of-day background to be consistent */
+            .thought-of-day-background {
+              background-size: cover !important;
+              background-position: center !important;
+              background-repeat: no-repeat !important;
+              filter: grayscale(100%) !important;
+              -webkit-filter: grayscale(100%) !important;
+            }
+            
             /* Ensure ALL background images are properly handled and stay grayscale */
             * {
               background-size: cover !important;
               background-position: center !important;
               background-repeat: no-repeat !important;
-              filter: none !important;
-              -webkit-filter: none !important;
             }
             
             .h-2\/3, .h-1\/3 {
@@ -355,7 +395,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling applied with complete image caching (including CSS backgrounds)');
+          console.log('✅ Comprehensive styling applied with FORCED night city background consistency');
         }
       });
 
@@ -401,7 +441,7 @@ function App() {
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
 
       pdf.save('Cybersecurity-Newsletter-SinglePage.pdf');
-      console.log('🎉 SINGLE-PAGE PDF generated with COMPLETE IMAGE CACHING (including CSS backgrounds)!');
+      console.log('🎉 SINGLE-PAGE PDF generated with FORCED NIGHT CITY BACKGROUND!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -417,7 +457,7 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with COMPLETE IMAGE CACHING (including CSS backgrounds)...');
+      console.log('🖼️ Generating PNG with FORCED NIGHT CITY BACKGROUND...');
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -439,15 +479,15 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING PNG: Pre-loading and caching ALL images (including CSS backgrounds)...');
+          console.log('🎨 PRE-PROCESSING PNG: Pre-loading and caching ALL images with FORCED night city background...');
           
-          // Pre-load and cache ALL images (both <img> and CSS backgrounds)
+          // Pre-load and cache ALL images with forced night city background
           const imageCache = await preloadAndCacheAllImages(element);
           
-          // Then replace ALL images with cached grayscale versions
+          // Then replace ALL images with cached grayscale versions including forced background
           replaceAllImagesWithCachedVersions(element, imageCache);
           
-          console.log('✅ ALL images (including CSS backgrounds) replaced with consistent cached grayscale versions for PNG!');
+          console.log('✅ ALL images replaced with consistent cached grayscale versions including FORCED night city background for PNG!');
           
           const comprehensiveStyle = clonedDoc.createElement('style');
           comprehensiveStyle.textContent = `
@@ -472,12 +512,18 @@ function App() {
               image-rendering: crisp-edges !important;
             }
             
+            .thought-of-day-background {
+              background-size: cover !important;
+              background-position: center !important;
+              background-repeat: no-repeat !important;
+              filter: grayscale(100%) !important;
+              -webkit-filter: grayscale(100%) !important;
+            }
+            
             * {
               background-size: cover !important;
               background-position: center !important;
               background-repeat: no-repeat !important;
-              filter: none !important;
-              -webkit-filter: none !important;
             }
             
             .h-2\/3, .h-1\/3 {
@@ -576,7 +622,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling for PNG applied with complete image caching');
+          console.log('✅ Comprehensive styling for PNG applied with FORCED night city background');
         }
       });
 
@@ -593,7 +639,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated with COMPLETE IMAGE CACHING (including CSS backgrounds)!');
+      console.log('🎉 PNG generated with FORCED NIGHT CITY BACKGROUND!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);

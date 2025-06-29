@@ -54,15 +54,17 @@ const NewsletterBestPractices: React.FC = () => {
       
       {/* Right side with images and quote */}
       <div className="w-7/12 bg-white relative">
-        {/* Background city image */}
-        <div className="h-2/3 overflow-hidden">
-          <img 
-            src="https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
-            alt="Night City" 
-            className="w-full h-full object-cover grayscale"
-            crossOrigin="anonymous"
-          />
-          
+        {/* Background city image - FORCED SPECIFIC URL */}
+        <div 
+          className="h-2/3 overflow-hidden thought-of-day-background"
+          style={{
+            backgroundImage: 'url("https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'grayscale(100%)'
+          }}
+        >
           {/* Red overlay box */}
           <div className="absolute top-8 left-8 bg-red-700 p-6 max-w-md text-white">
             <h3 className="text-xl font-bold mb-4">THOUGHT OF THE DAY !!</h3>
