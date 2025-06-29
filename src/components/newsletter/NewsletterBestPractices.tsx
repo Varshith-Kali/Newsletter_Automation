@@ -10,7 +10,7 @@ const NewsletterBestPractices: React.FC = () => {
   } = useNewsletter();
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex newsletter-best-practices">
       {/* Left side with red background */}
       <div className="w-5/12 bg-red-700 text-white p-8 flex flex-col">
         <div>
@@ -64,10 +64,40 @@ const NewsletterBestPractices: React.FC = () => {
             filter: 'grayscale(100%)'
           }}
         >
-          {/* Red overlay box - FORCE RED COLOR */}
-          <div className="absolute top-8 left-8 bg-red-700 p-6 max-w-md text-white z-20 force-red-box">
-            <h3 className="text-xl font-bold mb-4 text-white">THOUGHT OF THE DAY !!</h3>
-            <p className="text-sm italic text-white">{thoughtOfTheDay}</p>
+          {/* AGGRESSIVE RED OVERLAY BOX - MAXIMUM SPECIFICITY */}
+          <div 
+            className="absolute top-8 left-8 p-6 max-w-md z-50 force-red-box"
+            style={{
+              backgroundColor: '#b91c1c',
+              color: '#ffffff',
+              filter: 'none',
+              WebkitFilter: 'none',
+              isolation: 'isolate',
+              zIndex: 999
+            }}
+          >
+            <h3 
+              className="text-xl font-bold mb-4"
+              style={{
+                color: '#ffffff',
+                backgroundColor: 'transparent',
+                filter: 'none',
+                WebkitFilter: 'none'
+              }}
+            >
+              THOUGHT OF THE DAY !!
+            </h3>
+            <p 
+              className="text-sm italic"
+              style={{
+                color: '#ffffff',
+                backgroundColor: 'transparent',
+                filter: 'none',
+                WebkitFilter: 'none'
+              }}
+            >
+              {thoughtOfTheDay}
+            </p>
           </div>
         </div>
         

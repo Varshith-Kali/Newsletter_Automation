@@ -13,25 +13,43 @@ body {
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* FORCE RED BOX COLOR - HIGHEST SPECIFICITY */
-.force-red-box {
+/* AGGRESSIVE RED BOX COLOR ENFORCEMENT - MAXIMUM SPECIFICITY */
+.force-red-box,
+.force-red-box.bg-red-700,
+div.force-red-box,
+.thought-of-day-background .force-red-box,
+.thought-of-day-background div.force-red-box,
+.newsletter-page .force-red-box,
+.newsletter-best-practices .force-red-box {
   background-color: #b91c1c !important;
+  background: #b91c1c !important;
   color: #ffffff !important;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
 .force-red-box h3,
-.force-red-box p {
+.force-red-box p,
+.force-red-box * {
   color: #ffffff !important;
   background-color: transparent !important;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
-/* Additional backup selectors */
+/* Override any grayscale filters on the red box */
 .thought-of-day-background .force-red-box {
   background-color: #b91c1c !important;
+  background: #b91c1c !important;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
-.bg-red-700.force-red-box {
-  background-color: #b91c1c !important;
+/* Ensure the red box is not affected by parent filters */
+.force-red-box {
+  isolation: isolate !important;
+  position: relative !important;
+  z-index: 999 !important;
 }
 
 @media print {
