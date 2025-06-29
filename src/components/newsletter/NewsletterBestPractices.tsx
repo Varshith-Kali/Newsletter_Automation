@@ -64,10 +64,10 @@ const NewsletterBestPractices: React.FC = () => {
             filter: 'grayscale(100%)'
           }}
         >
-          {/* Red overlay box - ENSURING RED BACKGROUND */}
+          {/* Red overlay box */}
           <div className="absolute top-8 left-8 bg-red-700 p-6 max-w-md text-white">
-            <h3 className="text-xl font-bold mb-4 text-white">THOUGHT OF THE DAY !!</h3>
-            <p className="text-sm italic text-white">{thoughtOfTheDay}</p>
+            <h3 className="text-xl font-bold mb-4">THOUGHT OF THE DAY !!</h3>
+            <p className="text-sm italic">{thoughtOfTheDay}</p>
           </div>
         </div>
         
