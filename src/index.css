@@ -13,6 +13,18 @@ body {
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+/* FORCE RED BOX COLOR - HIGHEST SPECIFICITY */
+.thought-of-day-background > div {
+  background-color: #b91c1c !important;
+  color: #ffffff !important;
+}
+
+.thought-of-day-background > div h3,
+.thought-of-day-background > div p {
+  color: #ffffff !important;
+  background-color: transparent !important;
+}
+
 @media print {
   body {
     margin: 0;

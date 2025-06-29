@@ -65,19 +65,22 @@ const NewsletterBestPractices: React.FC = () => {
             filter: 'grayscale(100%)'
           }}
         >
-          {/* Red overlay box - EXPLICITLY STYLED TO MAINTAIN RED COLOR */}
+          {/* Red overlay box - FORCE RED COLOR WITH IMPORTANT STYLES */}
           <div 
-            className="absolute top-8 left-8 p-6 max-w-md text-white z-10"
+            className="absolute top-8 left-8 p-6 max-w-md z-20"
             style={{
-              backgroundColor: '#b91c1c',
-              color: '#ffffff'
+              backgroundColor: '#b91c1c !important',
+              color: '#ffffff !important',
+              border: 'none',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
             }}
           >
             <h3 
               className="text-xl font-bold mb-4"
               style={{
-                color: '#ffffff',
-                backgroundColor: 'transparent'
+                color: '#ffffff !important',
+                backgroundColor: 'transparent !important',
+                textShadow: 'none'
               }}
             >
               THOUGHT OF THE DAY !!
@@ -85,8 +88,9 @@ const NewsletterBestPractices: React.FC = () => {
             <p 
               className="text-sm italic"
               style={{
-                color: '#ffffff',
-                backgroundColor: 'transparent'
+                color: '#ffffff !important',
+                backgroundColor: 'transparent !important',
+                textShadow: 'none'
               }}
             >
               {thoughtOfTheDay}
