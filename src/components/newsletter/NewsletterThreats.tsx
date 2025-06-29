@@ -145,11 +145,7 @@ const NewsletterThreats: React.FC = () => {
                   {threat.source && (
                     <span className="italic">Source: {threat.source}</span>
                   )}
-                  {threat.cves && threat.cves.length > 0 && (
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
-                      {threat.cves.join(', ')}
-                    </span>
-                  )}
+                  {/* REMOVED: CVE display section - no more CVE numbers shown */}
                   <span className="text-gray-600 font-medium">
                     {formatDate(threat.formattedDate, threat.pubDate)}
                   </span>

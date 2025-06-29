@@ -423,7 +423,8 @@ const fetchLatestThreats = async (): Promise<Threat[]> => {
         link: threat.link,
         linkType: 'direct' as const,
         threatScore: threat.threatScore,
-        cves: Math.random() > 0.5 ? [`CVE-2025-${Math.floor(Math.random() * 9999).toString().padStart(4, '0')}`] : []
+        // REMOVED: No CVE generation - cves array is empty or undefined
+        cves: [] // Always empty to prevent CVE display
       };
     });
   
@@ -457,7 +458,8 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       pubDate: new Date().toISOString(),
       link: 'https://msrc.microsoft.com/update-guide/en-US/security-updates',
       linkType: 'direct',
-      threatScore: 85
+      threatScore: 85,
+      cves: [] // No CVE numbers
     },
     {
       id: '2',
@@ -469,7 +471,8 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       pubDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       link: 'https://www.cisa.gov/news-events/cybersecurity-advisories',
       linkType: 'direct',
-      threatScore: 72
+      threatScore: 72,
+      cves: [] // No CVE numbers
     },
     {
       id: '3',
@@ -481,7 +484,8 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       pubDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
       link: 'https://github.com/advisories',
       linkType: 'direct',
-      threatScore: 68
+      threatScore: 68,
+      cves: [] // No CVE numbers
     },
     {
       id: '4',
@@ -493,7 +497,8 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       pubDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       link: 'https://www.cisa.gov/news-events/alerts',
       linkType: 'direct',
-      threatScore: 45
+      threatScore: 45,
+      cves: [] // No CVE numbers
     }
   ]);
   
@@ -636,7 +641,12 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (response.ok) {
         const data = await response.json();
         if (data.threats && data.threats.length >= 4) {
-          setThreats(data.threats);
+          // Remove CVE numbers from loaded threats
+          const threatsWithoutCVEs = data.threats.map((threat: Threat) => ({
+            ...threat,
+            cves: [] // Remove any CVE numbers
+          }));
+          setThreats(threatsWithoutCVEs);
           // Best practices and training will be auto-generated via useEffect
         }
         if (data.thoughtOfTheDay) setThoughtOfTheDay(data.thoughtOfTheDay);
@@ -671,7 +681,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setGenerationStats({
         articlesScanned: 50,
         threatsGenerated: latestThreats.length,
-        cveCount: latestThreats.reduce((acc, t) => acc + (t.cves?.length || 0), 0),
+        cveCount: 0, // No CVE numbers
         sourcesUsed: [...new Set(latestThreats.map(t => t.source))].length,
         avgThreatScore: Math.round(latestThreats.reduce((acc, t) => acc + (t.threatScore || 0), 0) / latestThreats.length),
         severityBreakdown: {
@@ -709,7 +719,8 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           pubDate: now.toISOString(),
           link: 'https://www.cisa.gov/news-events/cybersecurity-advisories',
           linkType: 'direct',
-          threatScore: 95
+          threatScore: 95,
+          cves: [] // No CVE numbers
         },
         {
           id: '2',
@@ -721,7 +732,8 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           pubDate: new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(),
           link: 'https://www.sans.org/blog/',
           linkType: 'direct',
-          threatScore: 88
+          threatScore: 88,
+          cves: [] // No CVE numbers
         },
         {
           id: '3',
@@ -733,7 +745,8 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           pubDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
           link: 'https://github.com/advisories',
           linkType: 'direct',
-          threatScore: 82
+          threatScore: 82,
+          cves: [] // No CVE numbers
         },
         {
           id: '4',
@@ -745,7 +758,8 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           pubDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
           link: 'https://www.darkreading.com/',
           linkType: 'direct',
-          threatScore: 75
+          threatScore: 75,
+          cves: [] // No CVE numbers
         }
       ];
       
@@ -760,7 +774,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setGenerationStats({
         articlesScanned: 50,
         threatsGenerated: 4,
-        cveCount: 1,
+        cveCount: 0, // No CVE numbers
         sourcesUsed: 4,
         avgThreatScore: 85,
         severityBreakdown: {
@@ -791,7 +805,8 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       pubDate: new Date().toISOString(),
       link: 'https://www.cisa.gov/news-events/alerts',
       linkType: 'direct',
-      threatScore: 30
+      threatScore: 30,
+      cves: [] // No CVE numbers
     };
     setThreats([...threats, newThreat]);
   };
