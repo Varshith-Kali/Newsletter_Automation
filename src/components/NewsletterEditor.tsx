@@ -408,10 +408,10 @@ const NewsletterEditor: React.FC = () => {
           <div className="flex items-center space-x-2">
             <Users className="text-blue-600" size={20} />
             <div>
-              <h3 className="text-lg font-medium">🎓 AI-Generated Training Spotlight</h3>
+              <h3 className="text-lg font-medium">🎓 AI-Generated Training Spotlight (2 Points)</h3>
               <p className="text-sm text-gray-600">
-                <strong>Automatically generated</strong> training recommendations based on current threats - 
-                <span className="text-blue-600 font-medium"> Updates dynamically!</span>
+                <strong>Exactly 2 targeted training recommendations</strong> to mitigate the 4 current threats - 
+                <span className="text-blue-600 font-medium"> Short & crisp!</span>
               </p>
             </div>
           </div>
@@ -426,12 +426,12 @@ const NewsletterEditor: React.FC = () => {
           <div className="flex items-center space-x-2 mb-2">
             <Brain className="text-blue-600" size={16} />
             <span className="text-sm font-medium text-blue-700">
-              🤖 AI Analysis: Training recommendations tailored to your specific threat environment
+              🤖 AI Analysis: 2 most critical training needs based on your specific threat environment
             </span>
           </div>
           <p className="text-xs text-blue-600">
-            AI identifies training needs based on threat types: phishing → email security training, 
-            ransomware → backup & recovery, vulnerabilities → secure development, etc.
+            AI prioritizes training based on threat severity: Microsoft Exchange → patch management, 
+            ransomware → incident response, supply chain → security assessment, AI phishing → detection training.
           </p>
         </div>
         <div className="space-y-4">

@@ -195,63 +195,86 @@ const generateContextualBestPractices = (threats: Threat[]): BestPractice[] => {
   return finalPractices;
 };
 
-// AI-powered function to generate contextual training based on threats
+// AI-powered function to generate EXACTLY 2 targeted training items based on threats
 const generateContextualTraining = (threats: Threat[]): TrainingItem[] => {
-  console.log('🎓 AI ANALYZING THREATS: Generating contextual training recommendations...');
+  console.log('🎓 AI ANALYZING THREATS: Generating 2 targeted training recommendations...');
   
   const threatContent = threats.map(t => (t.title + ' ' + t.description).toLowerCase()).join(' ');
   const trainingItems: TrainingItem[] = [];
   let trainingId = 1;
   
-  // Generate training based on threat analysis
-  if (threatContent.includes('phishing') || threatContent.includes('email')) {
+  // Priority-based training generation - most critical threats first
+  
+  // 1. Microsoft Exchange/Vulnerability Training (CRITICAL)
+  if (threatContent.includes('microsoft') || threatContent.includes('exchange') || threatContent.includes('vulnerability') || threatContent.includes('patch')) {
     trainingItems.push({
       id: (trainingId++).toString(),
-      content: 'Advanced phishing simulation exercises with real-world attack scenarios, email security awareness, and incident reporting procedures.'
+      content: 'Emergency patch management training: Rapid vulnerability assessment, testing procedures, and coordinated deployment strategies for critical system updates.'
     });
   }
   
-  if (threatContent.includes('ransomware') || threatContent.includes('malware')) {
+  // 2. Ransomware/Healthcare Training (HIGH PRIORITY)
+  if (threatContent.includes('ransomware') || threatContent.includes('healthcare') || threatContent.includes('malware')) {
     trainingItems.push({
       id: (trainingId++).toString(),
-      content: 'Ransomware response and recovery workshop including backup validation, incident communication, and business continuity planning.'
+      content: 'Ransomware incident response workshop: Isolation procedures, backup validation, communication protocols, and recovery strategies for healthcare environments.'
     });
   }
   
-  if (threatContent.includes('vulnerability') || threatContent.includes('patch')) {
+  // 3. Supply Chain Security Training
+  if (threatContent.includes('supply chain') || threatContent.includes('npm') || threatContent.includes('package') || threatContent.includes('third-party')) {
     trainingItems.push({
       id: (trainingId++).toString(),
-      content: 'Secure development lifecycle training with vulnerability assessment, code review practices, and remediation techniques.'
+      content: 'Supply chain security assessment: Code dependency analysis, vendor risk evaluation, and secure development practices for third-party integrations.'
     });
   }
   
-  if (threatContent.includes('supply chain') || threatContent.includes('third-party')) {
+  // 4. AI-Generated Phishing Training
+  if (threatContent.includes('ai-generated') || threatContent.includes('phishing') || threatContent.includes('email') || threatContent.includes('artificial intelligence')) {
     trainingItems.push({
       id: (trainingId++).toString(),
-      content: 'Third-party risk management and supply chain security assessment methodologies for procurement and development teams.'
+      content: 'Advanced AI phishing detection: Identifying AI-generated content, deepfake recognition, and enhanced email security awareness for modern attack vectors.'
     });
   }
   
-  // Default training items
+  // 5. Zero-day/Advanced Threat Training
+  if (threatContent.includes('zero-day') || threatContent.includes('exploit') || threatContent.includes('advanced')) {
+    trainingItems.push({
+      id: (trainingId++).toString(),
+      content: 'Zero-day threat hunting: Behavioral analysis techniques, anomaly detection, and proactive threat identification for unknown attack patterns.'
+    });
+  }
+  
+  // 6. Critical Infrastructure Training
+  if (threatContent.includes('critical') || threatContent.includes('infrastructure') || threatContent.includes('industrial')) {
+    trainingItems.push({
+      id: (trainingId++).toString(),
+      content: 'Critical infrastructure protection: OT/IT security integration, industrial control system hardening, and emergency response coordination.'
+    });
+  }
+  
+  // Default high-impact training items if no specific matches
   const defaultTraining = [
     {
       id: (trainingId++).toString(),
-      content: 'Incident response tabletop exercises with cross-functional team coordination, communication protocols, and lessons learned documentation.'
+      content: 'Incident response tabletop exercise: Cross-functional coordination, communication protocols, and decision-making under pressure for security incidents.'
     },
     {
       id: (trainingId++).toString(),
-      content: 'Cloud security fundamentals workshop covering configuration management, access control best practices, and compliance requirements.'
-    },
-    {
-      id: (trainingId++).toString(),
-      content: 'Security awareness training focused on current threat landscape, attack vectors, and defensive strategies for all employees.'
+      content: 'Advanced threat detection workshop: SIEM analysis, threat intelligence integration, and proactive security monitoring techniques.'
     }
   ];
   
+  // Combine specific and default training
   const allTraining = [...trainingItems, ...defaultTraining];
-  const finalTraining = allTraining.slice(0, 3);
   
-  console.log(`✅ AI GENERATED ${finalTraining.length} contextual training items`);
+  // Return EXACTLY 2 training items - the most relevant ones
+  const finalTraining = allTraining.slice(0, 2);
+  
+  console.log(`✅ AI GENERATED exactly ${finalTraining.length} targeted training recommendations`);
+  finalTraining.forEach((training, index) => {
+    console.log(`   ${index + 1}. ${training.content.substring(0, 80)}...`);
+  });
   
   return finalTraining;
 };
@@ -372,7 +395,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     ])
   );
   
-  // Initialize training items based on current threats
+  // Initialize training items based on current threats - EXACTLY 2 items
   const [trainingItems, setTrainingItems] = useState<TrainingItem[]>(() => 
     generateContextualTraining([
       {
@@ -445,6 +468,8 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setTrainingItems(newTrainingItems);
       
       console.log('✅ Best practices and training updated based on current threats');
+      console.log(`   📚 Generated ${newBestPractices.length} best practices`);
+      console.log(`   🎓 Generated ${newTrainingItems.length} training items`);
     }
   }, [threats]);
   
