@@ -70,13 +70,6 @@ const NewsletterThreats: React.FC = () => {
     }
   };
 
-  const getLinkTypeIcon = (linkType?: string) => {
-    if (linkType === 'fallback') {
-      return '🔍'; // Search icon for fallback links
-    }
-    return '🔗'; // Direct link icon
-  };
-
   const getLinkTypeTooltip = (linkType?: string, source?: string) => {
     if (linkType === 'fallback') {
       return `Click to search for this article on ${source || 'the web'}`;
@@ -134,7 +127,7 @@ const NewsletterThreats: React.FC = () => {
                     }`}
                     title={getLinkTypeTooltip(threat.linkType, threat.source)}
                   >
-                    {getLinkTypeIcon(threat.linkType)} {index + 1}. {threat.title}
+                    {index + 1}. {threat.title}
                   </span>
                   {getSeverityBadge(threat.severity)}
                 </h3>
