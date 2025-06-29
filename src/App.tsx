@@ -221,11 +221,12 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating SINGLE-PAGE PDF with CURRENT PREVIEW WIDTH...');
+      console.log('📄 Generating SINGLE-PAGE PDF with PRESERVED LAYOUT...');
       console.log(`📏 Current preview width: ${previewWidth}%`);
 
+      // CRITICAL: Force layout stabilization before capture
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Longer wait for layout stabilization
 
       const canvas = await html2canvas(content, {
         scale: 2,
@@ -244,18 +245,18 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING: Pre-loading and caching ALL images with FORCED night city background...');
+          console.log('🎨 PRE-PROCESSING: Preserving layout and spacing...');
           console.log(`📏 Maintaining current width: ${previewWidth}%`);
           
-          // CRITICAL: Pre-load and cache ALL images with forced night city background
+          // CRITICAL: Pre-load and cache ALL images
           const imageCache = await preloadAndCacheAllImages(element);
           
-          // Then replace ALL images with cached grayscale versions including forced background
+          // Then replace ALL images with cached grayscale versions
           replaceAllImagesWithCachedVersions(element, imageCache);
           
-          console.log('✅ ALL images replaced with consistent cached grayscale versions including FORCED night city background!');
+          console.log('✅ ALL images replaced with consistent cached grayscale versions!');
           
-          // Apply comprehensive styling
+          // Apply comprehensive styling with EXPLICIT SPACING PRESERVATION
           const comprehensiveStyle = clonedDoc.createElement('style');
           comprehensiveStyle.textContent = `
             html, body, .newsletter-container, .newsletter, .newsletter-page {
@@ -272,6 +273,21 @@ function App() {
             .text-gray-700 { color: #374151 !important; }
             .text-gray-600 { color: #4b5563 !important; }
             .text-gray-500 { color: #6b7280 !important; }
+            
+            /* CRITICAL: Preserve flexbox layout and spacing */
+            .flex { display: flex !important; }
+            .flex-col { flex-direction: column !important; }
+            .flex-1 { flex: 1 1 0% !important; }
+            .items-center { align-items: center !important; }
+            .justify-center { justify-content: center !important; }
+            .text-center { text-align: center !important; }
+            
+            /* CRITICAL: Preserve explicit margins and spacing */
+            .mb-6 { margin-bottom: 1.5rem !important; }
+            .mr-4 { margin-right: 1rem !important; }
+            .mt-2 { margin-top: 0.5rem !important; }
+            .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+            .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
             
             /* Ensure ALL images stay grayscale and maintain consistency */
             img {
@@ -317,8 +333,6 @@ function App() {
             .inset-0 { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; }
             .max-w-md { max-width: 28rem !important; }
             .inline-block { display: inline-block !important; }
-            .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-            .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
             .mt-10 { margin-top: 2.5rem !important; }
             .text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
             .font-medium { font-weight: 500 !important; }
@@ -398,7 +412,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling applied with CURRENT WIDTH MAINTAINED');
+          console.log('✅ Comprehensive styling applied with LAYOUT PRESERVATION');
         }
       });
 
@@ -444,7 +458,7 @@ function App() {
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
 
       pdf.save(`Cybersecurity-Newsletter-${previewWidth}percent.pdf`);
-      console.log(`🎉 SINGLE-PAGE PDF generated at ${previewWidth}% width!`);
+      console.log(`🎉 SINGLE-PAGE PDF generated at ${previewWidth}% width with PRESERVED SPACING!`);
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -460,11 +474,12 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with CURRENT PREVIEW WIDTH...');
+      console.log('🖼️ Generating PNG with PRESERVED LAYOUT...');
       console.log(`📏 Current preview width: ${previewWidth}%`);
 
+      // CRITICAL: Force layout stabilization before capture
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Longer wait for layout stabilization
 
       const canvas = await html2canvas(content, {
         scale: 2,
@@ -483,16 +498,16 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING PNG: Pre-loading and caching ALL images with FORCED night city background...');
+          console.log('🎨 PRE-PROCESSING PNG: Preserving layout and spacing...');
           console.log(`📏 Maintaining current width: ${previewWidth}%`);
           
-          // Pre-load and cache ALL images with forced night city background
+          // Pre-load and cache ALL images
           const imageCache = await preloadAndCacheAllImages(element);
           
-          // Then replace ALL images with cached grayscale versions including forced background
+          // Then replace ALL images with cached grayscale versions
           replaceAllImagesWithCachedVersions(element, imageCache);
           
-          console.log('✅ ALL images replaced with consistent cached grayscale versions including FORCED night city background for PNG!');
+          console.log('✅ ALL images replaced with consistent cached grayscale versions for PNG!');
           
           const comprehensiveStyle = clonedDoc.createElement('style');
           comprehensiveStyle.textContent = `
@@ -509,6 +524,21 @@ function App() {
             .text-gray-700 { color: #374151 !important; }
             .text-gray-600 { color: #4b5563 !important; }
             .text-gray-500 { color: #6b7280 !important; }
+            
+            /* CRITICAL: Preserve flexbox layout and spacing */
+            .flex { display: flex !important; }
+            .flex-col { flex-direction: column !important; }
+            .flex-1 { flex: 1 1 0% !important; }
+            .items-center { align-items: center !important; }
+            .justify-center { justify-content: center !important; }
+            .text-center { text-align: center !important; }
+            
+            /* CRITICAL: Preserve explicit margins and spacing */
+            .mb-6 { margin-bottom: 1.5rem !important; }
+            .mr-4 { margin-right: 1rem !important; }
+            .mt-2 { margin-top: 0.5rem !important; }
+            .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+            .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
             
             img {
               filter: none !important;
@@ -551,8 +581,6 @@ function App() {
             .inset-0 { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; }
             .max-w-md { max-width: 28rem !important; }
             .inline-block { display: inline-block !important; }
-            .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-            .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
             .mt-10 { margin-top: 2.5rem !important; }
             .text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
             .font-medium { font-weight: 500 !important; }
@@ -627,7 +655,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling for PNG applied with CURRENT WIDTH MAINTAINED');
+          console.log('✅ Comprehensive styling for PNG applied with LAYOUT PRESERVATION');
         }
       });
 
@@ -644,7 +672,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log(`🎉 PNG generated at ${previewWidth}% width!`);
+      console.log(`🎉 PNG generated at ${previewWidth}% width with PRESERVED SPACING!`);
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
