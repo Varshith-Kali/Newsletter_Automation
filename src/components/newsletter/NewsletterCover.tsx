@@ -28,9 +28,9 @@ const NewsletterCover: React.FC = () => {
         <h2 className="text-3xl font-bold text-white">{organizationName.split(' ')[0]}</h2>
       </div>
       
-      {/* Main Content - Reduced spacing */}
+      {/* Main Content */}
       <div className="relative z-10 flex flex-col h-full">
-        <div className="mt-auto ml-8 mb-32">
+        <div className="mt-auto ml-8 mb-52">
           <div className="flex items-end">
             <h1 className="text-8xl font-bold leading-none text-red-700 -ml-4 mr-4">
               {year}
@@ -44,8 +44,8 @@ const NewsletterCover: React.FC = () => {
               </h2>
             </div>
           </div>
-          {/* Reduced margin from mt-10 to mt-6 */}
-          <div className="mt-6 bg-red-700 inline-block py-2 px-4 relative z-20">
+          {/* Fixed the problematic text element with explicit styling */}
+          <div className="mt-10 bg-red-700 inline-block py-2 px-4 relative z-20">
             <h3 
               className="text-lg font-medium text-white"
               style={{
