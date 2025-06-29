@@ -1,6 +1,6 @@
 import React from 'react';
 import { Threat, useNewsletter } from '../context/NewsletterContext';
-import { Trash2, RefreshCw, Zap, Clock, TrendingUp, Shield, Users, Calendar, Brain, Target, BarChart3 } from 'lucide-react';
+import { Trash2, RefreshCw, Zap, Clock, TrendingUp, Shield, Users, Calendar, Brain, Target, BarChart3, Lightbulb } from 'lucide-react';
 
 const NewsletterEditor: React.FC = () => {
   const {
@@ -126,7 +126,7 @@ const NewsletterEditor: React.FC = () => {
             </div>
             <ul className="space-y-1 text-sm text-red-600">
               <li>• Advanced summarization</li>
-              <li>• Contextual best practices</li>
+              <li>• <strong>Dynamic best practices</strong></li>
               <li>• <strong>Real article links</strong></li>
               <li>• Date extraction & validation</li>
             </ul>
@@ -353,9 +353,15 @@ const NewsletterEditor: React.FC = () => {
 
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-lg font-medium">🛡️ AI-Generated Best Practices</h3>
-            <p className="text-sm text-gray-600">Contextual recommendations based on current threat landscape</p>
+          <div className="flex items-center space-x-2">
+            <Lightbulb className="text-yellow-600" size={20} />
+            <div>
+              <h3 className="text-lg font-medium">🛡️ AI-Generated Best Practices</h3>
+              <p className="text-sm text-gray-600">
+                <strong>Automatically generated</strong> based on the 4 current threats above - 
+                <span className="text-green-600 font-medium"> Updates when threats change!</span>
+              </p>
+            </div>
           </div>
           <button
             onClick={addBestPractice}
@@ -363,6 +369,18 @@ const NewsletterEditor: React.FC = () => {
           >
             Add Practice
           </button>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+          <div className="flex items-center space-x-2 mb-2">
+            <Brain className="text-green-600" size={16} />
+            <span className="text-sm font-medium text-green-700">
+              🤖 AI Analysis: These practices are contextually generated based on your current threat landscape
+            </span>
+          </div>
+          <p className="text-xs text-green-600">
+            The AI analyzes keywords like "Microsoft Exchange", "ransomware", "supply chain", "AI-generated phishing" 
+            from your threats to recommend the most relevant security practices.
+          </p>
         </div>
         <div className="space-y-4">
           {bestPractices.map((practice, index) => (
@@ -387,9 +405,15 @@ const NewsletterEditor: React.FC = () => {
 
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-lg font-medium">🎓 AI-Generated Training Spotlight</h3>
-            <p className="text-sm text-gray-600">Relevant training based on current threat intelligence</p>
+          <div className="flex items-center space-x-2">
+            <Users className="text-blue-600" size={20} />
+            <div>
+              <h3 className="text-lg font-medium">🎓 AI-Generated Training Spotlight</h3>
+              <p className="text-sm text-gray-600">
+                <strong>Automatically generated</strong> training recommendations based on current threats - 
+                <span className="text-blue-600 font-medium"> Updates dynamically!</span>
+              </p>
+            </div>
           </div>
           <button
             onClick={addTrainingItem}
@@ -397,6 +421,18 @@ const NewsletterEditor: React.FC = () => {
           >
             Add Training
           </button>
+        </div>
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <div className="flex items-center space-x-2 mb-2">
+            <Brain className="text-blue-600" size={16} />
+            <span className="text-sm font-medium text-blue-700">
+              🤖 AI Analysis: Training recommendations tailored to your specific threat environment
+            </span>
+          </div>
+          <p className="text-xs text-blue-600">
+            AI identifies training needs based on threat types: phishing → email security training, 
+            ransomware → backup & recovery, vulnerabilities → secure development, etc.
+          </p>
         </div>
         <div className="space-y-4">
           {trainingItems.map((item, index) => (
