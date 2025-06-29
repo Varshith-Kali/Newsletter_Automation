@@ -652,13 +652,19 @@ function App() {
       <div className="min-h-screen bg-gray-100">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-center mb-8">Cybersecurity Newsletter Editor</h1>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* SINGLE COLUMN LAYOUT: Editor on top, Preview below */}
+          <div className="space-y-8">
+            {/* Editor Section */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Edit Newsletter Content</h2>
               <NewsletterEditor />
             </div>
+            
+            {/* Preview Section */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Newsletter Preview</h2>
+              
               <div
                 ref={printRef}
                 className="newsletter-container border border-gray-300 rounded-lg overflow-hidden bg-white"
@@ -671,6 +677,7 @@ function App() {
               >
                 <Newsletter />
               </div>
+              
               <div className="mt-6 flex gap-4 justify-center print:hidden">
                 <button
                   onClick={downloadAsPDF}
