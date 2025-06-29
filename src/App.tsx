@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import NewsletterEditor from './components/NewsletterEditor';
 import Newsletter from './components/Newsletter';
 import { NewsletterProvider } from './context/NewsletterContext';
@@ -7,6 +7,7 @@ import { jsPDF } from 'jspdf';
 
 function App() {
   const printRef = useRef<HTMLDivElement>(null);
+  const [previewWidth, setPreviewWidth] = useState(100); // Default to 100% width
 
   // Function to convert image to grayscale canvas
   const convertImageToGrayscale = (img: HTMLImageElement): Promise<string> => {
@@ -661,21 +662,47 @@ function App() {
               <NewsletterEditor />
             </div>
             
-            {/* Preview Section */}
+            {/* Preview Section with Width Slider */}
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Newsletter Preview</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Newsletter Preview</h2>
+                
+                {/* Width Adjustment Slider */}
+                <div className="flex items-center space-x-4">
+                  <label className="text-sm font-medium text-gray-700">Preview Width:</label>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-gray-500">50%</span>
+                    <input
+                      type="range"
+                      min="50"
+                      max="100"
+                      value={previewWidth}
+                      onChange={(e) => setPreviewWidth(Number(e.target.value))}
+                      className="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                      style={{
+                        background: `linear-gradient(to right, #b91c1c 0%, #b91c1c ${previewWidth}%, #e5e7eb ${previewWidth}%, #e5e7eb 100%)`
+                      }}
+                    />
+                    <span className="text-xs text-gray-500">100%</span>
+                  </div>
+                  <span className="text-sm font-medium text-red-600 min-w-[3rem]">{previewWidth}%</span>
+                </div>
+              </div>
               
-              <div
-                ref={printRef}
-                className="newsletter-container border border-gray-300 rounded-lg overflow-hidden bg-white"
-                style={{ 
-                  backgroundColor: 'white',
-                  position: 'relative',
-                  width: '100%',
-                  height: 'auto'
-                }}
-              >
-                <Newsletter />
+              {/* Newsletter Preview Container with Dynamic Width */}
+              <div className="flex justify-center">
+                <div
+                  ref={printRef}
+                  className="newsletter-container border border-gray-300 rounded-lg overflow-hidden bg-white transition-all duration-300 ease-in-out"
+                  style={{ 
+                    backgroundColor: 'white',
+                    position: 'relative',
+                    width: `${previewWidth}%`,
+                    height: 'auto'
+                  }}
+                >
+                  <Newsletter />
+                </div>
               </div>
               
               <div className="mt-6 flex gap-4 justify-center print:hidden">
