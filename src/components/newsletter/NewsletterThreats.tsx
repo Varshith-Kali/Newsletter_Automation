@@ -78,9 +78,9 @@ const NewsletterThreats: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-[1123px] bg-white text-black flex overflow-hidden">
+    <div className="min-h-screen bg-white text-black flex">
       {/* Left red sidebar with images */}
-      <div className="w-5/12 bg-red-700 relative flex-shrink-0">
+      <div className="w-5/12 bg-red-700 relative">
         <div className="h-1/3 overflow-hidden">
           <img 
             src="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
@@ -108,7 +108,7 @@ const NewsletterThreats: React.FC = () => {
       </div>
       
       {/* Right side with content */}
-      <div className="w-7/12 p-8 flex-shrink-0 overflow-y-auto">
+      <div className="w-7/12 p-8">
         <h2 className="text-3xl font-bold mb-8">
           SECURITY FLAWS, ZERO-DAY ATTACKS & VULNERABILITIES
         </h2>
