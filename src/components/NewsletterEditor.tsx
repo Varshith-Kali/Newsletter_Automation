@@ -1,6 +1,6 @@
 import React from 'react';
 import { Threat, useNewsletter } from '../context/NewsletterContext';
-import { Trash2, RefreshCw, Zap, Clock, TrendingUp, Shield, Users, Calendar, Brain, Target, BarChart3, Lightbulb } from 'lucide-react';
+import { Trash2, RefreshCw, Zap, Clock, TrendingUp, Shield, Users, Calendar, Brain, Target, BarChart3, Lightbulb, Award, BookOpen } from 'lucide-react';
 
 const NewsletterEditor: React.FC = () => {
   const {
@@ -406,11 +406,15 @@ const NewsletterEditor: React.FC = () => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <Users className="text-blue-600" size={20} />
+            <div className="flex items-center space-x-1">
+              <Users className="text-blue-600" size={20} />
+              <Award className="text-purple-600" size={16} />
+              <BookOpen className="text-green-600" size={16} />
+            </div>
             <div>
               <h3 className="text-lg font-medium">🎓 AI-Generated Training Spotlight (2 Points)</h3>
               <p className="text-sm text-gray-600">
-                <strong>Exactly 2 targeted training recommendations</strong> to mitigate the 4 current threats - 
+                <strong>Exactly 2 targeted training recommendations</strong> with certifications & real workshops to mitigate the 4 current threats - 
                 <span className="text-blue-600 font-medium"> Short & crisp!</span>
               </p>
             </div>
@@ -426,13 +430,36 @@ const NewsletterEditor: React.FC = () => {
           <div className="flex items-center space-x-2 mb-2">
             <Brain className="text-blue-600" size={16} />
             <span className="text-sm font-medium text-blue-700">
-              🤖 AI Analysis: 2 most critical training needs based on your specific threat environment
+              🤖 AI Analysis: 2 most critical training needs with industry certifications based on your specific threat environment
             </span>
           </div>
-          <p className="text-xs text-blue-600">
+          <p className="text-xs text-blue-600 mb-2">
             AI prioritizes training based on threat severity: Microsoft Exchange → patch management, 
             ransomware → incident response, supply chain → security assessment, AI phishing → detection training.
           </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+            <div className="bg-white p-3 rounded-lg border border-blue-200">
+              <div className="flex items-center space-x-2 mb-1">
+                <Award className="text-purple-600" size={14} />
+                <span className="text-xs font-semibold text-purple-700">Certifications</span>
+              </div>
+              <p className="text-xs text-purple-600">CISSP, GCIH, GCFA, CISM, CompTIA Security+, CySA+</p>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-blue-200">
+              <div className="flex items-center space-x-2 mb-1">
+                <BookOpen className="text-green-600" size={14} />
+                <span className="text-xs font-semibold text-green-700">SANS Training</span>
+              </div>
+              <p className="text-xs text-green-600">SEC566, FOR508, FOR572, SEC487, MGT512</p>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-blue-200">
+              <div className="flex items-center space-x-2 mb-1">
+                <Users className="text-blue-600" size={14} />
+                <span className="text-xs font-semibold text-blue-700">Workshops</span>
+              </div>
+              <p className="text-xs text-blue-600">Incident Response, Threat Hunting, Vulnerability Management</p>
+            </div>
+          </div>
         </div>
         <div className="space-y-4">
           {trainingItems.map((item, index) => (
@@ -441,7 +468,7 @@ const NewsletterEditor: React.FC = () => {
               <textarea
                 value={item.content}
                 onChange={(e) => updateTrainingItem(item.id, e.target.value)}
-                rows={2}
+                rows={3}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
               />
               <button

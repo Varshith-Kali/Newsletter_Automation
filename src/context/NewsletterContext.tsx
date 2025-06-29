@@ -195,21 +195,21 @@ const generateContextualBestPractices = (threats: Threat[]): BestPractice[] => {
   return finalPractices;
 };
 
-// AI-powered function to generate EXACTLY 2 targeted training items based on threats
+// Enhanced AI-powered function to generate EXACTLY 2 targeted training items with certifications and real workshops
 const generateContextualTraining = (threats: Threat[]): TrainingItem[] => {
-  console.log('🎓 AI ANALYZING THREATS: Generating 2 targeted training recommendations...');
+  console.log('🎓 AI ANALYZING THREATS: Generating 2 targeted training recommendations with certifications...');
   
   const threatContent = threats.map(t => (t.title + ' ' + t.description).toLowerCase()).join(' ');
   const trainingItems: TrainingItem[] = [];
   let trainingId = 1;
   
-  // Priority-based training generation - most critical threats first
+  // Priority-based training generation with certifications and real workshops
   
   // 1. Microsoft Exchange/Vulnerability Training (CRITICAL)
   if (threatContent.includes('microsoft') || threatContent.includes('exchange') || threatContent.includes('vulnerability') || threatContent.includes('patch')) {
     trainingItems.push({
       id: (trainingId++).toString(),
-      content: 'Emergency patch management training: Rapid vulnerability assessment, testing procedures, and coordinated deployment strategies for critical system updates.'
+      content: 'Emergency Patch Management Workshop: Rapid vulnerability assessment, testing procedures, and coordinated deployment strategies. Recommended: Microsoft Certified: Security, Compliance, and Identity Fundamentals (SC-900) + SANS SEC566 (Implementing and Auditing Critical Security Controls).'
     });
   }
   
@@ -217,7 +217,7 @@ const generateContextualTraining = (threats: Threat[]): TrainingItem[] => {
   if (threatContent.includes('ransomware') || threatContent.includes('healthcare') || threatContent.includes('malware')) {
     trainingItems.push({
       id: (trainingId++).toString(),
-      content: 'Ransomware incident response workshop: Isolation procedures, backup validation, communication protocols, and recovery strategies for healthcare environments.'
+      content: 'Ransomware Incident Response Workshop: Isolation procedures, backup validation, communication protocols, and recovery strategies. Recommended: GCIH (GIAC Certified Incident Handler) + SANS FOR508 (Advanced Incident Response, Threat Hunting, and Digital Forensics).'
     });
   }
   
@@ -225,7 +225,7 @@ const generateContextualTraining = (threats: Threat[]): TrainingItem[] => {
   if (threatContent.includes('supply chain') || threatContent.includes('npm') || threatContent.includes('package') || threatContent.includes('third-party')) {
     trainingItems.push({
       id: (trainingId++).toString(),
-      content: 'Supply chain security assessment: Code dependency analysis, vendor risk evaluation, and secure development practices for third-party integrations.'
+      content: 'Supply Chain Security Assessment: Code dependency analysis, vendor risk evaluation, and secure development practices. Recommended: CISSP (Certified Information Systems Security Professional) + NIST Cybersecurity Framework Workshop + DevSecOps Foundation Certification.'
     });
   }
   
@@ -233,7 +233,7 @@ const generateContextualTraining = (threats: Threat[]): TrainingItem[] => {
   if (threatContent.includes('ai-generated') || threatContent.includes('phishing') || threatContent.includes('email') || threatContent.includes('artificial intelligence')) {
     trainingItems.push({
       id: (trainingId++).toString(),
-      content: 'Advanced AI phishing detection: Identifying AI-generated content, deepfake recognition, and enhanced email security awareness for modern attack vectors.'
+      content: 'Advanced AI Phishing Detection Workshop: Identifying AI-generated content, deepfake recognition, and enhanced email security awareness. Recommended: CompTIA Security+ + SANS SEC487 (Open-Source Intelligence Gathering and Analysis) + AI Security Specialist Certification.'
     });
   }
   
@@ -241,7 +241,7 @@ const generateContextualTraining = (threats: Threat[]): TrainingItem[] => {
   if (threatContent.includes('zero-day') || threatContent.includes('exploit') || threatContent.includes('advanced')) {
     trainingItems.push({
       id: (trainingId++).toString(),
-      content: 'Zero-day threat hunting: Behavioral analysis techniques, anomaly detection, and proactive threat identification for unknown attack patterns.'
+      content: 'Zero-Day Threat Hunting Workshop: Behavioral analysis techniques, anomaly detection, and proactive threat identification. Recommended: GCTI (GIAC Cyber Threat Intelligence) + SANS FOR572 (Advanced Network Forensics: Threat Hunting, Analysis, and Incident Response).'
     });
   }
   
@@ -249,19 +249,19 @@ const generateContextualTraining = (threats: Threat[]): TrainingItem[] => {
   if (threatContent.includes('critical') || threatContent.includes('infrastructure') || threatContent.includes('industrial')) {
     trainingItems.push({
       id: (trainingId++).toString(),
-      content: 'Critical infrastructure protection: OT/IT security integration, industrial control system hardening, and emergency response coordination.'
+      content: 'Critical Infrastructure Protection Workshop: OT/IT security integration, industrial control system hardening, and emergency response coordination. Recommended: GICSP (Global Industrial Cyber Security Professional) + ICS-CERT Training Program.'
     });
   }
   
-  // Default high-impact training items if no specific matches
+  // Default high-impact training items with certifications if no specific matches
   const defaultTraining = [
     {
       id: (trainingId++).toString(),
-      content: 'Incident response tabletop exercise: Cross-functional coordination, communication protocols, and decision-making under pressure for security incidents.'
+      content: 'Incident Response Tabletop Exercise: Cross-functional coordination, communication protocols, and decision-making under pressure. Recommended: GCIH (GIAC Certified Incident Handler) + CISM (Certified Information Security Manager) + SANS MGT512 (Security Leadership Essentials).'
     },
     {
       id: (trainingId++).toString(),
-      content: 'Advanced threat detection workshop: SIEM analysis, threat intelligence integration, and proactive security monitoring techniques.'
+      content: 'Advanced Threat Detection Workshop: SIEM analysis, threat intelligence integration, and proactive security monitoring. Recommended: GCFA (GIAC Certified Forensic Analyst) + Splunk Certified Security Analyst + CySA+ (CompTIA Cybersecurity Analyst).'
     }
   ];
   
@@ -271,9 +271,9 @@ const generateContextualTraining = (threats: Threat[]): TrainingItem[] => {
   // Return EXACTLY 2 training items - the most relevant ones
   const finalTraining = allTraining.slice(0, 2);
   
-  console.log(`✅ AI GENERATED exactly ${finalTraining.length} targeted training recommendations`);
+  console.log(`✅ AI GENERATED exactly ${finalTraining.length} targeted training recommendations with certifications`);
   finalTraining.forEach((training, index) => {
-    console.log(`   ${index + 1}. ${training.content.substring(0, 80)}...`);
+    console.log(`   ${index + 1}. ${training.content.substring(0, 100)}...`);
   });
   
   return finalTraining;
@@ -395,7 +395,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     ])
   );
   
-  // Initialize training items based on current threats - EXACTLY 2 items
+  // Initialize training items based on current threats - EXACTLY 2 items with certifications
   const [trainingItems, setTrainingItems] = useState<TrainingItem[]>(() => 
     generateContextualTraining([
       {
@@ -460,7 +460,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Auto-generate best practices and training when threats change
   useEffect(() => {
     if (threats.length > 0) {
-      console.log('🤖 THREATS UPDATED: Regenerating contextual best practices and training...');
+      console.log('🤖 THREATS UPDATED: Regenerating contextual best practices and training with certifications...');
       const newBestPractices = generateContextualBestPractices(threats);
       const newTrainingItems = generateContextualTraining(threats);
       
@@ -469,7 +469,7 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       
       console.log('✅ Best practices and training updated based on current threats');
       console.log(`   📚 Generated ${newBestPractices.length} best practices`);
-      console.log(`   🎓 Generated ${newTrainingItems.length} training items`);
+      console.log(`   🎓 Generated ${newTrainingItems.length} training items with certifications`);
     }
   }, [threats]);
   
