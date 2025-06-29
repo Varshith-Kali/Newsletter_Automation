@@ -223,10 +223,6 @@ function App() {
     try {
       console.log('📄 Generating SINGLE-PAGE PDF with FORCED NIGHT CITY BACKGROUND...');
 
-      // CRITICAL: Temporarily set width to 100% for download
-      const originalWidth = content.style.width;
-      content.style.width = '100%';
-      
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -248,9 +244,6 @@ function App() {
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
           console.log('🎨 PRE-PROCESSING: Pre-loading and caching ALL images with FORCED night city background...');
-          
-          // CRITICAL: Ensure cloned element is also at 100% width
-          element.style.width = '100%';
           
           // CRITICAL: Pre-load and cache ALL images with forced night city background
           const imageCache = await preloadAndCacheAllImages(element);
@@ -407,9 +400,6 @@ function App() {
         }
       });
 
-      // Restore original width
-      content.style.width = originalWidth;
-
       console.log(`📸 Canvas created: ${canvas.width}x${canvas.height}`);
 
       if (canvas.width === 0 || canvas.height === 0) {
@@ -470,10 +460,6 @@ function App() {
     try {
       console.log('🖼️ Generating PNG with FORCED NIGHT CITY BACKGROUND...');
 
-      // CRITICAL: Temporarily set width to 100% for download
-      const originalWidth = content.style.width;
-      content.style.width = '100%';
-
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -495,9 +481,6 @@ function App() {
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
           console.log('🎨 PRE-PROCESSING PNG: Pre-loading and caching ALL images with FORCED night city background...');
-          
-          // CRITICAL: Ensure cloned element is also at 100% width
-          element.style.width = '100%';
           
           // Pre-load and cache ALL images with forced night city background
           const imageCache = await preloadAndCacheAllImages(element);
@@ -626,7 +609,7 @@ function App() {
                 if (textEl instanceof HTMLElement) {
                   textEl.style.setProperty('color', '#ffffff', 'important');
                   textEl.style.setProperty('opacity', '1', 'important');
-                  textEl.setProperty('visibility', 'visible', 'important');
+                  textEl.style.setProperty('visibility', 'visible', 'important');
                   textEl.style.setProperty('display', 'block', 'important');
                   
                   if (textEl.tagName === 'H3') {
@@ -643,9 +626,6 @@ function App() {
           console.log('✅ Comprehensive styling for PNG applied with FORCED night city background');
         }
       });
-
-      // Restore original width
-      content.style.width = originalWidth;
 
       console.log(`📸 PNG canvas: ${canvas.width}x${canvas.height}`);
 
