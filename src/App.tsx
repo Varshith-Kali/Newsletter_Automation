@@ -652,44 +652,25 @@ function App() {
       <div className="min-h-screen bg-gray-100">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-center mb-8">Cybersecurity Newsletter Editor</h1>
-          
-          {/* FIXED LAYOUT: Editor on left, Preview on right with FIXED ASPECT RATIO */}
-          <div className="flex gap-8">
-            {/* Left side - Editor (flexible width) */}
-            <div className="flex-1 bg-white rounded-lg shadow-lg p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Edit Newsletter Content</h2>
               <NewsletterEditor />
             </div>
-            
-            {/* Right side - Preview (FIXED ASPECT RATIO) */}
-            <div className="w-[600px] bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Newsletter Preview</h2>
-              
-              {/* FIXED ASPECT RATIO CONTAINER - 16:9 landscape orientation */}
-              <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
-                <div
-                  ref={printRef}
-                  className="newsletter-container absolute inset-0 border border-gray-300 rounded-lg overflow-hidden bg-white"
-                  style={{ 
-                    backgroundColor: 'white',
-                    width: '100%',
-                    height: '100%',
-                    transform: 'scale(0.4)', // Scale down to fit in preview
-                    transformOrigin: 'top left',
-                    position: 'absolute'
-                  }}
-                >
-                  {/* SCALED NEWSLETTER CONTENT */}
-                  <div style={{ 
-                    width: '250%', // Compensate for 0.4 scale
-                    height: '250%', // Compensate for 0.4 scale
-                    transform: 'scale(1)'
-                  }}>
-                    <Newsletter />
-                  </div>
-                </div>
+              <div
+                ref={printRef}
+                className="newsletter-container border border-gray-300 rounded-lg overflow-hidden bg-white"
+                style={{ 
+                  backgroundColor: 'white',
+                  position: 'relative',
+                  width: '100%',
+                  height: 'auto'
+                }}
+              >
+                <Newsletter />
               </div>
-              
               <div className="mt-6 flex gap-4 justify-center print:hidden">
                 <button
                   onClick={downloadAsPDF}
