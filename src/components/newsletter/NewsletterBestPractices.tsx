@@ -56,7 +56,7 @@ const NewsletterBestPractices: React.FC = () => {
       <div className="w-7/12 bg-white relative">
         {/* Background city image - FORCED SPECIFIC URL */}
         <div 
-          className="h-2/3 overflow-hidden thought-of-day-background"
+          className="h-2/3 overflow-hidden thought-of-day-background relative"
           style={{
             backgroundImage: 'url("https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1")',
             backgroundSize: 'cover',
@@ -65,10 +65,32 @@ const NewsletterBestPractices: React.FC = () => {
             filter: 'grayscale(100%)'
           }}
         >
-          {/* Red overlay box */}
-          <div className="absolute top-8 left-8 bg-red-700 p-6 max-w-md text-white">
-            <h3 className="text-xl font-bold mb-4">THOUGHT OF THE DAY !!</h3>
-            <p className="text-sm italic">{thoughtOfTheDay}</p>
+          {/* Red overlay box - EXPLICITLY STYLED TO MAINTAIN RED COLOR */}
+          <div 
+            className="absolute top-8 left-8 p-6 max-w-md text-white z-10"
+            style={{
+              backgroundColor: '#b91c1c',
+              color: '#ffffff'
+            }}
+          >
+            <h3 
+              className="text-xl font-bold mb-4"
+              style={{
+                color: '#ffffff',
+                backgroundColor: 'transparent'
+              }}
+            >
+              THOUGHT OF THE DAY !!
+            </h3>
+            <p 
+              className="text-sm italic"
+              style={{
+                color: '#ffffff',
+                backgroundColor: 'transparent'
+              }}
+            >
+              {thoughtOfTheDay}
+            </p>
           </div>
         </div>
         
