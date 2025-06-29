@@ -181,17 +181,17 @@ export const NewsletterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       console.log('🤖 AI analyzing 20+ sources to identify TOP 4 most critical threats...');
       console.log('📅 Fetching STRICTLY latest incidents from past 7 days with EXACT article links...');
       
-      // Import and run the enhanced AI update function
-      const { updateNewsletterContent } = await import('../../scripts/update-newsletter.js');
-      await updateNewsletterContent();
+      // Inform user to run the Node.js script in terminal
+      console.log('⚠️ To generate fresh AI-powered content, please run "npm run auto-update" in your terminal.');
+      alert('To generate fresh AI-powered content, please run "npm run auto-update" in your terminal, then click the update button again to refresh the data.');
       
-      // Reload the updated content
+      // Reload the updated content (in case the script was already run)
       await loadSavedContent();
       
-      console.log('✅ AI-powered newsletter content updated with TOP 4 threats and EXACT article links!');
+      console.log('✅ Content refreshed from saved data!');
       
     } catch (error) {
-      console.error('❌ Error in AI-powered content update:', error);
+      console.error('❌ Error in content refresh:', error);
       
       // Enhanced fallback: Generate realistic current threats with REAL working links and threat scores
       const now = new Date();
