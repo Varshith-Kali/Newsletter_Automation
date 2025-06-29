@@ -414,7 +414,7 @@ const NewsletterEditor: React.FC = () => {
             <div>
               <h3 className="text-lg font-medium">🎓 AI-Generated Training Spotlight (2 Points)</h3>
               <p className="text-sm text-gray-600">
-                <strong>Exactly 2 targeted training recommendations</strong> with certifications & real workshops to mitigate the 4 current threats - 
+                <strong>Exactly 2 targeted training recommendations</strong> with <strong>2 most relevant certifications</strong> to mitigate the 4 current threats - 
                 <span className="text-blue-600 font-medium"> Short & crisp!</span>
               </p>
             </div>
@@ -430,20 +430,20 @@ const NewsletterEditor: React.FC = () => {
           <div className="flex items-center space-x-2 mb-2">
             <Brain className="text-blue-600" size={16} />
             <span className="text-sm font-medium text-blue-700">
-              🤖 AI Analysis: 2 most critical training needs with industry certifications based on your specific threat environment
+              🤖 AI Analysis: 2 most critical training needs with <strong>2 most relevant certifications</strong> based on your specific threat environment
             </span>
           </div>
           <p className="text-xs text-blue-600 mb-2">
             AI prioritizes training based on threat severity: Microsoft Exchange → patch management, 
             ransomware → incident response, supply chain → security assessment, AI phishing → detection training.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
             <div className="bg-white p-3 rounded-lg border border-blue-200">
               <div className="flex items-center space-x-2 mb-1">
                 <Award className="text-purple-600" size={14} />
-                <span className="text-xs font-semibold text-purple-700">Certifications</span>
+                <span className="text-xs font-semibold text-purple-700">Top 2 Certifications</span>
               </div>
-              <p className="text-xs text-purple-600">CISSP, GCIH, GCFA, CISM, CompTIA Security+, CySA+</p>
+              <p className="text-xs text-purple-600"><strong>CISSP, GCIH, GCFA, CISM, CompTIA Security+, CySA+</strong></p>
             </div>
             <div className="bg-white p-3 rounded-lg border border-blue-200">
               <div className="flex items-center space-x-2 mb-1">
@@ -451,13 +451,6 @@ const NewsletterEditor: React.FC = () => {
                 <span className="text-xs font-semibold text-green-700">SANS Training</span>
               </div>
               <p className="text-xs text-green-600">SEC566, FOR508, FOR572, SEC487, MGT512</p>
-            </div>
-            <div className="bg-white p-3 rounded-lg border border-blue-200">
-              <div className="flex items-center space-x-2 mb-1">
-                <Users className="text-blue-600" size={14} />
-                <span className="text-xs font-semibold text-blue-700">Workshops</span>
-              </div>
-              <p className="text-xs text-blue-600">Incident Response, Threat Hunting, Vulnerability Management</p>
             </div>
           </div>
         </div>
@@ -483,7 +476,21 @@ const NewsletterEditor: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">💭 AI-Generated Thought of the Day</h3>
+        <div className="flex items-center space-x-2">
+          <Lightbulb className="text-yellow-600" size={20} />
+          <div>
+            <h3 className="text-lg font-medium">💭 AI-Generated Thought of the Day</h3>
+            <p className="text-sm text-gray-600">
+              <strong>Unique technology-focused insights</strong> that change based on date - 
+              <span className="text-purple-600 font-medium"> Never repetitive!</span>
+            </p>
+          </div>
+        </div>
+        <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+          <p className="text-xs text-purple-600">
+            🤖 AI generates unique thoughts about AI, quantum computing, cloud security, zero trust, blockchain, and emerging technologies.
+          </p>
+        </div>
         <textarea
           value={thoughtOfTheDay}
           onChange={(e) => setThoughtOfTheDay(e.target.value)}
@@ -493,7 +500,21 @@ const NewsletterEditor: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">😄 AI-Generated Security Joke</h3>
+        <div className="flex items-center space-x-2">
+          <Users className="text-green-600" size={20} />
+          <div>
+            <h3 className="text-lg font-medium">😄 AI-Generated Security Joke</h3>
+            <p className="text-sm text-gray-600">
+              <strong>Unique technology-focused humor</strong> that rotates weekly - 
+              <span className="text-green-600 font-medium"> Fresh & relevant!</span>
+            </p>
+          </div>
+        </div>
+        <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+          <p className="text-xs text-green-600">
+            🤖 AI creates unique jokes about quantum computing, blockchain, AI security, cloud engineering, and modern cybersecurity concepts.
+          </p>
+        </div>
         <textarea
           value={securityJoke}
           onChange={(e) => setSecurityJoke(e.target.value)}

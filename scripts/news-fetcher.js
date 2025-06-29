@@ -628,71 +628,77 @@ export function generateContextualTraining(threats) {
   
   const trainingItems = [];
   
-  // Generate training based on current threats
-  if (allText.includes('phishing') || allText.includes('social engineering')) {
-    trainingItems.push('Advanced phishing simulation exercises with real-world attack scenarios and reporting procedures.');
+  // Generate training based on current threats with ONLY 2 most relevant certifications in bold
+  if (allText.includes('microsoft') || allText.includes('exchange') || allText.includes('vulnerability') || allText.includes('patch')) {
+    trainingItems.push('Emergency Patch Management Workshop: Rapid vulnerability assessment, testing procedures, and coordinated deployment strategies. **Recommended: CISSP + SANS SEC566** (Implementing and Auditing Critical Security Controls).');
   }
   
-  if (allText.includes('ransomware') || allText.includes('malware')) {
-    trainingItems.push('Ransomware response and recovery workshop including backup validation and incident communication.');
+  if (allText.includes('ransomware') || allText.includes('healthcare') || allText.includes('malware')) {
+    trainingItems.push('Ransomware Incident Response Workshop: Isolation procedures, backup validation, communication protocols, and recovery strategies. **Recommended: GCIH + SANS FOR508** (Advanced Incident Response, Threat Hunting, and Digital Forensics).');
   }
   
-  if (allText.includes('vulnerability') || allText.includes('patch')) {
-    trainingItems.push('Secure development lifecycle training with vulnerability assessment and remediation techniques.');
+  if (allText.includes('supply chain') || allText.includes('npm') || allText.includes('package') || allText.includes('third-party')) {
+    trainingItems.push('Supply Chain Security Assessment: Code dependency analysis, vendor risk evaluation, and secure development practices. **Recommended: CISSP + DevSecOps Foundation** Certification.');
   }
   
-  if (allText.includes('supply chain') || allText.includes('third-party')) {
-    trainingItems.push('Third-party risk management and supply chain security assessment methodologies.');
+  if (allText.includes('ai-generated') || allText.includes('phishing') || allText.includes('email') || allText.includes('artificial intelligence')) {
+    trainingItems.push('Advanced AI Phishing Detection Workshop: Identifying AI-generated content, deepfake recognition, and enhanced email security awareness. **Recommended: CompTIA Security+ + SANS SEC487** (Open-Source Intelligence Gathering and Analysis).');
   }
   
-  if (allText.includes('zero-day') || allText.includes('exploit')) {
-    trainingItems.push('Advanced threat hunting and incident response training for zero-day attack scenarios.');
-  }
-  
-  // Default training items
+  // Default training items with 2 most relevant certifications
   const defaultTraining = [
-    'Incident response tabletop exercises with cross-functional team coordination and communication protocols.',
-    'Cloud security fundamentals workshop covering configuration management and access control best practices.',
-    'Mobile device and remote work security training including BYOD policies and secure connectivity.',
-    'Security awareness training focused on current threat landscape and attack vectors.'
+    'Incident Response Tabletop Exercise: Cross-functional coordination, communication protocols, and decision-making under pressure. **Recommended: GCIH + CISM** (Certified Information Security Manager).',
+    'Advanced Threat Detection Workshop: SIEM analysis, threat intelligence integration, and proactive security monitoring. **Recommended: GCFA + CySA+** (CompTIA Cybersecurity Analyst).'
   ];
   
   const allTraining = [...trainingItems, ...defaultTraining];
   
-  return allTraining.slice(0, 3).map((training, index) => ({
+  return allTraining.slice(0, 2).map((training, index) => ({
     id: (index + 1).toString(),
     content: training
   }));
 }
 
+// Enhanced unique thought generator with technology focus
 export function generateSecurityThought() {
-  const thoughts = [
-    'CYBERSECURITY IS NOT ABOUT BUILDING PERFECT WALLS, BUT ABOUT DETECTING AND RESPONDING TO BREACHES FASTER THAN ATTACKERS CAN EXPLOIT THEM.',
-    'IN THE DIGITAL BATTLEFIELD, YOUR WEAKEST LINK IS OFTEN YOUR STRONGEST TEACHER - LEARN FROM EVERY INCIDENT.',
-    'SECURITY IS A TEAM SPORT: EVERY EMPLOYEE IS A DEFENDER, EVERY PROCESS IS A CONTROL, EVERY DECISION IS A RISK ASSESSMENT.',
-    'THE BEST DEFENSE AGAINST TOMORROW\'S THREATS IS TODAY\'S PREPARATION - ASSUME BREACH, PLAN FOR RESILIENCE.',
-    'CYBERSECURITY IS NOT A DESTINATION BUT A CONTINUOUS JOURNEY OF ADAPTATION, LEARNING, AND IMPROVEMENT.',
-    'IN CYBERSECURITY, PARANOIA IS PROFESSIONALISM - QUESTION EVERYTHING, VERIFY CONSTANTLY, TRUST CAUTIOUSLY.',
-    'THE COST OF PREVENTION IS ALWAYS LESS THAN THE PRICE OF RECOVERY - INVEST IN SECURITY BEFORE YOU NEED IT.',
-    'ARTIFICIAL INTELLIGENCE IS RESHAPING BOTH CYBER ATTACKS AND DEFENSES - STAY AHEAD OF THE CURVE OR FALL BEHIND.',
-    'ZERO TRUST IS NOT JUST A SECURITY MODEL, IT\'S A MINDSET - NEVER TRUST, ALWAYS VERIFY, CONTINUOUSLY MONITOR.'
+  const uniqueThoughts = [
+    'IN THE AGE OF AI AND QUANTUM COMPUTING, CYBERSECURITY IS EVOLVING FROM REACTIVE DEFENSE TO PREDICTIVE INTELLIGENCE - ANTICIPATE THREATS BEFORE THEY MATERIALIZE.',
+    'CLOUD-NATIVE SECURITY REQUIRES A FUNDAMENTAL SHIFT: SECURE BY DESIGN, NOT SECURE BY ADDITION - EMBED PROTECTION INTO EVERY MICROSERVICE AND API.',
+    'THE CONVERGENCE OF IOT, 5G, AND EDGE COMPUTING CREATES AN EXPONENTIALLY LARGER ATTACK SURFACE - SECURITY MUST SCALE AT THE SPEED OF INNOVATION.',
+    'ZERO TRUST IS NOT A PRODUCT BUT A PHILOSOPHY: VERIFY EVERY USER, DEVICE, AND TRANSACTION AS IF THE NETWORK IS ALREADY COMPROMISED.',
+    'ARTIFICIAL INTELLIGENCE IN CYBERSECURITY IS A DOUBLE-EDGED SWORD - WHILE IT ENHANCES DETECTION, IT ALSO EMPOWERS SOPHISTICATED ADVERSARIES.',
+    'THE FUTURE OF CYBERSECURITY LIES IN AUTONOMOUS RESPONSE SYSTEMS THAT CAN ADAPT AND COUNTER THREATS FASTER THAN HUMAN REACTION TIME.',
+    'BLOCKCHAIN TECHNOLOGY OFFERS IMMUTABLE AUDIT TRAILS, BUT ITS SECURITY IS ONLY AS STRONG AS ITS IMPLEMENTATION AND KEY MANAGEMENT.',
+    'QUANTUM-RESISTANT CRYPTOGRAPHY IS NOT A FUTURE CONCERN - IT IS A PRESENT NECESSITY AS QUANTUM COMPUTING CAPABILITIES RAPIDLY ADVANCE.',
+    'CYBERSECURITY MESH ARCHITECTURE ENABLES DISTRIBUTED SECURITY PERIMETERS THAT MOVE WITH DATA AND APPLICATIONS ACROSS HYBRID ENVIRONMENTS.',
+    'THE HUMAN ELEMENT REMAINS THE WEAKEST LINK IN CYBERSECURITY - TECHNOLOGY MUST AUGMENT HUMAN DECISION-MAKING, NOT REPLACE IT.',
+    'DEVSECOPS TRANSFORMS SECURITY FROM A BOTTLENECK TO AN ACCELERATOR - SHIFT LEFT TO BUILD SECURITY INTO THE SOFTWARE DEVELOPMENT LIFECYCLE.',
+    'PRIVACY-PRESERVING TECHNOLOGIES LIKE HOMOMORPHIC ENCRYPTION ENABLE SECURE COMPUTATION ON ENCRYPTED DATA WITHOUT EXPOSING SENSITIVE INFORMATION.'
   ];
   
-  return thoughts[Math.floor(Math.random() * thoughts.length)];
+  // Select based on current date to ensure uniqueness over time
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+  return uniqueThoughts[dayOfYear % uniqueThoughts.length];
 }
 
+// Enhanced unique joke generator with technology focus
 export function generateSecurityJoke() {
-  const jokes = [
-    'WHY DO CYBERSECURITY EXPERTS NEVER GET LOCKED OUT? THEY ALWAYS HAVE A BACKUP PLAN... AND A BACKUP BACKUP PLAN!',
-    'WHAT\'S THE DIFFERENCE BETWEEN A SECURITY EXPERT AND A MAGICIAN? THE MAGICIAN MAKES THINGS DISAPPEAR, THE SECURITY EXPERT MAKES THREATS REAPPEAR!',
-    'WHY DID THE HACKER BREAK UP WITH THE FIREWALL? BECAUSE THEIR RELATIONSHIP HAD TOO MANY TRUST ISSUES!',
-    'HOW MANY CYBERSECURITY PROFESSIONALS DOES IT TAKE TO CHANGE A LIGHT BULB? NONE - THEY JUST DECLARE DARKNESS A SECURITY FEATURE!',
-    'WHY DON\'T SECURITY ANALYSTS TRUST STAIRS? BECAUSE THEY\'RE ALWAYS UP TO SOMETHING SUSPICIOUS!',
-    'WHAT DO YOU CALL A CYBERSECURITY EXPERT WHO WORKS FROM HOME? A REMOTE ACCESS TROJAN... WAIT, THAT CAME OUT WRONG!',
-    'WHY DID THE PASSWORD GO TO THERAPY? IT HAD TOO MANY COMPLEX REQUIREMENTS AND COULDN\'T HANDLE THE PRESSURE!',
-    'WHAT\'S A HACKER\'S FAVORITE TYPE OF MUSIC? ANYTHING WITH GOOD ENCRYPTION... I MEAN, GOOD RHYTHM!',
-    'WHY DO CYBERSECURITY TEAMS LOVE COFFEE? BECAUSE THEY NEED TO STAY ALERT FOR THOSE 3 AM INCIDENT RESPONSE CALLS!'
+  const uniqueJokes = [
+    'WHY DID THE AI SECURITY ANALYST BREAK UP WITH THE TRADITIONAL FIREWALL? BECAUSE IT COULDN\'T HANDLE THEIR MACHINE LEARNING RELATIONSHIP!',
+    'WHAT DO YOU CALL A CYBERSECURITY EXPERT WHO WORKS WITH QUANTUM COMPUTERS? A SCHRÖDINGER\'S DEFENDER - THEY\'RE SIMULTANEOUSLY SECURE AND BREACHED!',
+    'WHY DON\'T BLOCKCHAIN DEVELOPERS EVER GET LOST? BECAUSE THEY ALWAYS HAVE A DISTRIBUTED LEDGER TO FOLLOW!',
+    'WHAT\'S THE DIFFERENCE BETWEEN A CLOUD SECURITY ENGINEER AND A METEOROLOGIST? ONE PREDICTS STORMS IN THE CLOUD, THE OTHER PREVENTS THEM!',
+    'WHY DID THE ZERO TRUST ARCHITECT REFUSE TO PLAY POKER? BECAUSE THEY NEVER TRUST ANYONE, EVEN WITH A ROYAL FLUSH!',
+    'WHAT DO YOU CALL A PHISHING EMAIL THAT USES DEEPFAKE TECHNOLOGY? A CATFISH WITH A PHD IN ARTIFICIAL INTELLIGENCE!',
+    'WHY DID THE IOT DEVICE GO TO THERAPY? IT HAD TOO MANY TRUST ISSUES WITH ITS NETWORK CONNECTIONS!',
+    'WHAT\'S A CYBERSECURITY PROFESSIONAL\'S FAVORITE TYPE OF MUSIC? ANYTHING WITH GOOD ENCRYPTION... AND STRONG AUTHENTICATION BEATS!',
+    'WHY DON\'T QUANTUM COMPUTERS MAKE GOOD COMEDIANS? BECAUSE THEIR JOKES EXIST IN SUPERPOSITION - FUNNY AND NOT FUNNY AT THE SAME TIME!',
+    'WHAT DO YOU CALL A SECURITY INCIDENT RESPONSE TEAM THAT WORKS FROM HOME? A REMOTE ACCESS TROJAN... WAIT, THAT CAME OUT WRONG AGAIN!',
+    'WHY DID THE DEVSECOPS ENGINEER BECOME A CHEF? BECAUSE THEY WERE ALREADY EXPERTS AT SHIFTING LEFT AND COOKING UP SECURE RECIPES!',
+    'WHAT\'S THE DIFFERENCE BETWEEN A CYBERSECURITY MESH AND A FISHING NET? ONE CATCHES THREATS, THE OTHER CATCHES FISH - BUT BOTH HAVE HOLES!'
   ];
   
-  return jokes[Math.floor(Math.random() * jokes.length)];
+  // Select based on current month and week to ensure variety
+  const weekOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24 * 7));
+  return uniqueJokes[weekOfYear % uniqueJokes.length];
 }
