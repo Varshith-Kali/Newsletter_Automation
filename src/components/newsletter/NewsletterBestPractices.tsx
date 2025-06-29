@@ -10,9 +10,9 @@ const NewsletterBestPractices: React.FC = () => {
   } = useNewsletter();
 
   return (
-    <div className="min-h-screen flex">
+    <div className="w-full h-[1123px] flex overflow-hidden">
       {/* Left side with red background */}
-      <div className="w-5/12 bg-red-700 text-white p-8 flex flex-col">
+      <div className="w-5/12 bg-red-700 text-white p-8 flex flex-col flex-shrink-0">
         <div>
           <h2 className="text-2xl font-bold mb-4">
             BEST PRACTICES &<br />AWARENESS
@@ -32,7 +32,7 @@ const NewsletterBestPractices: React.FC = () => {
           <ul className="space-y-6">
             {trainingItems.map((item) => (
               <li key={item.id} className="flex items-start">
-                <span className="w-2 h-2 bg-white rounded-full mt-2 mr-2"></span>
+                <span className="w-2 h-2 bg-white rounded-full mt-2 mr-2 flex-shrink-0"></span>
                 <span className="text-sm">{item.content}</span>
               </li>
             ))}
@@ -53,7 +53,7 @@ const NewsletterBestPractices: React.FC = () => {
       </div>
       
       {/* Right side with images and quote */}
-      <div className="w-7/12 bg-white relative">
+      <div className="w-7/12 bg-white relative flex-shrink-0">
         {/* Background city image */}
         <div className="h-2/3 overflow-hidden">
           <img 

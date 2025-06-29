@@ -9,13 +9,14 @@ const Newsletter: React.FC = () => {
   
   return (
     <div className="newsletter w-full">
-      <div className="newsletter-page newsletter-cover">
+      {/* Fixed dimensions for consistent layout across all devices */}
+      <div className="newsletter-page newsletter-cover w-full h-[1123px] overflow-hidden">
         <NewsletterCover />
       </div>
-      <div className="newsletter-page newsletter-threats">
+      <div className="newsletter-page newsletter-threats w-full h-[1123px] overflow-hidden">
         <NewsletterThreats />
       </div>
-      <div className="newsletter-page newsletter-best-practices">
+      <div className="newsletter-page newsletter-best-practices w-full h-[1123px] overflow-hidden">
         <NewsletterBestPractices />
       </div>
     </div>

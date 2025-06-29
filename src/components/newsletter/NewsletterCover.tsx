@@ -12,7 +12,7 @@ const NewsletterCover: React.FC = () => {
   } = useNewsletter();
 
   return (
-    <div className="bg-black h-screen text-white relative overflow-hidden">
+    <div className="bg-black w-full h-[1123px] text-white relative overflow-hidden">
       {/* Background image - grayscale */}
       <div className="absolute inset-0 opacity-60">
         <img 
