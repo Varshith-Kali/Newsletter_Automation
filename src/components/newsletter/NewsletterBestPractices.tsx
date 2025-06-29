@@ -14,12 +14,12 @@ const NewsletterBestPractices: React.FC = () => {
       {/* Left side with red background */}
       <div className="w-5/12 bg-red-700 text-white p-8 flex flex-col">
         <div>
-          <h2 className="text-2xl font-bold mb-8">
+          <h2 className="text-2xl font-bold mb-4">
             BEST PRACTICES &<br />AWARENESS
           </h2>
         </div>
         
-        <div className="space-y-4 my-8">
+        <div className="space-y-4">
           {bestPractices.map((practice) => (
             <p key={practice.id} className="text-sm leading-relaxed">
               {practice.content}
