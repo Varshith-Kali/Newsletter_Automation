@@ -32,7 +32,6 @@ const NewsletterBestPractices: React.FC = () => {
           <ul className="space-y-6">
             {trainingItems.map((item) => (
               <li key={item.id} className="flex items-start">
-                <span className="w-2 h-2 bg-white rounded-full mt-2 mr-2"></span>
                 <span className="text-sm">{item.content}</span>
               </li>
             ))}
@@ -56,7 +55,7 @@ const NewsletterBestPractices: React.FC = () => {
       <div className="w-7/12 bg-white relative">
         {/* Background city image - FORCED SPECIFIC URL */}
         <div 
-          className="h-2/3 overflow-hidden thought-of-day-background relative"
+          className="h-2/3 overflow-hidden thought-of-day-background"
           style={{
             backgroundImage: 'url("https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1")',
             backgroundSize: 'cover',
@@ -65,36 +64,10 @@ const NewsletterBestPractices: React.FC = () => {
             filter: 'grayscale(100%)'
           }}
         >
-          {/* Red overlay box - FORCE RED COLOR WITH IMPORTANT STYLES */}
-          <div 
-            className="absolute top-8 left-8 p-6 max-w-md z-20"
-            style={{
-              backgroundColor: '#b91c1c !important',
-              color: '#ffffff !important',
-              border: 'none',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-            }}
-          >
-            <h3 
-              className="text-xl font-bold mb-4"
-              style={{
-                color: '#ffffff !important',
-                backgroundColor: 'transparent !important',
-                textShadow: 'none'
-              }}
-            >
-              THOUGHT OF THE DAY !!
-            </h3>
-            <p 
-              className="text-sm italic"
-              style={{
-                color: '#ffffff !important',
-                backgroundColor: 'transparent !important',
-                textShadow: 'none'
-              }}
-            >
-              {thoughtOfTheDay}
-            </p>
+          {/* Red overlay box - FORCE RED COLOR */}
+          <div className="absolute top-8 left-8 bg-red-700 p-6 max-w-md text-white z-20 force-red-box">
+            <h3 className="text-xl font-bold mb-4 text-white">THOUGHT OF THE DAY !!</h3>
+            <p className="text-sm italic text-white">{thoughtOfTheDay}</p>
           </div>
         </div>
         

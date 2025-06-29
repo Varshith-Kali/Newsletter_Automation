@@ -14,15 +14,24 @@ body {
 }
 
 /* FORCE RED BOX COLOR - HIGHEST SPECIFICITY */
-.thought-of-day-background > div {
+.force-red-box {
   background-color: #b91c1c !important;
   color: #ffffff !important;
 }
 
-.thought-of-day-background > div h3,
-.thought-of-day-background > div p {
+.force-red-box h3,
+.force-red-box p {
   color: #ffffff !important;
   background-color: transparent !important;
+}
+
+/* Additional backup selectors */
+.thought-of-day-background .force-red-box {
+  background-color: #b91c1c !important;
+}
+
+.bg-red-700.force-red-box {
+  background-color: #b91c1c !important;
 }
 
 @media print {
