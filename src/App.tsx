@@ -55,71 +55,66 @@ function App() {
     });
   };
 
-  // Function to replace all images with grayscale versions
-  const replaceImagesWithGrayscale = async (element: HTMLElement): Promise<void> => {
+  // Function to preload and cache images before processing
+  const preloadAndCacheImages = async (element: HTMLElement): Promise<Map<string, string>> => {
+    const imageCache = new Map<string, string>();
     const images = element.querySelectorAll('img');
-    const promises: Promise<void>[] = [];
     
-    console.log(`🎨 Found ${images.length} images to convert to grayscale`);
+    console.log(`🖼️ Pre-loading and caching ${images.length} images...`);
     
-    images.forEach((img, index) => {
-      if (img instanceof HTMLImageElement) {
-        const promise = new Promise<void>((resolve) => {
-          const processImage = async () => {
-            try {
-              console.log(`🖼️ Processing image ${index + 1}: ${img.src.substring(0, 50)}...`);
-              
-              if (img.complete && img.naturalWidth > 0) {
-                // Image is already loaded
-                const grayscaleDataUrl = await convertImageToGrayscale(img);
-                img.src = grayscaleDataUrl;
-                img.style.filter = 'none'; // Remove any existing filters
-                console.log(`✅ Image ${index + 1} converted to grayscale`);
-                resolve();
-              } else {
-                // Wait for image to load
-                const handleLoad = async () => {
-                  try {
-                    const grayscaleDataUrl = await convertImageToGrayscale(img);
-                    img.src = grayscaleDataUrl;
-                    img.style.filter = 'none';
-                    console.log(`✅ Image ${index + 1} loaded and converted to grayscale`);
-                    resolve();
-                  } catch (error) {
-                    console.warn(`⚠️ Failed to convert image ${index + 1}:`, error);
-                    resolve();
-                  }
-                };
-                
-                const handleError = () => {
-                  console.warn(`⚠️ Failed to load image ${index + 1}:`, img.src);
-                  resolve();
-                };
-                
-                img.addEventListener('load', handleLoad, { once: true });
-                img.addEventListener('error', handleError, { once: true });
-                
-                // Force reload if needed
-                if (!img.src) {
-                  console.warn(`⚠️ Image ${index + 1} has no src, skipping`);
-                  resolve();
-                }
-              }
-            } catch (error) {
-              console.warn(`⚠️ Error processing image ${index + 1}:`, error);
-              resolve();
-            }
-          };
+    const promises = Array.from(images).map(async (img, index) => {
+      if (img instanceof HTMLImageElement && img.src) {
+        try {
+          console.log(`📥 Pre-loading image ${index + 1}: ${img.src.substring(0, 50)}...`);
           
-          processImage();
-        });
-        
-        promises.push(promise);
+          // Create a new image to ensure it's fully loaded
+          const tempImg = new Image();
+          tempImg.crossOrigin = 'anonymous';
+          
+          await new Promise<void>((resolve, reject) => {
+            tempImg.onload = () => resolve();
+            tempImg.onerror = () => reject(new Error(`Failed to load image: ${img.src}`));
+            tempImg.src = img.src;
+          });
+          
+          // Convert to grayscale and cache
+          const grayscaleDataUrl = await convertImageToGrayscale(tempImg);
+          imageCache.set(img.src, grayscaleDataUrl);
+          
+          console.log(`✅ Image ${index + 1} cached successfully`);
+        } catch (error) {
+          console.warn(`⚠️ Failed to cache image ${index + 1}:`, error);
+          // Keep original src as fallback
+          imageCache.set(img.src, img.src);
+        }
       }
     });
     
     await Promise.all(promises);
-    console.log('🎉 All images converted to grayscale!');
+    console.log(`🎉 All ${imageCache.size} images cached!`);
+    return imageCache;
+  };
+
+  // Function to replace all images with cached grayscale versions
+  const replaceImagesWithCachedVersions = (element: HTMLElement, imageCache: Map<string, string>): void => {
+    const images = element.querySelectorAll('img');
+    
+    console.log(`🔄 Replacing ${images.length} images with cached grayscale versions...`);
+    
+    images.forEach((img, index) => {
+      if (img instanceof HTMLImageElement && img.src) {
+        const cachedVersion = imageCache.get(img.src);
+        if (cachedVersion) {
+          img.src = cachedVersion;
+          img.style.filter = 'none'; // Remove any existing filters
+          console.log(`✅ Image ${index + 1} replaced with cached version`);
+        } else {
+          console.warn(`⚠️ No cached version found for image ${index + 1}: ${img.src}`);
+        }
+      }
+    });
+    
+    console.log('🎉 All images replaced with cached grayscale versions!');
   };
 
   const downloadAsPDF = async () => {
@@ -130,7 +125,7 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating SINGLE-PAGE PDF with PRE-PROCESSED GRAYSCALE IMAGES...');
+      console.log('📄 Generating SINGLE-PAGE PDF with CACHED GRAYSCALE IMAGES...');
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -152,12 +147,15 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING: Converting all images to grayscale...');
+          console.log('🎨 PRE-PROCESSING: Pre-loading and caching all images as grayscale...');
           
-          // CRITICAL: First, replace all images with grayscale versions
-          await replaceImagesWithGrayscale(element);
+          // CRITICAL: Pre-load and cache all images first
+          const imageCache = await preloadAndCacheImages(element);
           
-          console.log('✅ All images converted to grayscale BEFORE canvas capture!');
+          // Then replace all images with cached grayscale versions
+          replaceImagesWithCachedVersions(element, imageCache);
+          
+          console.log('✅ All images replaced with consistent cached grayscale versions!');
           
           // Apply comprehensive styling
           const comprehensiveStyle = clonedDoc.createElement('style');
@@ -177,10 +175,19 @@ function App() {
             .text-gray-600 { color: #4b5563 !important; }
             .text-gray-500 { color: #6b7280 !important; }
             
-            /* Ensure images stay grayscale */
+            /* Ensure images stay grayscale and maintain consistency */
             img {
               filter: none !important;
               -webkit-filter: none !important;
+              image-rendering: -webkit-optimize-contrast !important;
+              image-rendering: crisp-edges !important;
+            }
+            
+            /* Ensure background images are properly handled */
+            .h-2\/3, .h-1\/3 {
+              background-size: cover !important;
+              background-position: center !important;
+              background-repeat: no-repeat !important;
             }
             
             .min-h-screen { min-height: 100vh !important; }
@@ -278,7 +285,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling applied with pre-processed grayscale images');
+          console.log('✅ Comprehensive styling applied with cached grayscale images');
         }
       });
 
@@ -324,7 +331,7 @@ function App() {
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
 
       pdf.save('Cybersecurity-Newsletter-SinglePage.pdf');
-      console.log('🎉 SINGLE-PAGE PDF generated with PRE-PROCESSED GRAYSCALE IMAGES!');
+      console.log('🎉 SINGLE-PAGE PDF generated with CACHED GRAYSCALE IMAGES!');
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -340,7 +347,7 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with PRE-PROCESSED GRAYSCALE IMAGES...');
+      console.log('🖼️ Generating PNG with CACHED GRAYSCALE IMAGES...');
 
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -362,12 +369,15 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING PNG: Converting all images to grayscale...');
+          console.log('🎨 PRE-PROCESSING PNG: Pre-loading and caching all images as grayscale...');
           
-          // Pre-process images to grayscale
-          await replaceImagesWithGrayscale(element);
+          // Pre-load and cache all images first
+          const imageCache = await preloadAndCacheImages(element);
           
-          console.log('✅ All images converted to grayscale for PNG!');
+          // Then replace all images with cached grayscale versions
+          replaceImagesWithCachedVersions(element, imageCache);
+          
+          console.log('✅ All images replaced with consistent cached grayscale versions for PNG!');
           
           const comprehensiveStyle = clonedDoc.createElement('style');
           comprehensiveStyle.textContent = `
@@ -388,6 +398,14 @@ function App() {
             img {
               filter: none !important;
               -webkit-filter: none !important;
+              image-rendering: -webkit-optimize-contrast !important;
+              image-rendering: crisp-edges !important;
+            }
+            
+            .h-2\/3, .h-1\/3 {
+              background-size: cover !important;
+              background-position: center !important;
+              background-repeat: no-repeat !important;
             }
             
             .min-h-screen { min-height: 100vh !important; }
@@ -480,7 +498,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling for PNG applied with pre-processed images');
+          console.log('✅ Comprehensive styling for PNG applied with cached images');
         }
       });
 
@@ -497,7 +515,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
 
-      console.log('🎉 PNG generated with PRE-PROCESSED GRAYSCALE IMAGES!');
+      console.log('🎉 PNG generated with CACHED GRAYSCALE IMAGES!');
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
