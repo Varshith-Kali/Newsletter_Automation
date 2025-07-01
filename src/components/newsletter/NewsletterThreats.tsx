@@ -77,6 +77,15 @@ const NewsletterThreats: React.FC = () => {
     return 'Click to read the full article';
   };
 
+  const shortenUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname + (urlObj.pathname !== '/' ? urlObj.pathname.substring(0, 25) + '...' : '');
+    } catch {
+      return url.substring(0, 40) + '...';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white text-black flex">
       {/* Left red sidebar with images */}
@@ -133,12 +142,28 @@ const NewsletterThreats: React.FC = () => {
                 </h3>
               </div>
               <p className="text-sm leading-relaxed mb-2">{threat.description}</p>
+              
+              {/* VISIBLE LINK FOR DOWNLOADS - Only shows in downloaded versions */}
+              {threat.link && threat.link.trim() !== '' && (
+                <div className="mt-2 mb-2 print-link-visible download-link-visible">
+                  <div className="bg-blue-50 border border-blue-200 rounded px-3 py-2">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-semibold text-blue-700">
+                        {threat.linkType === 'fallback' ? '🔍 Search:' : '🔗 Source:'}
+                      </span>
+                      <span className="text-xs text-blue-600 font-mono break-all">
+                        {threat.link}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <div className="flex items-center space-x-4">
                   {threat.source && (
                     <span className="italic">Source: {threat.source}</span>
                   )}
-                  {/* REMOVED: CVE display section - no more CVE numbers shown */}
                   <span className="text-gray-600 font-medium">
                     {formatDate(threat.formattedDate, threat.pubDate)}
                   </span>

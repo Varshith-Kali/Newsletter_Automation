@@ -221,7 +221,7 @@ function App() {
     }
 
     try {
-      console.log('📄 Generating SINGLE-PAGE PDF with PRESERVED LAYOUT...');
+      console.log('📄 Generating SINGLE-PAGE PDF with PRESERVED LAYOUT and VISIBLE LINKS...');
       console.log(`📏 Current preview width: ${previewWidth}%`);
 
       // CRITICAL: Force layout stabilization before capture
@@ -245,7 +245,7 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING: Preserving layout and spacing...');
+          console.log('🎨 PRE-PROCESSING: Preserving layout, spacing, and MAKING LINKS VISIBLE...');
           console.log(`📏 Maintaining current width: ${previewWidth}%`);
           
           // CRITICAL: Pre-load and cache ALL images
@@ -256,7 +256,7 @@ function App() {
           
           console.log('✅ ALL images replaced with consistent cached grayscale versions!');
           
-          // Apply comprehensive styling with EXPLICIT SPACING PRESERVATION
+          // Apply comprehensive styling with EXPLICIT SPACING PRESERVATION and VISIBLE LINKS
           const comprehensiveStyle = clonedDoc.createElement('style');
           comprehensiveStyle.textContent = `
             html, body, .newsletter-container, .newsletter, .newsletter-page {
@@ -288,6 +288,32 @@ function App() {
             .mt-2 { margin-top: 0.5rem !important; }
             .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
             .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+            
+            /* CRITICAL: MAKE LINKS VISIBLE IN DOWNLOADS */
+            .download-link-visible,
+            .print-link-visible {
+              display: block !important;
+              visibility: visible !important;
+              opacity: 1 !important;
+              background-color: #eff6ff !important;
+              border: 1px solid #bfdbfe !important;
+              border-radius: 0.375rem !important;
+              padding: 0.5rem 0.75rem !important;
+              margin: 0.5rem 0 !important;
+            }
+            
+            .download-link-visible .text-blue-700 {
+              color: #1d4ed8 !important;
+              font-weight: 600 !important;
+              font-size: 0.75rem !important;
+            }
+            
+            .download-link-visible .text-blue-600 {
+              color: #2563eb !important;
+              font-family: monospace !important;
+              font-size: 0.75rem !important;
+              word-break: break-all !important;
+            }
             
             /* Ensure ALL images stay grayscale and maintain consistency */
             img {
@@ -412,7 +438,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling applied with LAYOUT PRESERVATION');
+          console.log('✅ Comprehensive styling applied with LAYOUT PRESERVATION and VISIBLE LINKS');
         }
       });
 
@@ -457,8 +483,8 @@ function App() {
 
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
 
-      pdf.save(`Cybersecurity-Newsletter-${previewWidth}percent.pdf`);
-      console.log(`🎉 SINGLE-PAGE PDF generated at ${previewWidth}% width with PRESERVED SPACING!`);
+      pdf.save(`Cybersecurity-Newsletter-${previewWidth}percent-with-links.pdf`);
+      console.log(`🎉 SINGLE-PAGE PDF generated at ${previewWidth}% width with PRESERVED SPACING and VISIBLE LINKS!`);
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
@@ -474,7 +500,7 @@ function App() {
     }
 
     try {
-      console.log('🖼️ Generating PNG with PRESERVED LAYOUT...');
+      console.log('🖼️ Generating PNG with PRESERVED LAYOUT and VISIBLE LINKS...');
       console.log(`📏 Current preview width: ${previewWidth}%`);
 
       // CRITICAL: Force layout stabilization before capture
@@ -498,7 +524,7 @@ function App() {
         removeContainer: false,
         ignoreElements: () => false,
         onclone: async (clonedDoc, element) => {
-          console.log('🎨 PRE-PROCESSING PNG: Preserving layout and spacing...');
+          console.log('🎨 PRE-PROCESSING PNG: Preserving layout, spacing, and MAKING LINKS VISIBLE...');
           console.log(`📏 Maintaining current width: ${previewWidth}%`);
           
           // Pre-load and cache ALL images
@@ -539,6 +565,32 @@ function App() {
             .mt-2 { margin-top: 0.5rem !important; }
             .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
             .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+            
+            /* CRITICAL: MAKE LINKS VISIBLE IN DOWNLOADS */
+            .download-link-visible,
+            .print-link-visible {
+              display: block !important;
+              visibility: visible !important;
+              opacity: 1 !important;
+              background-color: #eff6ff !important;
+              border: 1px solid #bfdbfe !important;
+              border-radius: 0.375rem !important;
+              padding: 0.5rem 0.75rem !important;
+              margin: 0.5rem 0 !important;
+            }
+            
+            .download-link-visible .text-blue-700 {
+              color: #1d4ed8 !important;
+              font-weight: 600 !important;
+              font-size: 0.75rem !important;
+            }
+            
+            .download-link-visible .text-blue-600 {
+              color: #2563eb !important;
+              font-family: monospace !important;
+              font-size: 0.75rem !important;
+              word-break: break-all !important;
+            }
             
             img {
               filter: none !important;
@@ -655,7 +707,7 @@ function App() {
             }
           });
           
-          console.log('✅ Comprehensive styling for PNG applied with LAYOUT PRESERVATION');
+          console.log('✅ Comprehensive styling for PNG applied with LAYOUT PRESERVATION and VISIBLE LINKS');
         }
       });
 
@@ -666,13 +718,13 @@ function App() {
       }
 
       const link = document.createElement('a');
-      link.download = `Cybersecurity-Newsletter-${previewWidth}percent.png`;
+      link.download = `Cybersecurity-Newsletter-${previewWidth}percent-with-links.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      console.log(`🎉 PNG generated at ${previewWidth}% width with PRESERVED SPACING!`);
+      console.log(`🎉 PNG generated at ${previewWidth}% width with PRESERVED SPACING and VISIBLE LINKS!`);
 
     } catch (error) {
       console.error('❌ PNG generation failed:', error);
@@ -742,13 +794,13 @@ function App() {
                   onClick={downloadAsPDF}
                   className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded shadow-lg transition-colors"
                 >
-                  📄 Download as PDF ({previewWidth}%)
+                  📄 Download as PDF ({previewWidth}%) with Links
                 </button>
                 <button
                   onClick={downloadAsPNG}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded shadow-lg transition-colors"
                 >
-                  🖼️ Download as PNG ({previewWidth}%)
+                  🖼️ Download as PNG ({previewWidth}%) with Links
                 </button>
               </div>
             </div>

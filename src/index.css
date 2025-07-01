@@ -52,6 +52,12 @@ div.force-red-box,
   z-index: 999 !important;
 }
 
+/* HIDE LINKS IN PREVIEW, SHOW ONLY IN DOWNLOADS */
+.download-link-visible,
+.print-link-visible {
+  display: none !important;
+}
+
 @media print {
   body {
     margin: 0;
@@ -66,6 +72,14 @@ div.force-red-box,
   .min-h-screen {
     min-height: 100vh;
     height: 100vh;
+  }
+  
+  /* SHOW LINKS IN PRINT/DOWNLOAD */
+  .download-link-visible,
+  .print-link-visible {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 
