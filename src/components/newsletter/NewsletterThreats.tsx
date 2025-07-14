@@ -119,6 +119,7 @@ const NewsletterThreats: React.FC = () => {
               <div className="flex items-start justify-between mb-2">
                 <h3 className="font-bold mb-2 flex items-center flex-1">
                   <span 
+                    data-threat-link={threat.link}
                     onClick={(e) => handleThreatClick(threat, e)}
                     className={`text-black transition-all duration-200 ${
                       threat.link && threat.link.trim() !== ''

@@ -460,6 +460,39 @@ function App() {
       pdf.save(`Cybersecurity-Newsletter-${previewWidth}percent.pdf`);
       console.log(`🎉 SINGLE-PAGE PDF generated at ${previewWidth}% width with PRESERVED SPACING!`);
 
+      // Add interactive links to the PDF for threat titles
+      console.log('🔗 Adding interactive links to PDF...');
+      
+      // Get threat elements and their positions
+      const threatElements = content.querySelectorAll('h3[data-threat-link]');
+      threatElements.forEach((element, index) => {
+        const rect = element.getBoundingClientRect();
+        const contentRect = content.getBoundingClientRect();
+        
+        // Calculate relative position within the content
+        const relativeX = (rect.left - contentRect.left) / content.offsetWidth;
+        const relativeY = (rect.top - contentRect.top) / content.offsetHeight;
+        const relativeWidth = rect.width / content.offsetWidth;
+        const relativeHeight = rect.height / content.offsetHeight;
+        
+        // Convert to PDF coordinates
+        const pdfX = xOffset + (relativeX * finalWidth);
+        const pdfY = yOffset + (relativeY * finalHeight);
+        const pdfWidth = relativeWidth * finalWidth;
+        const pdfHeight = relativeHeight * finalHeight;
+        
+        // Get the link URL from the data attribute
+        const linkUrl = element.getAttribute('data-threat-link');
+        
+        if (linkUrl) {
+          // Add clickable link annotation to PDF
+          pdf.link(pdfX, pdfY, pdfWidth, pdfHeight, { url: linkUrl });
+          console.log(`✅ Added clickable link ${index + 1}: ${linkUrl.substring(0, 50)}...`);
+        }
+      });
+      
+      console.log('🔗 Interactive links added to PDF!');
+
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
       alert('PDF download failed: ' + error.message);
