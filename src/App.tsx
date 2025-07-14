@@ -457,14 +457,13 @@ function App() {
 
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
 
-      pdf.save(`Cybersecurity-Newsletter-${previewWidth}percent.pdf`);
-      console.log(`🎉 SINGLE-PAGE PDF generated at ${previewWidth}% width with PRESERVED SPACING!`);
-
-      // Add interactive links to the PDF for threat titles
+      // Add interactive links to the PDF BEFORE saving
       console.log('🔗 Adding interactive links to PDF...');
       
-      // Get threat elements and their positions
-      const threatElements = content.querySelectorAll('h3[data-threat-link]');
+      // Get threat elements and their positions from the original content
+      const threatElements = content.querySelectorAll('[data-threat-link]');
+      console.log(`📍 Found ${threatElements.length} threat elements with links`);
+      
       threatElements.forEach((element, index) => {
         const rect = element.getBoundingClientRect();
         const contentRect = content.getBoundingClientRect();
@@ -475,23 +474,37 @@ function App() {
         const relativeWidth = rect.width / content.offsetWidth;
         const relativeHeight = rect.height / content.offsetHeight;
         
-        // Convert to PDF coordinates
+        // Convert to PDF coordinates (jsPDF uses different coordinate system)
         const pdfX = xOffset + (relativeX * finalWidth);
         const pdfY = yOffset + (relativeY * finalHeight);
-        const pdfWidth = relativeWidth * finalWidth;
-        const pdfHeight = relativeHeight * finalHeight;
+        const pdfLinkWidth = relativeWidth * finalWidth;
+        const pdfLinkHeight = relativeHeight * finalHeight;
         
         // Get the link URL from the data attribute
         const linkUrl = element.getAttribute('data-threat-link');
         
-        if (linkUrl) {
-          // Add clickable link annotation to PDF
-          pdf.link(pdfX, pdfY, pdfWidth, pdfHeight, { url: linkUrl });
-          console.log(`✅ Added clickable link ${index + 1}: ${linkUrl.substring(0, 50)}...`);
+        if (linkUrl && linkUrl.trim() !== '') {
+          try {
+            // Validate URL
+            new URL(linkUrl);
+            
+            // Add clickable link annotation to PDF
+            pdf.link(pdfX, pdfY, pdfLinkWidth, pdfLinkHeight, { url: linkUrl });
+            console.log(`✅ Added clickable link ${index + 1}:`);
+            console.log(`   📍 Position: (${pdfX.toFixed(1)}, ${pdfY.toFixed(1)}) Size: ${pdfLinkWidth.toFixed(1)}x${pdfLinkHeight.toFixed(1)}`);
+            console.log(`   🔗 URL: ${linkUrl}`);
+          } catch (error) {
+            console.warn(`⚠️ Invalid URL for threat ${index + 1}: ${linkUrl}`);
+          }
+        } else {
+          console.warn(`⚠️ No valid URL found for threat ${index + 1}`);
         }
       });
       
-      console.log('🔗 Interactive links added to PDF!');
+      console.log('🔗 Interactive links processing complete!');
+
+      pdf.save(`Cybersecurity-Newsletter-${previewWidth}percent.pdf`);
+      console.log(`🎉 INTERACTIVE PDF generated at ${previewWidth}% width with clickable links!`);
 
     } catch (error) {
       console.error('❌ PDF generation failed:', error);
