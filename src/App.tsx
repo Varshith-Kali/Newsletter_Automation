@@ -289,38 +289,6 @@ function App() {
             .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
             .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
             
-            /* CRITICAL: Fix text centering and alignment issues */
-            .bg-red-700 {
-              display: flex !important;
-              align-items: center !important;
-              justify-content: center !important;
-              text-align: center !important;
-            }
-            
-            .bg-red-700 h3 {
-              margin: 0 !important;
-              padding: 0 !important;
-              line-height: 1.2 !important;
-              display: block !important;
-              text-align: center !important;
-              vertical-align: middle !important;
-            }
-            
-            /* Fix severity badge alignment */
-            .inline-block {
-              display: inline-block !important;
-              vertical-align: middle !important;
-              line-height: 1 !important;
-            }
-            
-            /* Ensure proper spacing for badges */
-            span[class*="bg-"][class*="text-"] {
-              display: inline-block !important;
-              vertical-align: middle !important;
-              margin: 0 !important;
-              line-height: 1.2 !important;
-            }
-            
             /* Ensure ALL images stay grayscale and maintain consistency */
             img {
               filter: none !important;
@@ -375,13 +343,7 @@ function App() {
               color: #ffffff !important;
               opacity: 1 !important;
               visibility: visible !important;
-              display: flex !important;
-              align-items: center !important;
-              justify-content: center !important;
-              text-align: center !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              line-height: 1.2 !important;
+              display: block !important;
             }
             
             * { opacity: 1 !important; }
@@ -398,10 +360,6 @@ function App() {
               if (el.classList.contains('bg-red-700')) {
                 el.style.setProperty('background-color', '#b91c1c', 'important');
                 el.style.setProperty('color', '#ffffff', 'important');
-                el.style.setProperty('display', 'flex', 'important');
-                el.style.setProperty('align-items', 'center', 'important');
-                el.style.setProperty('justify-content', 'center', 'important');
-                el.style.setProperty('text-align', 'center', 'important');
               }
               
               if (el.classList.contains('bg-black')) {
@@ -435,32 +393,19 @@ function App() {
               box.style.setProperty('background-color', '#b91c1c', 'important');
               box.style.setProperty('color', '#ffffff', 'important');
               
-              // Ensure the red box itself is properly centered
-              box.style.setProperty('display', 'flex', 'important');
-              box.style.setProperty('align-items', 'center', 'important');
-              box.style.setProperty('justify-content', 'center', 'important');
-              box.style.setProperty('text-align', 'center', 'important');
-              
               const textElements = box.querySelectorAll('*');
               textElements.forEach((textEl) => {
                 if (textEl instanceof HTMLElement) {
                   textEl.style.setProperty('color', '#ffffff', 'important');
                   textEl.style.setProperty('opacity', '1', 'important');
                   textEl.style.setProperty('visibility', 'visible', 'important');
-                  textEl.style.setProperty('display', 'flex', 'important');
-                  textEl.style.setProperty('align-items', 'center', 'important');
-                  textEl.style.setProperty('justify-content', 'center', 'important');
-                  textEl.style.setProperty('text-align', 'center', 'important');
-                  textEl.style.setProperty('margin', '0', 'important');
-                  textEl.style.setProperty('padding', '0', 'important');
-                  textEl.style.setProperty('line-height', '1.2', 'important');
+                  textEl.style.setProperty('display', 'block', 'important');
                   
                   if (textEl.tagName === 'H3') {
                     textEl.style.setProperty('font-size', '1.125rem', 'important');
                     textEl.style.setProperty('font-weight', '500', 'important');
-                    textEl.style.setProperty('line-height', '1.2', 'important');
+                    textEl.style.setProperty('line-height', '1.75rem', 'important');
                     textEl.style.setProperty('white-space', 'nowrap', 'important');
-                    textEl.style.setProperty('vertical-align', 'middle', 'important');
                   }
                 }
               });
@@ -641,38 +586,6 @@ function App() {
             .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
             .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
             
-            /* CRITICAL: Fix text centering and alignment issues */
-            .bg-red-700 {
-              display: flex !important;
-              align-items: center !important;
-              justify-content: center !important;
-              text-align: center !important;
-            }
-            
-            .bg-red-700 h3 {
-              margin: 0 !important;
-              padding: 0 !important;
-              line-height: 1.2 !important;
-              display: block !important;
-              text-align: center !important;
-              vertical-align: middle !important;
-            }
-            
-            /* Fix severity badge alignment */
-            .inline-block {
-              display: inline-block !important;
-              vertical-align: middle !important;
-              line-height: 1 !important;
-            }
-            
-            /* Ensure proper spacing for badges */
-            span[class*="bg-"][class*="text-"] {
-              display: inline-block !important;
-              vertical-align: middle !important;
-              margin: 0 !important;
-              line-height: 1.2 !important;
-            }
-            
             img {
               filter: none !important;
               -webkit-filter: none !important;
@@ -723,13 +636,7 @@ function App() {
               color: #ffffff !important; 
               opacity: 1 !important; 
               visibility: visible !important; 
-              display: flex !important;
-              align-items: center !important;
-              justify-content: center !important;
-              text-align: center !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              line-height: 1.2 !important;
+              display: block !important; 
             }
             * { opacity: 1 !important; }
           `;
@@ -743,10 +650,6 @@ function App() {
               if (el.classList.contains('bg-red-700')) {
                 el.style.setProperty('background-color', '#b91c1c', 'important');
                 el.style.setProperty('color', '#ffffff', 'important');
-                el.style.setProperty('display', 'flex', 'important');
-                el.style.setProperty('align-items', 'center', 'important');
-                el.style.setProperty('justify-content', 'center', 'important');
-                el.style.setProperty('text-align', 'center', 'important');
               }
               
               if (el.classList.contains('bg-black')) {
@@ -779,32 +682,19 @@ function App() {
               box.style.setProperty('background-color', '#b91c1c', 'important');
               box.style.setProperty('color', '#ffffff', 'important');
               
-              // Ensure the red box itself is properly centered
-              box.style.setProperty('display', 'flex', 'important');
-              box.style.setProperty('align-items', 'center', 'important');
-              box.style.setProperty('justify-content', 'center', 'important');
-              box.style.setProperty('text-align', 'center', 'important');
-              
               const textElements = box.querySelectorAll('*');
               textElements.forEach((textEl) => {
                 if (textEl instanceof HTMLElement) {
                   textEl.style.setProperty('color', '#ffffff', 'important');
                   textEl.style.setProperty('opacity', '1', 'important');
                   textEl.style.setProperty('visibility', 'visible', 'important');
-                  textEl.style.setProperty('display', 'flex', 'important');
-                  textEl.style.setProperty('align-items', 'center', 'important');
-                  textEl.style.setProperty('justify-content', 'center', 'important');
-                  textEl.style.setProperty('text-align', 'center', 'important');
-                  textEl.style.setProperty('margin', '0', 'important');
-                  textEl.style.setProperty('padding', '0', 'important');
-                  textEl.style.setProperty('line-height', '1.2', 'important');
+                  textEl.style.setProperty('display', 'block', 'important');
                   
                   if (textEl.tagName === 'H3') {
                     textEl.style.setProperty('font-size', '1.125rem', 'important');
                     textEl.style.setProperty('font-weight', '500', 'important');
-                    textEl.style.setProperty('line-height', '1.2', 'important');
+                    textEl.style.setProperty('line-height', '1.75rem', 'important');
                     textEl.style.setProperty('white-space', 'nowrap', 'important');
-                    textEl.style.setProperty('vertical-align', 'middle', 'important');
                   }
                 }
               });
