@@ -802,6 +802,77 @@ function App() {
                   🖼️ Download as PNG ({previewWidth}%)
                 </button>
               </div>
+              
+              {/* Email Newsletter Section */}
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border border-green-200 print:hidden">
+                <div className="text-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">📧 Email Newsletter</h3>
+                  <p className="text-sm text-gray-600">Send this newsletter exactly as shown in preview to any email address</p>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+                  <div className="flex-1 w-full">
+                    <input
+                      type="email"
+                      value={emailAddress}
+                      onChange={(e) => {
+                        setEmailAddress(e.target.value);
+                        setEmailStatus('idle');
+                      }}
+                      placeholder="Enter email address..."
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      disabled={isEmailSending}
+                    />
+                  </div>
+                  
+                  <button
+                    onClick={sendNewsletterEmail}
+                    disabled={isEmailSending || !emailAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)}
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 flex items-center space-x-2 ${
+                      isEmailSending || !emailAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)
+                        ? 'bg-gray-400 cursor-not-allowed text-white'
+                        : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl'
+                    }`}
+                  >
+                    {isEmailSending ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                        <span>Sending...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send size={18} />
+                        <span>Send Newsletter</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                
+                {/* Status Messages */}
+                {emailStatus === 'success' && (
+                  <div className="mt-4 flex items-center justify-center space-x-2 text-green-700 bg-green-100 p-3 rounded-lg">
+                    <CheckCircle size={20} />
+                    <span className="font-medium">Newsletter sent successfully to {emailAddress}!</span>
+                  </div>
+                )}
+                
+                {emailStatus === 'error' && (
+                  <div className="mt-4 flex items-center justify-center space-x-2 text-red-700 bg-red-100 p-3 rounded-lg">
+                    <AlertCircle size={20} />
+                    <span className="font-medium">{emailMessage || 'Failed to send newsletter. Please try again.'}</span>
+                  </div>
+                )}
+                
+                {emailAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress) && emailAddress.length > 0 && (
+                  <div className="mt-2 text-center text-sm text-orange-600">
+                    Please enter a valid email address
+                  </div>
+                )}
+                
+                <div className="mt-4 text-center text-xs text-gray-500">
+                  Newsletter will be sent at current preview width ({previewWidth}%) with optimized email formatting
+                </div>
+              </div>
             </div>
           </div>
         </div>
