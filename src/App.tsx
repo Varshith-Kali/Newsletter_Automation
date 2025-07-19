@@ -4,10 +4,15 @@ import Newsletter from './components/Newsletter';
 import { NewsletterProvider } from './context/NewsletterContext';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { Mail, Send, CheckCircle, AlertCircle } from 'lucide-react';
 
 function App() {
   const printRef = useRef<HTMLDivElement>(null);
   const [previewWidth, setPreviewWidth] = useState(100); // Default to 100% width
+  const [emailAddress, setEmailAddress] = useState('');
+  const [isEmailSending, setIsEmailSending] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [emailMessage, setEmailMessage] = useState('');
 
   // Function to convert image to grayscale canvas
   const convertImageToGrayscale = (img: HTMLImageElement): Promise<string> => {
