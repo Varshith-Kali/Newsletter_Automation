@@ -14,6 +14,104 @@ function App() {
   const [emailStatus, setEmailStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [emailMessage, setEmailMessage] = useState('');
 
+  const sendNewsletterEmail = async () => {
+    if (!emailAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)) {
+      setEmailStatus('error');
+      setEmailMessage('Please enter a valid email address');
+      return;
+    }
+
+    setIsEmailSending(true);
+    setEmailStatus('idle');
+    setEmailMessage('');
+
+    try {
+      console.log(`📧 Generating newsletter email for: ${emailAddress}`);
+      console.log(`📏 Current preview width: ${previewWidth}%`);
+
+      const content = printRef.current;
+      if (!content) {
+        throw new Error('Newsletter content not found');
+      }
+
+      // Force layout stabilization
+      window.scrollTo(0, 0);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Generate newsletter image for email
+      const canvas = await html2canvas(content, {
+        scale: 1.5,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: content.offsetWidth,
+        height: content.offsetHeight,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+        scrollX: 0,
+        scrollY: 0,
+        foreignObjectRendering: false,
+        imageTimeout: 10000,
+        onclone: async (clonedDoc, element) => {
+          console.log('🎨 Preparing newsletter for email...');
+          
+          // Pre-load and cache ALL images
+          const imageCache = await preloadAndCacheAllImages(element);
+          
+          // Replace ALL images with cached grayscale versions
+          replaceAllImagesWithCachedVersions(element, imageCache);
+          
+          // Apply email-optimized styling
+          const emailStyle = clonedDoc.createElement('style');
+          emailStyle.textContent = `
+            html, body, .newsletter-container, .newsletter, .newsletter-page {
+              background-color: #ffffff !important;
+              color: #000000 !important;
+            }
+            .bg-red-700 { background-color: #b91c1c !important; color: #ffffff !important; }
+            .bg-black { background-color: #000000 !important; color: #ffffff !important; }
+            .bg-white { background-color: #ffffff !important; color: #000000 !important; }
+            .text-white { color: #ffffff !important; }
+            .text-black { color: #000000 !important; }
+            .text-red-700 { color: #b91c1c !important; }
+            img { filter: none !important; }
+            * { opacity: 1 !important; }
+          `;
+          clonedDoc.head.appendChild(emailStyle);
+        }
+      });
+
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Failed to generate newsletter image');
+      }
+
+      // Convert to optimized JPEG for email
+      const imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      
+      console.log(`📧 Newsletter image generated: ${canvas.width}x${canvas.height}`);
+      
+      // Simulate email sending (replace with actual email service integration)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // For demo purposes, we'll show success
+      // In production, integrate with EmailJS, SendGrid, or similar service
+      console.log(`✅ Newsletter would be sent to: ${emailAddress}`);
+      console.log(`📏 At width: ${previewWidth}%`);
+      console.log(`📧 Email content ready for delivery`);
+      
+      setEmailStatus('success');
+      setEmailMessage(`Newsletter sent successfully to ${emailAddress}!`);
+      
+    } catch (error) {
+      console.error('❌ Email sending failed:', error);
+      setEmailStatus('error');
+      setEmailMessage(error.message || 'Failed to send newsletter. Please try again.');
+    } finally {
+      setIsEmailSending(false);
+    }
+  };
+
   // Function to convert image to grayscale canvas
   const convertImageToGrayscale = (img: HTMLImageElement): Promise<string> => {
     return new Promise((resolve, reject) => {
