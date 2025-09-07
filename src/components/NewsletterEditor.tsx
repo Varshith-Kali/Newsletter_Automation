@@ -87,8 +87,8 @@ const NewsletterEditor: React.FC = () => {
               <Brain className="text-white" size={24} />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-red-800">🚨 Real-Time Threat Intelligence</h3>
-              <p className="text-sm text-red-600">Live threat analysis from 18+ sources - Attacks, Vulnerabilities, Breaches & Critical Incidents</p>
+              <h3 className="text-xl font-bold text-red-800">🌐 Real-Time Threat Intelligence</h3>
+              <p className="text-sm text-red-600">Live RSS feeds from 15+ cybersecurity sources - STRICTLY past 7 days only</p>
             </div>
           </div>
           <button
@@ -101,7 +101,7 @@ const NewsletterEditor: React.FC = () => {
             }`}
           >
             <RefreshCw className={isUpdating ? 'animate-spin' : ''} size={18} />
-            <span>{isUpdating ? 'Analyzing Threats...' : '🚨 Fetch Real-Time Threats'}</span>
+            <span>{isUpdating ? 'Fetching Live Data...' : '🌐 Fetch Real-Time News'}</span>
           </button>
         </div>
         
@@ -109,39 +109,39 @@ const NewsletterEditor: React.FC = () => {
           <div className="bg-white p-4 rounded-lg border border-red-200">
             <div className="flex items-center space-x-2 mb-2">
               <Target className="text-red-600" size={20} />
-              <h4 className="font-semibold text-red-700">🚨 Threat Intelligence</h4>
+              <h4 className="font-semibold text-red-700">🌐 Real-Time Sources</h4>
             </div>
             <ul className="space-y-1 text-sm text-red-600">
-              <li>• <strong>18+ Live Threat Feeds</strong></li>
+              <li>• <strong>15+ Live RSS Feeds</strong></li>
               <li>• The Hacker News, Krebs, BleepingComputer</li>
-              <li>• Dark Reading, Threatpost, Talos Intelligence</li>
-              <li>• <strong>Attacks & Vulnerabilities ONLY</strong></li>
+              <li>• Dark Reading, Security Week, CyberScoop</li>
+              <li>• <strong>STRICTLY past 7 days</strong></li>
             </ul>
           </div>
           
           <div className="bg-white p-4 rounded-lg border border-red-200">
             <div className="flex items-center space-x-2 mb-2">
               <Shield className="text-red-600" size={20} />
-              <h4 className="font-semibold text-red-700">🔍 Full Article Analysis</h4>
+              <h4 className="font-semibold text-red-700">⚡ Live Processing</h4>
             </div>
             <ul className="space-y-1 text-sm text-red-600">
-              <li>• <strong>Full article content fetching</strong></li>
-              <li>• Professional threat summarization</li>
-              <li>• <strong>Complete CVE extraction</strong></li>
-              <li>• Advanced threat scoring</li>
+              <li>• <strong>Real-time RSS parsing</strong></li>
+              <li>• Duplicate removal & filtering</li>
+              <li>• <strong>Direct article links</strong></li>
+              <li>• Smart threat scoring</li>
             </ul>
           </div>
           
           <div className="bg-white p-4 rounded-lg border border-red-200">
             <div className="flex items-center space-x-2 mb-2">
               <BarChart3 className="text-red-600" size={20} />
-              <h4 className="font-semibold text-red-700">🎯 Professional Output</h4>
+              <h4 className="font-semibold text-red-700">🎯 Fresh Content</h4>
             </div>
             <ul className="space-y-1 text-sm text-red-600">
-              <li>• <strong>Crisp professional summaries</strong></li>
-              <li>• Complete CVE numbers (no cutoffs)</li>
-              <li>• <strong>Attack-focused content</strong></li>
-              <li>• TOP 4 critical incidents</li>
+              <li>• <strong>NO repetitive data</strong></li>
+              <li>• Weekly fresh content</li>
+              <li>• <strong>Real-time timestamps</strong></li>
+              <li>• TOP 4 most critical</li>
             </ul>
           </div>
         </div>
@@ -149,18 +149,18 @@ const NewsletterEditor: React.FC = () => {
         <div className="flex items-center justify-between text-sm bg-white p-3 rounded-lg border border-red-200">
           <div className="flex items-center space-x-2">
             <Clock size={16} className="text-red-600" />
-            <span className="font-semibold text-red-700">Last Threat Analysis:</span>
+            <span className="font-semibold text-red-700">Last Real-Time Fetch:</span>
             <span className="text-red-600">{formatLastUpdated(lastUpdated)}</span>
           </div>
           
           {generationStats && (
             <div className="flex items-center space-x-4 text-red-600">
-              <span>🚨 {generationStats.threatsGenerated} threats</span>
+              <span>🎯 {generationStats.threatsGenerated} threats</span>
               {generationStats.avgThreatScore && (
                 <span>📊 Avg Score: {generationStats.avgThreatScore}</span>
               )}
-              <span>🔍 {generationStats.cveCount} CVEs extracted</span>
-              <span>📡 {generationStats.sourcesUsed} threat sources</span>
+              <span>🔍 {generationStats.cveCount} CVEs</span>
+              <span>📡 {generationStats.sourcesUsed} sources</span>
               {generationStats.newestArticle && (
                 <span>📅 {generationStats.newestArticle} - {generationStats.oldestArticle}</span>
               )}
@@ -170,7 +170,7 @@ const NewsletterEditor: React.FC = () => {
           {isUpdating && (
             <div className="flex items-center space-x-2 text-red-600">
               <div className="animate-pulse w-2 h-2 bg-red-600 rounded-full"></div>
-              <span>Analyzing threat articles...</span>
+              <span>Fetching live RSS feeds...</span>
             </div>
           )}
         </div>
@@ -191,8 +191,8 @@ const NewsletterEditor: React.FC = () => {
               <div className="text-yellow-600 text-xs">Medium</div>
             </div>
             <div className="bg-blue-100 p-3 rounded-lg text-center">
-              <div className="text-blue-800 font-bold text-lg">{generationStats.articlesScanned || 150}</div>
-              <div className="text-blue-600 text-xs">Articles Analyzed</div>
+              <div className="text-blue-800 font-bold text-lg">{generationStats.articlesScanned || 100}</div>
+              <div className="text-blue-600 text-xs">Live RSS Articles</div>
             </div>
           </div>
         )}
@@ -261,8 +261,8 @@ const NewsletterEditor: React.FC = () => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-medium">🚨 Real-Time Top 4 Critical Threats</h3>
-            <p className="text-sm text-gray-600">Professional summaries from full article analysis - Attacks, Vulnerabilities & Breaches</p>
+            <h3 className="text-lg font-medium">🌐 Real-Time Top 4 Critical Threats</h3>
+            <p className="text-sm text-gray-600">Live from 15+ RSS sources - STRICTLY past 7 days with direct article links</p>
           </div>
           <button
             onClick={addThreat}
@@ -290,7 +290,7 @@ const NewsletterEditor: React.FC = () => {
                   )}
                   {threat.cves && threat.cves.length > 0 && (
                     <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                      CVEs: {threat.cves.join(', ')}
+                      {threat.cves.join(', ')}
                     </span>
                   )}
                   <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold border border-green-300">
