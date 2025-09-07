@@ -366,27 +366,61 @@ export async function fetchRealTimeCyberSecurityNews(): Promise<Threat[]> {
   const uniqueArticles = removeDuplicates(allArticles)
     .filter(article => isRecentArticle(article.publishedAt))
     .filter(article => {
-      // Ensure it's cybersecurity related
+      // Ensure it's cybersecurity incident/attack/threat related
       const text = (article.title + ' ' + article.description).toLowerCase();
-      const securityKeywords = [
-        'vulnerability', 'exploit', 'breach', 'attack', 'malware', 'ransomware', 
-        'phishing', 'hack', 'security', 'cyber', 'threat', 'zero-day', 'cve',
-        'backdoor', 'trojan', 'compromise', 'infiltration', 'data leak', 'patch'
+      
+      // Focus on actual incidents, attacks, and threats
+      const incidentKeywords = [
+        'vulnerability', 'exploit', 'exploited', 'breach', 'attack', 'attacked',
+        'malware', 'ransomware', 'phishing', 'hack', 'hacked', 'threat', 
+        'zero-day', 'cve-', 'backdoor', 'trojan', 'compromise', 'compromised',
+        'infiltration', 'data leak', 'leaked', 'stolen', 'exposed', 'disclosed',
+        'critical', 'emergency patch', 'actively exploited', 'in the wild',
+        'security flaw', 'bug', 'weakness', 'injection', 'bypass', 'escalation'
       ];
-      return securityKeywords.some(keyword => text.includes(keyword));
+      
+      // Exclude generic security news/tips/guides
+      const excludeKeywords = [
+        'how to', 'tips for', 'best practices', 'guide to', 'introduction to',
+        'what is', 'why you should', 'benefits of', 'comparison', 'review of',
+        'interview with', 'opinion', 'analysis of trends', 'market report'
+      ];
+      
+      const hasIncident = incidentKeywords.some(keyword => text.includes(keyword));
+      const isGeneric = excludeKeywords.some(keyword => text.includes(keyword));
+      
+      return hasIncident && !isGeneric;
     });
   
   console.log(`🎯 ${uniqueArticles.length} unique, recent cybersecurity articles found`);
   
-  // Convert to threats with scoring
-  const threats: Threat[] = uniqueArticles.map((article, index) => {
+  // Convert to threats with enhanced processing
+  const threats: Threat[] = [];
+  
+  for (let i = 0; i < Math.min(uniqueArticles.length, 8); i++) {
+    const article = uniqueArticles[i];
     const threatScore = calculateThreatScore(article);
     const severity = classifyThreatSeverity(article, threatScore);
     
-    return {
-      id: (index + 1).toString(),
+    // Create enhanced description with full context
+    let enhancedDescription = article.description;
+    
+    // If description is too short or cut off, try to get more content
+    if (enhancedDescription.length < 100 || enhancedDescription.endsWith('...')) {
+      // Try to extract more meaningful content from the article
+      const fullContent = article.content || article.description;
+      if (fullContent && fullContent.length > enhancedDescription.length) {
+        enhancedDescription = await extractKeyInformation(fullContent, 200);
+      }
+    }
+    
+    // Extract CVE numbers from title and description
+    const cveNumbers = extractCVEs(article.title + ' ' + enhancedDescription);
+    
+    threats.push({
+      id: (i + 1).toString(),
       title: article.title,
-      description: article.description.substring(0, 200) + (article.description.length > 200 ? '...' : ''),
+      description: enhancedDescription,
       severity,
       source: article.source,
       pubDate: article.publishedAt,
@@ -394,9 +428,9 @@ export async function fetchRealTimeCyberSecurityNews(): Promise<Threat[]> {
       link: article.url,
       linkType: 'direct',
       threatScore,
-      cves: [] // Will be populated if CVEs are found in content
-    };
-  });
+      cves: cveNumbers
+    });
+  }
   
   // Sort by threat score and recency
   const sortedThreats = threats.sort((a, b) => {
@@ -415,6 +449,9 @@ export async function fetchRealTimeCyberSecurityNews(): Promise<Threat[]> {
   topThreats.forEach((threat, index) => {
     console.log(`   ${index + 1}. ${threat.severity} (Score: ${threat.threatScore}) - ${threat.title.substring(0, 60)}...`);
     console.log(`      📅 ${threat.formattedDate} | 🔗 ${threat.source}`);
+    if (threat.cves && threat.cves.length > 0) {
+      console.log(`      🔍 CVEs: ${threat.cves.join(', ')}`);
+    }
   });
   
   if (topThreats.length === 0) {
