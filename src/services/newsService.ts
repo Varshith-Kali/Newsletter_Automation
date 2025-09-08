@@ -323,6 +323,27 @@ function removeDuplicates(articles: NewsArticle[]): NewsArticle[] {
   return unique;
 }
 
+// Extract CVE numbers from text
+function extractCVEs(text: string): string[] {
+  const cvePattern = /CVE-\d{4}-\d{4,7}/gi;
+  const matches = text.match(cvePattern) || [];
+  return [...new Set(matches.map(cve => cve.toUpperCase()))];
+}
+
+// Extract key information from article content
+async function extractKeyInformation(content: string, maxLength: number): Promise<string> {
+  // Simple extraction - take first meaningful sentences up to maxLength
+  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20);
+  let result = '';
+  
+  for (const sentence of sentences) {
+    if (result.length + sentence.length > maxLength) break;
+    result += sentence.trim() + '. ';
+  }
+  
+  return result.trim() || content.substring(0, maxLength);
+}
+
 // Main function to fetch real-time cybersecurity news
 export async function fetchRealTimeCyberSecurityNews(): Promise<Threat[]> {
   console.log('🚀 FETCHING REAL-TIME CYBERSECURITY NEWS...');
